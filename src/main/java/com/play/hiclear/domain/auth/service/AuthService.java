@@ -65,6 +65,7 @@ public class AuthService {
         );
     }
 
+
     public LoginResponse login(LoginRequest request) {
 
         // email으로 가입여부 홧인
@@ -90,6 +91,7 @@ public class AuthService {
 
         return new LoginResponse(token);
     }
+
 
     @Transactional
     public void withdrawal(AuthUser authUser, WithdrawalRequest request) {

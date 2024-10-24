@@ -22,16 +22,19 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // 회원가입
     @PostMapping("/v1/auth/signup")
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
         return ResponseEntity.ok(authService.signup(request));
     }
 
+    // 로그인
     @PostMapping("/v1/auth/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    // 회원탈퇴
     @GetMapping("/v1/auth/withdrawal")
     public ResponseEntity<String> withdrawal(@AuthenticationPrincipal AuthUser authUser, @RequestBody WithdrawalRequest request){
         authService.withdrawal(authUser, request);

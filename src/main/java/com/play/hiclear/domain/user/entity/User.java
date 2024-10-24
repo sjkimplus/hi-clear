@@ -5,6 +5,7 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.participant.entity.Participant;
+import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -63,6 +64,15 @@ public class User extends TimeStamped {
         this.password = encodePassword;
         this.selfRank = selfRank;
         this.userRole = role;
+    }
+
+    public void update(String region, String selfRank) {
+        if(region != null){
+            this.region = region;
+        }
+        if(selfRank != null){
+            this.selfRank = Ranks.of(selfRank);
+        }
     }
 
    /* public static User fromAuthUser(AuthUser authUser){
