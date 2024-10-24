@@ -41,6 +41,16 @@ public class ReservationController {
         return reservationService.getReservation(reservationId, email);
     }
 
+    // 예약 목록 조회(다건)
+    @GetMapping
+    public List<ReservationResponse> getAllReservations(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String email = getEmailFromToken(authorizationHeader);
+        return reservationService.getAllReservations(email);
+    }
+
+
 
     // 토큰에서 email 추출
     private String getEmailFromToken(String authorizationHeader) {

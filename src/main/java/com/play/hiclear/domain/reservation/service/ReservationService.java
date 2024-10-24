@@ -69,4 +69,19 @@ public class ReservationService {
 
         return ReservationResponse.from(reservation);
     }
+
+    // 예약 목록 조회(다건)
+    public List<ReservationResponse> getAllReservations(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+
+        List<Reservation> reservations = reservationRepository.findByUser(user);
+
+        if (reservations.isEmpty()) {
+            throw new CustomException(ErrorCode.RESERVATION_LIST_EMPTY);
+        }
+        return reservations.stream().map(ReservationResponse::from).toList();
+    }
+
+
 }
