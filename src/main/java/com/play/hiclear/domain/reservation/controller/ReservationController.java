@@ -4,6 +4,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.utils.JwtUtil;
 import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
+import com.play.hiclear.domain.reservation.dto.request.UpdateReservationRequest;
 import com.play.hiclear.domain.reservation.dto.response.ReservationResponse;
 import com.play.hiclear.domain.reservation.service.ReservationService;
 import io.jsonwebtoken.Claims;
@@ -49,6 +50,18 @@ public class ReservationController {
         String email = getEmailFromToken(authorizationHeader);
         return reservationService.getAllReservations(email);
     }
+
+    // 예약 수정
+    @PatchMapping("/{reservationId}")
+    public ReservationResponse updateReservation(
+            @PathVariable Long reservationId,
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody UpdateReservationRequest request) {
+
+        String email = getEmailFromToken(authorizationHeader);
+        return reservationService.updateReservation(reservationId, email, request);
+    }
+
 
 
 

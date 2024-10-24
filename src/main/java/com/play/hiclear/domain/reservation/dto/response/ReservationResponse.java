@@ -2,14 +2,11 @@ package com.play.hiclear.domain.reservation.dto.response;
 
 import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.reservation.entity.Reservation;
-import com.play.hiclear.domain.reservation.enums.ReservationStatus;
 import com.play.hiclear.domain.timeslot.entity.TimeSlot;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalTime;
 
 @Getter
 @NoArgsConstructor
@@ -33,8 +30,8 @@ public class ReservationResponse {
     @Getter
     @NoArgsConstructor
     public static class TimeSlotResponse {
-        private LocalDateTime startTime;
-        private LocalDateTime endTime;
+        private LocalTime startTime;
+        private LocalTime  endTime;
 
         public TimeSlotResponse(TimeSlot timeSlot) {
             this.startTime = timeSlot.getStartTime();
