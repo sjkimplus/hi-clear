@@ -13,7 +13,7 @@ public class SignupResponse {
     private final String name;
     private final String email;
     private final String region;
-    private final Ranks selectRank;
+    private final Ranks selfRank;
     private final UserRole userRole;
 
 }

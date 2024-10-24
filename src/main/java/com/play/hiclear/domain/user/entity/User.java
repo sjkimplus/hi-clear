@@ -34,7 +34,7 @@ public class User extends TimeStamped {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Ranks selectRank;
+    private Ranks selfRank;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,20 +49,19 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<Participant> participants = new ArrayList<>();
 
-    public User(Long id, String name, String email, String region, Ranks selectRank, UserRole userRole){
-        this.id = id;
+    public User(String name, String email, String region, Ranks selfRank, UserRole userRole){
         this.name = name;
         this.email = email;
         this.region = region;
-        this.selectRank = selectRank;
+        this.selfRank = selfRank;
         this.userRole = userRole;
     }
-    public User(String name, String email, String region, String encodePassword, Ranks selectRank, UserRole role) {
+    public User(String name, String email, String region, String encodePassword, Ranks selfRank, UserRole role) {
         this.name = name;
         this.email = email;
         this.region = region;
         this.password = encodePassword;
-        this.selectRank = selectRank;
+        this.selfRank = selfRank;
         this.userRole = role;
     }
 

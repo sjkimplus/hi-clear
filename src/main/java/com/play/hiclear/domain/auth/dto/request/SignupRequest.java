@@ -27,7 +27,7 @@ public class SignupRequest {
     private String region;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
-    private String selectRank;
+    private String selfRank;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
     private String userRole;
