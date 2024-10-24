@@ -2,6 +2,7 @@ package com.play.hiclear.domain.reservation.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.court.entity.Court;
+import com.play.hiclear.domain.reservation.dto.response.ReservationResponse;
 import com.play.hiclear.domain.reservation.enums.ReservationStatus;
 import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import com.play.hiclear.domain.user.entity.User;
@@ -31,4 +32,12 @@ public class Reservation extends TimeStamped {
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;       // 예약 상태
+
+    public Reservation(User user, Court court, TimeSlot timeSlot, ReservationStatus status) {
+        this.user = user;
+        this.court = court;
+        this.timeSlot = timeSlot;
+        this.status = status;
+    }
+
 }
