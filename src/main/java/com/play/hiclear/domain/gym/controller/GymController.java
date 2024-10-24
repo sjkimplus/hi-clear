@@ -1,7 +1,7 @@
-package com.play.hiclear.domain.user.controller;
+package com.play.hiclear.domain.gym.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class UserController {
+public class GymController {
 }
