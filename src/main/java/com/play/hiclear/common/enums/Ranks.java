@@ -1,6 +1,9 @@
 package com.play.hiclear.common.enums;
 
+import com.play.hiclear.domain.user.enums.UserRole;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 public enum Ranks {
@@ -12,6 +15,13 @@ public enum Ranks {
     RANK_F(6);
 
     private final int rankValue;
+
+    public static Ranks of(String rank) {
+        return Arrays.stream(Ranks.values())
+                .filter(r -> r.name().equalsIgnoreCase(rank))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 등급입니다 \'RANK_O\'양식으로 O자리에 A~F사이 값을 입력해주세요"));
+    }
 
     // Constructor to set the corresponding number
     Ranks(int rankValue) {

@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.user.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
+import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.participant.entity.Participant;
@@ -29,6 +30,12 @@ public class User extends TimeStamped {
 
     private String password;
 
+    private String region;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Ranks selectRank;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole userRole;
@@ -42,11 +49,21 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<Participant> participants = new ArrayList<>();
 
-    public User(Long id, String name, String email, UserRole userRole){
+    public User(Long id, String name, String email, String region, Ranks selectRank, UserRole userRole){
         this.id = id;
         this.name = name;
         this.email = email;
-        this.userRole = getUserRole();
+        this.region = region;
+        this.selectRank = selectRank;
+        this.userRole = userRole;
+    }
+    public User(String name, String email, String region, String encodePassword, Ranks selectRank, UserRole role) {
+        this.name = name;
+        this.email = email;
+        this.region = region;
+        this.password = encodePassword;
+        this.selectRank = selectRank;
+        this.userRole = role;
     }
 
    /* public static User fromAuthUser(AuthUser authUser){
