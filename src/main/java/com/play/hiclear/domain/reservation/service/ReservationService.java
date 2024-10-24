@@ -59,4 +59,14 @@ public class ReservationService {
     }
 
 
+    // 예약 조회(단건)
+    public ReservationResponse getReservation(Long reservationId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+
+        Reservation reservation = reservationRepository.findByIdAndUser(reservationId, user)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        return ReservationResponse.from(reservation);
+    }
 }
