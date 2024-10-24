@@ -4,7 +4,9 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.utils.JwtUtil;
+import com.play.hiclear.domain.auth.dto.request.LoginRequest;
 import com.play.hiclear.domain.auth.dto.request.SignupRequest;
+import com.play.hiclear.domain.auth.dto.response.LoginResponse;
 import com.play.hiclear.domain.auth.dto.response.SignupResponse;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
@@ -59,6 +61,32 @@ public class AuthService {
                 user.getSelectRank(),
                 user.getUserRole()
         );
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        // email으로 가입여부 홧인
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+
+        // 비밀번호 확인
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
+        }
+
+        // 탈퇴여부 확인
+        if(user.getDeletedAt() != null){
+            throw new CustomException(ErrorCode.AUTH_USER_DELETED);
+        }
+
+        // 토큰 생성
+        String token = jwtUtil.createToken(
+                user.getId(),
+                user.getEmail(),
+                user.getUserRole()
+        );
+
+        return new LoginResponse(token);
     }
 
 }
