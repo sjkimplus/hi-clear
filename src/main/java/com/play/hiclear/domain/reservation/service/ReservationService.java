@@ -122,4 +122,18 @@ public class ReservationService {
 
         return ReservationResponse.from(updatedReservation);
     }
+
+    // 예약 취소
+    @Transactional
+    public void cancelReservation(Long reservationId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .filter(res -> res.getUser().equals(user))
+                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        // 예약 취소
+        reservationRepository.delete(reservation);
+    }
 }

@@ -9,9 +9,13 @@ import com.play.hiclear.domain.reservation.dto.response.ReservationResponse;
 import com.play.hiclear.domain.reservation.service.ReservationService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,7 +66,23 @@ public class ReservationController {
         return reservationService.updateReservation(reservationId, email, request);
     }
 
+    // 예약 취소
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<Map<String, Object>> cancelReservation(
+            @PathVariable Long reservationId,
+            @RequestHeader("Authorization") String authorizationHeader) {
 
+        String email = getEmailFromToken(authorizationHeader);
+        reservationService.cancelReservation(reservationId, email);
+
+        // 응답 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", HttpStatus.OK.value());
+        response.put("message", ErrorCode.RESERVATION_CANCELED.getMessage());
+        response.put("status", HttpStatus.OK.name());
+
+        return ResponseEntity.ok(response);
+    }
 
 
     // 토큰에서 email 추출
