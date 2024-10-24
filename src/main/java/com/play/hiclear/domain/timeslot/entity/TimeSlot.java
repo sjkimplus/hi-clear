@@ -1,6 +1,6 @@
 package com.play.hiclear.domain.timeslot.entity;
 
-import com.play.hiclear.domain.club.entity.Club;
+import com.play.hiclear.domain.court.entity.Court;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +25,13 @@ public class TimeSlot {
     private LocalDateTime endTime;
 
     @ManyToOne
-    @JoinColumn(name = "club_id")
-    private Club club;
+    @JoinColumn(name = "court_id")
+    private Court court;
+
+    public TimeSlot(Long id, LocalDateTime startTime, LocalDateTime endTime, Court court) {
+        this.id = id;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.court = court;
+    }
 }
