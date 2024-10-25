@@ -33,7 +33,7 @@ public class ReservationController {
 
         return reservationService.create(email, request);
     }
-    
+
     // 예약 조회(단건)
     @GetMapping("/v1/reservations/{reservationId}")
     public ReservationSearchDetailResponse getReservation(
@@ -71,12 +71,14 @@ public class ReservationController {
             @RequestHeader("Authorization") String authorizationHeader) {
 
         String email = extractEmailFromToken(authorizationHeader);
+
+        // 예약 취소 서비스 호출
         reservationService.delete(reservationId, email);
 
         // 응답 생성
         Map<String, Object> response = new HashMap<>();
         response.put("code", HttpStatus.OK.value());
-        response.put("message", ErrorCode.RESERVATION_CANCELED.getMessage());
+        response.put("message", "예약이 성공적으로 취소되었습니다.");  // 사용자 친화적인 메시지
         response.put("status", HttpStatus.OK.name());
 
         return ResponseEntity.ok(response);

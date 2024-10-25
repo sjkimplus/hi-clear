@@ -45,4 +45,8 @@ public class Reservation extends TimeStamped {
         this.court = newCourt;
     }
 
+    // 상태 업데이트 메서드
+    public void updateStatus(ReservationStatus newStatus) {
+        this.status = newStatus;
+    }
 }

@@ -35,10 +35,10 @@ public class ReservationService {
     @Transactional
     public List<ReservationSearchDetailResponse> create(String email, ReservationRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         Court court = courtRepository.findById(request.getCourtId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Court 객체를"));
 
         // 모든 타임슬롯을 한 번에 조회
         List<TimeSlot> timeSlots = timeSlotRepository.findAllById(request.getTimeList());
@@ -66,7 +66,7 @@ public class ReservationService {
     // 예약 조회(단건)
     public ReservationSearchDetailResponse get(Long reservationId, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         Reservation reservation = reservationRepository.findByIdAndUserWithDetails(reservationId, user)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -78,7 +78,7 @@ public class ReservationService {
     @Transactional
     public List<ReservationSearchResponse> search(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         List<Reservation> reservations = reservationRepository.findByUserWithDetails(user);
 
@@ -96,15 +96,16 @@ public class ReservationService {
     @Transactional
     public ReservationSearchDetailResponse update(Long reservationId, String email, ReservationUpdateRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .filter(res -> res.getUser().equals(user))
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 
-        // 현재 예약 상태가 ACCEPTED 또는 REJECTED인 경우 수정 불가
+        // 현재 예약 상태 체크
         if (reservation.getStatus() == ReservationStatus.ACCEPTED ||
-                reservation.getStatus() == ReservationStatus.REJECTED) {
+                reservation.getStatus() == ReservationStatus.REJECTED ||
+                reservation.getStatus() == ReservationStatus.CANCELED) {
             throw new CustomException(ErrorCode.RESERVATION_MODIFICATION_NOT_ALLOWED);
         }
 
@@ -123,7 +124,7 @@ public class ReservationService {
 
         // 새로운 코트 자동 연결
         Court newCourt = courtRepository.findById(newTimeSlot.getCourt().getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Court 객체를"));
 
         // 예약 수정
         reservation.update(newTimeSlot, newCourt);
@@ -136,13 +137,19 @@ public class ReservationService {
     @Transactional
     public void delete(Long reservationId, String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .filter(res -> res.getUser().equals(user))
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 
-        // 예약 취소
-        reservationRepository.delete(reservation);
+        // 예약 상태를 CANCELED로 변경
+        reservation.updateStatus(ReservationStatus.CANCELED);
+
+        // 예약 삭제 메서드 호출
+        reservation.markDeleted();
+
+        // 예약 업데이트
+        reservationRepository.save(reservation);
     }
 }
