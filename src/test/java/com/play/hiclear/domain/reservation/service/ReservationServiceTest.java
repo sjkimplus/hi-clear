@@ -147,7 +147,7 @@ class ReservationServiceTest {
         });
 
         // then
-        assertEquals(ErrorCode.AUTH_USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -191,7 +191,7 @@ class ReservationServiceTest {
         });
 
         // then
-        assertEquals(ErrorCode.AUTH_USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -242,7 +242,7 @@ class ReservationServiceTest {
         });
 
         // then
-        assertEquals(ErrorCode.AUTH_USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -285,9 +285,15 @@ class ReservationServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
 
-        // when & then
-        assertDoesNotThrow(() -> reservationService.delete(reservation.getId(), user.getEmail()));
-        verify(reservationRepository, times(1)).delete(reservation);
+        // when
+        reservationService.delete(reservation.getId(), user.getEmail());
+
+        // then
+        // 상태가 CANCELED로 변경되었는지 확인
+        assertEquals(ReservationStatus.CANCELED, reservation.getStatus());
+
+        // 예약이 삭제되었다고 기대
+        verify(reservationRepository, times(1)).save(reservation); // 업데이트 메서드 확인
     }
 
     // 예약 취소 실패 테스트 케이스
@@ -302,7 +308,7 @@ class ReservationServiceTest {
         });
 
         // then
-        assertEquals(ErrorCode.AUTH_USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
