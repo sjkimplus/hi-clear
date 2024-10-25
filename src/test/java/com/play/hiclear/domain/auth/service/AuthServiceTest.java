@@ -3,11 +3,11 @@ package com.play.hiclear.domain.auth.service;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.utils.JwtUtil;
-import com.play.hiclear.domain.auth.dto.request.LoginRequest;
-import com.play.hiclear.domain.auth.dto.request.SignupRequest;
-import com.play.hiclear.domain.auth.dto.request.WithdrawalRequest;
-import com.play.hiclear.domain.auth.dto.response.LoginResponse;
-import com.play.hiclear.domain.auth.dto.response.SignupResponse;
+import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
+import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
+import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
+import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
+import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
@@ -42,15 +42,15 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    private SignupRequest signupRequest;
+    private AuthSignupRequest authSignupRequest;
     private User user;
     private AuthUser authUser;
 
     @BeforeEach
     void setup() {
-        signupRequest = new SignupRequest("test1@gamil.com", "Password!!", "홍길동", "서울특별시", "RANK_A", "BUSINESS");
+        authSignupRequest = new AuthSignupRequest("test1@gamil.com", "Password!!", "홍길동", "서울특별시", "RANK_A", "BUSINESS");
         ;
-        user = new User(signupRequest.getName(), signupRequest.getEmail(), signupRequest.getRegion(), "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), authSignupRequest.getRegion(), "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
         authUser = new AuthUser(1L, "홍길동", "test1@gmail.com", UserRole.BUSINESS);
     }
@@ -59,16 +59,16 @@ class AuthServiceTest {
     @Test
     void signup_success() {
         // given
-        when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
+        when(passwordEncoder.encode(authSignupRequest.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // when
-        SignupResponse result = authService.signup(signupRequest);
+        AuthSignupResponse result = authService.signup(authSignupRequest);
 
         // then
         verify(userRepository, times(1)).save(any(User.class));
-        assertEquals(signupRequest.getEmail(), result.getEmail());
-        assertEquals(signupRequest.getName(), result.getName());
+        assertEquals(authSignupRequest.getEmail(), result.getEmail());
+        assertEquals(authSignupRequest.getName(), result.getName());
         assertEquals("encodedPassword", user.getPassword());
     }
 
@@ -76,13 +76,13 @@ class AuthServiceTest {
     @Test
     void signup_fail_duplicate_email() {
         // given
-        SignupRequest invalidSignupRequest = new SignupRequest("test1@gamil.com", "Password!!", "김스파", "서울특별시", "RANK_B", "BUSINESS");
+        AuthSignupRequest invalidAuthSignupRequest = new AuthSignupRequest("test1@gamil.com", "Password!!", "김스파", "서울특별시", "RANK_B", "BUSINESS");
         ;
-        when(userRepository.findByEmail(invalidSignupRequest.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(invalidAuthSignupRequest.getEmail())).thenReturn(Optional.of(user));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            authService.signup(invalidSignupRequest);
+            authService.signup(invalidAuthSignupRequest);
         });
 
         assertEquals("해당 이메일으로 가입된 유저가 이미 존재합니다.", exception.getMessage());
@@ -93,13 +93,13 @@ class AuthServiceTest {
     @Test
     void login_success() {
         // given
-        LoginRequest loginRequest = new LoginRequest("test1@gmail.com", "Password!!");
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(true);
+        AuthLoginRequest authLoginRequest = new AuthLoginRequest("test1@gmail.com", "Password!!");
+        when(userRepository.findByEmail(authLoginRequest.getEmail())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(authLoginRequest.getPassword(), user.getPassword())).thenReturn(true);
         when(jwtUtil.createToken(user.getId(), user.getEmail(), user.getUserRole())).thenReturn("mockToken");
 
         // when
-        LoginResponse result = authService.login(loginRequest);
+        AuthLoginResponse result = authService.login(authLoginRequest);
 
         // then
         assertEquals("mockToken", result.getBearerToken());
@@ -109,12 +109,12 @@ class AuthServiceTest {
     @Test
     void login_fail_mismatch_password() {
         // given
-        LoginRequest failLoginRequest = new LoginRequest("test1@gmail.com", "passworD!!");
-        when(userRepository.findByEmail(failLoginRequest.getEmail())).thenReturn(Optional.of(user));
+        AuthLoginRequest failAuthLoginRequest = new AuthLoginRequest("test1@gmail.com", "passworD!!");
+        when(userRepository.findByEmail(failAuthLoginRequest.getEmail())).thenReturn(Optional.of(user));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            authService.login(failLoginRequest);
+            authService.login(failAuthLoginRequest);
         });
 
         assertEquals("입력하신 비밀번호가 올바르지 않습니다. 비밀번호를 다시 확인하고 입력해 주세요.", exception.getMessage());
@@ -123,29 +123,29 @@ class AuthServiceTest {
 
 
     @Test
-    void withdrawal_success() {
+    void delete_success() {
         // given
-        WithdrawalRequest withdrawalRequest = new WithdrawalRequest("Password!!");
+        AuthDeleteRequest authDeleteRequest = new AuthDeleteRequest("Password!!");
         when(passwordEncoder.matches("Password!!", user.getPassword())).thenReturn(true);
         when(userRepository.findById(authUser.getUserId())).thenReturn(Optional.of(user));
 
         // when
-        authService.withdrawal(authUser, withdrawalRequest);
+        authService.delete(authUser, authDeleteRequest);
 
         // then
         assertNotNull(user.getDeletedAt());
     }
 
     @Test
-    void withdrawal_fail_mismatch_password() {
+    void delete_fail_mismatch_password() {
         // given
-        WithdrawalRequest withdrawalRequest = new WithdrawalRequest("PassworD@@");
+        AuthDeleteRequest authDeleteRequest = new AuthDeleteRequest("PassworD@@");
         when(userRepository.findById(authUser.getUserId())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password!!", user.getPassword())).thenReturn(true);
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            authService.withdrawal(authUser, withdrawalRequest);
+            authService.delete(authUser, authDeleteRequest);
         });
 
         assertEquals("입력하신 비밀번호가 올바르지 않습니다. 비밀번호를 다시 확인하고 입력해 주세요.", exception.getMessage());

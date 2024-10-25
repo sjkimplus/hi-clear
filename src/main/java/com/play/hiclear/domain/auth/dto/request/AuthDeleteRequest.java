@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class WithdrawalRequest {
+public class AuthDeleteRequest {
 
     private String password;
 }

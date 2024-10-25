@@ -4,11 +4,11 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.utils.JwtUtil;
-import com.play.hiclear.domain.auth.dto.request.LoginRequest;
-import com.play.hiclear.domain.auth.dto.request.SignupRequest;
-import com.play.hiclear.domain.auth.dto.request.WithdrawalRequest;
-import com.play.hiclear.domain.auth.dto.response.LoginResponse;
-import com.play.hiclear.domain.auth.dto.response.SignupResponse;
+import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
+import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
+import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
+import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
+import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
@@ -30,7 +30,7 @@ public class AuthService {
     private final UserRepository userRepository;
 
     @Transactional
-    public SignupResponse signup(SignupRequest request) {
+    public AuthSignupResponse signup(AuthSignupRequest request) {
 
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
@@ -55,7 +55,7 @@ public class AuthService {
         userRepository.save(user);
 
         // DTO 객체 생성 및 반환
-        return new SignupResponse(
+        return new AuthSignupResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
@@ -66,7 +66,7 @@ public class AuthService {
     }
 
 
-    public LoginResponse login(LoginRequest request) {
+    public AuthLoginResponse login(AuthLoginRequest request) {
 
         // email으로 가입여부 홧인
         User user = userRepository.findByEmail(request.getEmail())
@@ -89,12 +89,12 @@ public class AuthService {
                 user.getUserRole()
         );
 
-        return new LoginResponse(token);
+        return new AuthLoginResponse(token);
     }
 
 
     @Transactional
-    public void withdrawal(AuthUser authUser, WithdrawalRequest request) {
+    public void delete(AuthUser authUser, AuthDeleteRequest request) {
 
         // 유저 조회
         User user = userRepository.findById(authUser.getUserId())

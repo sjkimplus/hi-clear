@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SignupResponse {
+public class AuthSignupResponse {
 
     private final Long id;
     private final String name;

@@ -1,12 +1,10 @@
 package com.play.hiclear.domain.user.service;
 
 import com.play.hiclear.common.enums.Ranks;
-import com.play.hiclear.domain.auth.dto.request.SignupRequest;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.dto.response.UserDetailResponse;
 import com.play.hiclear.domain.user.dto.response.UserSimpleResponse;
-import com.play.hiclear.domain.user.dto.response.UserUpdateResponse;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
