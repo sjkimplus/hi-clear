@@ -12,8 +12,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<Map<String, Object>> handlePasswordMismatchException(CustomException ex) {
-        return getErrorResponse(ex.getErrorCode().getStatus(), ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
+        String message = ex.getErrorCode().customMessage(ex.getMessage()); // detail 메시지도 보여줌
+        return getErrorResponse(ex.getErrorCode().getStatus(), message);
     }
 
     @ExceptionHandler(Exception.class)
