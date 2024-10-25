@@ -10,19 +10,18 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
 public class MeetingController {
     private final MeetingService meetingService;
 
     // 번개글 생성
-    @PostMapping("/meetings")
+    @PostMapping("/v1/meetings")
     public ResponseEntity<String> create(@AuthenticationPrincipal AuthUser authUser,
                                          @RequestBody MeetingCreateEditRequest request) {
         return ResponseEntity.ok(meetingService.create(authUser, request));
     }
 
     // 번개글 수정
-    @PatchMapping("/meetings/{meetingId}")
+    @PatchMapping("/v1/meetings/{meetingId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser,
                                        @RequestBody MeetingCreateEditRequest request,
                                        @PathVariable Long meetingId) {
@@ -30,7 +29,7 @@ public class MeetingController {
     }
 
     // 번개글 삭제
-    @DeleteMapping("/meetings/{meetingId}")
+    @DeleteMapping("/v1/meetings/{meetingId}")
     public ResponseEntity<String> delete(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long meetingId) {
         return ResponseEntity.ok(meetingService.delete(authUser, meetingId));
     }
