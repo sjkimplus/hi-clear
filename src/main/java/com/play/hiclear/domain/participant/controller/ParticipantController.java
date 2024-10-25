@@ -10,11 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
 public class ParticipantController {
     private final ParticipantService participantService;
 
-    @PostMapping("/meetings/{meetingId}/participants")
+    @PostMapping("/v1/meetings/{meetingId}/participants")
     public ResponseEntity<String> add(@AuthenticationPrincipal AuthUser authUser,
                                       @PathVariable Long meetingId) {
         return ResponseEntity.ok(participantService.add(authUser, meetingId));
