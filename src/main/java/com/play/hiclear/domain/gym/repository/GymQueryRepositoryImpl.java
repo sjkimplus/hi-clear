@@ -45,6 +45,8 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
     private BooleanExpression buildCondition(String name, String address, GymType gymType) {
         BooleanExpression condition = gym.isNotNull();
 
+        condition = condition.and(gym.deletedAt.isNull());
+
         if(name != null && !name.isEmpty()){
             condition = condition.and(gym.name.containsIgnoreCase(name));
         }
