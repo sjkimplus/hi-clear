@@ -28,11 +28,18 @@ public enum ErrorCode {
 
 
 
+    // Reservation
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당예약을 찾을 수 없거나, 해당예약을 생성한 사용자가 아닙니다."),
+    RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
+    RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
+    RESERVATION_MODIFICATION_NOT_ALLOWED(HttpStatus.FORBIDDEN, "수락됬거나 거절된 예약은 수정할 수 없습니다."),
+    TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
+    TIME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 코트 시간을 찾을 수 없습니다."),
+    RESERVATION_CANCELED(HttpStatus.OK, "예약이 취소되었습니다."),
 
 
-
-
-    //
+    // ClubMember
+    CLUBMEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 클럼에 멤버가 아닙니다."),
 
     // 기본 코드
     NOT_FOUND(HttpStatus.NOT_FOUND, "찾지못했습니다.");

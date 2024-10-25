@@ -1,6 +1,5 @@
 package com.play.hiclear.domain.reservation.dto.response;
 
-import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.reservation.entity.Reservation;
 import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import lombok.Getter;
@@ -10,19 +9,17 @@ import java.time.LocalTime;
 
 @Getter
 @NoArgsConstructor
-public class ReservationResponse {
+public class ReservationSearchResponse {
     private Long id;
     private String email;
     private TimeSlotResponse timeSlot;
-    private CourtResponse court;
     private String status;
 
-    public static ReservationResponse from(Reservation reservation) {
-        ReservationResponse response = new ReservationResponse();
+    public static ReservationSearchResponse from(Reservation reservation) {
+        ReservationSearchResponse response = new ReservationSearchResponse();
         response.id = reservation.getId();
         response.email = reservation.getUser().getEmail();
         response.timeSlot = new TimeSlotResponse(reservation.getTimeSlot());
-        response.court = new CourtResponse(reservation.getCourt());
         response.status = reservation.getStatus().name();
         return response;
     }
@@ -36,18 +33,6 @@ public class ReservationResponse {
         public TimeSlotResponse(TimeSlot timeSlot) {
             this.startTime = timeSlot.getStartTime();
             this.endTime = timeSlot.getEndTime();
-        }
-    }
-
-    @Getter
-    @NoArgsConstructor
-    public static class CourtResponse {
-        private Long courtNum;
-        private int price;
-
-        public CourtResponse(Court court) {
-            this.courtNum = court.getCourtNum();
-            this.price = court.getPrice();
         }
     }
 }

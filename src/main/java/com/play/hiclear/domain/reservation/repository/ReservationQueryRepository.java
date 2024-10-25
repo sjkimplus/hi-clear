@@ -4,15 +4,16 @@ import com.play.hiclear.domain.reservation.entity.Reservation;
 import com.play.hiclear.domain.reservation.enums.ReservationStatus;
 import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import com.play.hiclear.domain.user.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationRespository extends JpaRepository<Reservation, Long> {
+public interface ReservationQueryRepository {
     boolean existsByTimeSlotAndStatus(TimeSlot timeSlot, ReservationStatus status);
 
-    Optional<Reservation> findByIdAndUser(Long reservationId, User user);
+    Optional<Reservation> findByIdAndUserWithDetails(Long reservationId, User user);
 
-    List<Reservation> findByUser(User user);
+    List<Reservation> findByUserWithDetails(User user);
+
+    List<Reservation> findByTimeSlotIdInAndStatusIn(List<Long> timeSlotIds, List<ReservationStatus> pending);
 }

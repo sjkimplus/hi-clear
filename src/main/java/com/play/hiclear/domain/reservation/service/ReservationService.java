@@ -5,11 +5,12 @@ import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.repository.CourtRepository;
 import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
-import com.play.hiclear.domain.reservation.dto.request.UpdateReservationRequest;
-import com.play.hiclear.domain.reservation.dto.response.ReservationResponse;
+import com.play.hiclear.domain.reservation.dto.request.ReservationUpdateRequest;
+import com.play.hiclear.domain.reservation.dto.response.ReservationSearchDetailResponse;
+import com.play.hiclear.domain.reservation.dto.response.ReservationSearchResponse;
 import com.play.hiclear.domain.reservation.entity.Reservation;
 import com.play.hiclear.domain.reservation.enums.ReservationStatus;
-import com.play.hiclear.domain.reservation.repository.ReservationRespository;
+import com.play.hiclear.domain.reservation.repository.ReservationRepository;
 import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import com.play.hiclear.domain.timeslot.repository.TimeSlotRepository;
 import com.play.hiclear.domain.user.entity.User;
@@ -25,69 +26,75 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private final ReservationRespository reservationRepository;
+    private final ReservationRepository reservationRepository;
     private final CourtRepository courtRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
 
     // 예약 생성
     @Transactional
-    public List<ReservationResponse> createReservations(String email, ReservationRequest request) {
+    public List<ReservationSearchDetailResponse> create(String email, ReservationRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        List<Reservation> reservations = request.getTimeList().stream()
-                .map(timeSlotId -> {
+        Court court = courtRepository.findById(request.getCourtId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-                    TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
-                            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+        // 모든 타임슬롯을 한 번에 조회
+        List<TimeSlot> timeSlots = timeSlotRepository.findAllById(request.getTimeList());
 
-                    // 시간 슬롯이 예약된 경우 체크
-                    if (reservationRepository.existsByTimeSlotAndStatus(timeSlot, ReservationStatus.PENDING) ||
-                            reservationRepository.existsByTimeSlotAndStatus(timeSlot, ReservationStatus.ACCEPTED)) {
-                        throw new CustomException(ErrorCode.TIME_SLOT_ALREADY_RESERVED);
-                    }
-                    // 코트 찾기
-                    Court court = courtRepository.findById(request.getCourtId())
-                            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+        // 타임슬롯 IDs로 예약된 상태를 한 번에 확인
+        List<Long> timeSlotIds = timeSlots.stream().map(TimeSlot::getId).toList();
+        List<Reservation> existingReservations = reservationRepository.findByTimeSlotIdInAndStatusIn(
+                timeSlotIds, List.of(ReservationStatus.PENDING, ReservationStatus.ACCEPTED));
 
-                    return new Reservation(user, court, timeSlot, ReservationStatus.PENDING);
-                })
+        // 중복 예약 상태 체크
+        if (!existingReservations.isEmpty()) {
+            throw new CustomException(ErrorCode.TIME_SLOT_ALREADY_RESERVED);
+        }
+
+        // 예약 객체 생성
+        List<Reservation> reservations = timeSlots.stream()
+                .map(timeSlot -> new Reservation(user, court, timeSlot, ReservationStatus.PENDING))
                 .toList();
 
         reservationRepository.saveAll(reservations);
-        return reservations.stream().map(ReservationResponse::from).toList();
+        return reservations.stream().map(ReservationSearchDetailResponse::from).toList();
     }
 
 
     // 예약 조회(단건)
-    public ReservationResponse getReservation(Long reservationId, String email) {
+    public ReservationSearchDetailResponse get(Long reservationId, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
 
-        Reservation reservation = reservationRepository.findByIdAndUser(reservationId, user)
+        Reservation reservation = reservationRepository.findByIdAndUserWithDetails(reservationId, user)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 
-        return ReservationResponse.from(reservation);
+        return ReservationSearchDetailResponse.from(reservation);
     }
 
     // 예약 목록 조회(다건)
-    public List<ReservationResponse> getAllReservations(String email) {
+    @Transactional
+    public List<ReservationSearchResponse> search(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
 
-        List<Reservation> reservations = reservationRepository.findByUser(user);
+        List<Reservation> reservations = reservationRepository.findByUserWithDetails(user);
 
         if (reservations.isEmpty()) {
             throw new CustomException(ErrorCode.RESERVATION_LIST_EMPTY);
         }
-        return reservations.stream().map(ReservationResponse::from).toList();
+
+        return reservations.stream()
+                .map(ReservationSearchResponse::from)
+                .toList();
     }
 
 
     // 예약 수정
     @Transactional
-    public ReservationResponse updateReservation(Long reservationId, String email, UpdateReservationRequest request) {
+    public ReservationSearchDetailResponse update(Long reservationId, String email, ReservationUpdateRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
 
@@ -105,9 +112,12 @@ public class ReservationService {
         TimeSlot newTimeSlot = timeSlotRepository.findById(request.getTimeId())
                 .orElseThrow(() -> new CustomException(ErrorCode.TIME_SLOT_NOT_FOUND));
 
-        // 새로운 시간 슬롯이 이미 예약되어 있는지 확인
-        if (reservationRepository.existsByTimeSlotAndStatus(newTimeSlot, ReservationStatus.PENDING) ||
-                reservationRepository.existsByTimeSlotAndStatus(newTimeSlot, ReservationStatus.ACCEPTED)) {
+        // 새로운 시간 슬롯의 상태를 한 번에 확인
+        List<ReservationStatus> statuses = List.of(ReservationStatus.PENDING, ReservationStatus.ACCEPTED);
+        boolean isTimeSlotReserved = reservationRepository.findByTimeSlotIdInAndStatusIn(
+                List.of(newTimeSlot.getId()), statuses).size() > 0;
+
+        if (isTimeSlotReserved) {
             throw new CustomException(ErrorCode.TIME_SLOT_ALREADY_RESERVED);
         }
 
@@ -117,15 +127,14 @@ public class ReservationService {
 
         // 예약 수정
         reservation.update(newTimeSlot, newCourt);
-
         Reservation updatedReservation = reservationRepository.save(reservation);
 
-        return ReservationResponse.from(updatedReservation);
+        return ReservationSearchDetailResponse.from(updatedReservation);
     }
 
     // 예약 취소
     @Transactional
-    public void cancelReservation(Long reservationId, String email) {
+    public void delete(Long reservationId, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
 

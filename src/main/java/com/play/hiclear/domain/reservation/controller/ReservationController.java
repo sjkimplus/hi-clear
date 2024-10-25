@@ -4,8 +4,9 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.utils.JwtUtil;
 import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
-import com.play.hiclear.domain.reservation.dto.request.UpdateReservationRequest;
-import com.play.hiclear.domain.reservation.dto.response.ReservationResponse;
+import com.play.hiclear.domain.reservation.dto.request.ReservationUpdateRequest;
+import com.play.hiclear.domain.reservation.dto.response.ReservationSearchDetailResponse;
+import com.play.hiclear.domain.reservation.dto.response.ReservationSearchResponse;
 import com.play.hiclear.domain.reservation.service.ReservationService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -13,67 +14,64 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
     private final JwtUtil jwtUtil;
 
     // 예약 생성
-    @PostMapping
-    public List<ReservationResponse> createReservation(
+    @PostMapping("/v1/reservations")
+    public List<ReservationSearchDetailResponse> createReservation(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody ReservationRequest request) {
 
-        String email = getEmailFromToken(authorizationHeader);
+        String email = extractEmailFromToken(authorizationHeader);
 
-        return reservationService.createReservations(email, request);
+        return reservationService.create(email, request);
     }
     
     // 예약 조회(단건)
-    @GetMapping("/{reservationId}")
-    public ReservationResponse getReservation(
+    @GetMapping("/v1/reservations/{reservationId}")
+    public ReservationSearchDetailResponse getReservation(
             @PathVariable Long reservationId,
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        String email = getEmailFromToken(authorizationHeader);
-        return reservationService.getReservation(reservationId, email);
+        String email = extractEmailFromToken(authorizationHeader);
+        return reservationService.get(reservationId, email);
     }
 
     // 예약 목록 조회(다건)
-    @GetMapping
-    public List<ReservationResponse> getAllReservations(
+    @GetMapping("/v1/reservations")
+    public List<ReservationSearchResponse> searchReservations(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        String email = getEmailFromToken(authorizationHeader);
-        return reservationService.getAllReservations(email);
+        String email = extractEmailFromToken(authorizationHeader);
+        return reservationService.search(email);
     }
 
     // 예약 수정
-    @PatchMapping("/{reservationId}")
-    public ReservationResponse updateReservation(
+    @PatchMapping("/v1/reservations/{reservationId}")
+    public ReservationSearchDetailResponse updateReservation(
             @PathVariable Long reservationId,
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody UpdateReservationRequest request) {
+            @RequestBody ReservationUpdateRequest request) {
 
-        String email = getEmailFromToken(authorizationHeader);
-        return reservationService.updateReservation(reservationId, email, request);
+        String email = extractEmailFromToken(authorizationHeader);
+        return reservationService.update(reservationId, email, request);
     }
 
     // 예약 취소
-    @DeleteMapping("/{reservationId}")
-    public ResponseEntity<Map<String, Object>> cancelReservation(
+    @DeleteMapping("/v1/reservations/{reservationId}")
+    public ResponseEntity<Map<String, Object>> deleteReservation(
             @PathVariable Long reservationId,
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        String email = getEmailFromToken(authorizationHeader);
-        reservationService.cancelReservation(reservationId, email);
+        String email = extractEmailFromToken(authorizationHeader);
+        reservationService.delete(reservationId, email);
 
         // 응답 생성
         Map<String, Object> response = new HashMap<>();
@@ -86,7 +84,7 @@ public class ReservationController {
 
 
     // 토큰에서 email 추출
-    private String getEmailFromToken(String authorizationHeader) {
+    private String extractEmailFromToken(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new CustomException(ErrorCode.AUTH_USER_NOT_FOUND, "사용자가 인증되지 않았습니다.");
         }

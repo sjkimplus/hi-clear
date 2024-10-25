@@ -5,10 +5,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class UpdateReservationRequest {
+public class ReservationUpdateRequest {
     private Long timeId;
 
-    public UpdateReservationRequest(Long timeId) {
+    public ReservationUpdateRequest(Long timeId) {
         this.timeId = timeId;
     }
 }
