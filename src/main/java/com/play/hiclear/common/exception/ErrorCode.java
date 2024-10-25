@@ -25,17 +25,17 @@ public enum ErrorCode {
 
 
     // User
+    NO_AUTHORITY(HttpStatus.FORBIDDEN, "이 번개일정에 대한권한이 없습니다."),
 
-
-
-
+    // Meeting
+    MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
 
 
 
     //
 
     // 기본 코드
-    NOT_FOUND(HttpStatus.NOT_FOUND, "찾지못했습니다.");
+    NOT_FOUND(HttpStatus.NOT_FOUND, "%s 찾지못했습니다.");
 
     private final HttpStatus status;
     private final String message;

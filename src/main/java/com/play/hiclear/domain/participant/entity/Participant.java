@@ -36,6 +36,12 @@ public class Participant extends TimeStamped {
     @Column(nullable = false)
     private ParticipantStatus status;
 
+    public Participant(Meeting meeting, User user, ParticipantRole role, ParticipantStatus status) {
+        this.meeting = meeting;
+        this.user = user;
+        this.role = role;
+        this.status = status;
+    }
 }
 
 
