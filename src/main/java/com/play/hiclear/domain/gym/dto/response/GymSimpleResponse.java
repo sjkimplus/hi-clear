@@ -1,16 +1,14 @@
 package com.play.hiclear.domain.gym.dto.response;
 
-import com.play.hiclear.domain.gym.enums.GymType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
-public class GymSaveResponse {
+public class GymSimpleResponse {
 
-    private Long id;
     private String name;
-    private String description;
     private String address;
-    private GymType gymType;
 }
