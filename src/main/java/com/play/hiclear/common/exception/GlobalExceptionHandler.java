@@ -13,8 +13,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
-        String message = ex.getErrorCode().customMessage(ex.getMessage()); // detail 메시지도 보여줌
-        return getErrorResponse(ex.getErrorCode().getStatus(), message);
+        return getErrorResponse(ex.getErrorCode().getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
