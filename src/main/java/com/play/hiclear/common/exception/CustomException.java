@@ -16,4 +16,5 @@ public class CustomException extends RuntimeException {
         super(String.format(errorCode.getMessage(), detail));
         this.errorCode = errorCode;
     }
+
 }
