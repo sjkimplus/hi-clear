@@ -3,6 +3,7 @@ package com.play.hiclear.domain.schedule.entity;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
+import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,4 +36,18 @@ public class Schedule extends TimeStamped {
 
     @OneToMany(mappedBy = "schedule")
     private List<ScheduleParticipant> scheduleParticipants;         // 참가자 목록
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public Schedule(User user, Club club, String title, String description, String region, LocalDateTime startTime, LocalDateTime endTime) {
+        this.user = user;
+        this.club = club;
+        this.title = title;
+        this.description = description;
+        this.region = region;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }
