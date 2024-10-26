@@ -36,6 +36,9 @@ public class ScheduleService {
         User user = findUserByEmail(email);
         Club club = findClubById(clubId);
 
+        // 클럽 멤버 확인
+        validateClubMembership(user, club);
+
         // 참가자 유효성 검사 및 중복 확인
         Set<Long> participantIds = validateAndGetParticipants(scheduleRequestDto.getParticipants(), club, user.getId());
 
@@ -51,16 +54,50 @@ public class ScheduleService {
         return ScheduleSearchDetailResponse.from(savedSchedule, user.getEmail(), user.getId(), List.copyOf(participantIds));
     }
 
+    // 모임 일정 단건 조회
+    public ScheduleSearchDetailResponse get(Long scheduleId, String email) {
+        // 일정 조회
+        Schedule schedule = scheduleRespsiroty.findById(scheduleId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Schedule 객체를"));
+
+        // 일정 생성자와 참가자 목록 확인
+        User creator = schedule.getUser();
+        List<ScheduleParticipant> participants = scheduleParticipantRepository.findBySchedule(schedule);
+
+        boolean isParticipant = participants.stream()
+                .anyMatch(participant -> participant.getUser().getEmail().equals(email));
+
+        // 사용자가 일정의 생성자거나 참가자인지 확인
+        if (!creator.getEmail().equals(email) && !isParticipant) {
+            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "이 모임일정을 조회할 권한이 없습니다.");
+        }
+
+        // 반환 DTO 생성
+        return ScheduleSearchDetailResponse.from(schedule, email, creator.getId(),
+                participants.stream().map(participant -> participant.getUser().getId()).toList());
+    }
+
+
+
     // User 조회
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
     }
 
     // Club 조회
     private Club findClubById(Long clubId) {
         return clubRepository.findById(clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Club 객체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Club 객체를"));
+    }
+
+    // 클럽 멤버 확인 메서드
+    private void validateClubMembership(User user, Club club) {
+        boolean isMember = club.getClubMembers().stream()
+                .anyMatch(member -> member.getUser().getId().equals(user.getId()));
+        if (!isMember) {
+            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "사용자는 이 클럽의 회원이 아닙니다.");
+        }
     }
 
     // 사용자가 Club의 회원인지 확인하고 유효한 참가자 ID를 반환
@@ -80,7 +117,7 @@ public class ScheduleService {
     // 참가자가 클럽의 회원인지 확인
     private void validateParticipant(Long participantId, Club club) {
         User participantUser = userRepository.findById(participantId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         // 클럽의 회원인지 확인
         boolean isMemberOfClub = club.getClubMembers().stream()
@@ -94,7 +131,7 @@ public class ScheduleService {
     private void addParticipants(Schedule schedule, Set<Long> participantIds, Club club) {
         for (Long participantId : participantIds) {
             User participantUser = userRepository.findById(participantId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
             // 이미 참가자인지 확인
             boolean alreadyParticipating = scheduleParticipantRepository.existsByScheduleAndUser(schedule, participantUser);

@@ -31,6 +31,17 @@ public class ScheduleController {
         return new ResponseEntity<>(createdSchedule, HttpStatus.CREATED);
     }
 
+    // 모임 일정 단건 조회
+    @GetMapping("/v1/schedules/{scheduleId}")
+    public ResponseEntity<ScheduleSearchDetailResponse> getSchedule(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long scheduleId) {
+
+        String email = extractEmailFromToken(authorizationHeader); // 토큰에서 이메일 추출
+        ScheduleSearchDetailResponse scheduleDetail = scheduleService.get(scheduleId, email);
+        return ResponseEntity.ok(scheduleDetail);
+    }
+
 
     // 토큰에서 email 추출
     private String extractEmailFromToken(String authorizationHeader) {
