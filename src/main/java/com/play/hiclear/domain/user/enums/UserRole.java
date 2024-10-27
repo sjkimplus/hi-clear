@@ -18,7 +18,7 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 권한입니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 권한입니다, [USER, BUSINESS]중 하나를 입력해주세요"));
     }
 
     public static class Authority {

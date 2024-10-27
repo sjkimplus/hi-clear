@@ -12,7 +12,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<Map<String, Object>> handlePasswordMismatchException(CustomException ex) {
+    public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
         return getErrorResponse(ex.getErrorCode().getStatus(), ex.getMessage());
     }
 
