@@ -23,7 +23,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class BoardService {
 
     private final BoardRepository boardRepository;
