@@ -9,7 +9,7 @@ import com.play.hiclear.domain.schduleparticipant.repository.ScheduleParticipant
 import com.play.hiclear.domain.schedule.dto.request.ScheduleRequest;
 import com.play.hiclear.domain.schedule.dto.response.ScheduleSearchDetailResponse;
 import com.play.hiclear.domain.schedule.entity.Schedule;
-import com.play.hiclear.domain.schedule.repository.ScheduleRespsiroty;
+import com.play.hiclear.domain.schedule.repository.ScheduleRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class ScheduleService {
 
-    private final ScheduleRespsiroty scheduleRespsiroty;
+    private final ScheduleRepository scheduleRepository;
     private final ScheduleParticipantRepository scheduleParticipantRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
@@ -45,7 +45,7 @@ public class ScheduleService {
         // 모임 생성
         Schedule schedule = new Schedule(user, club, scheduleRequestDto.getTitle(), scheduleRequestDto.getDescription(),
                 scheduleRequestDto.getRegion(), scheduleRequestDto.getStartTime(), scheduleRequestDto.getEndTime());
-        Schedule savedSchedule = scheduleRespsiroty.save(schedule);
+        Schedule savedSchedule = scheduleRepository.save(schedule);
 
         // 참가자 목록 추가
         addParticipants(savedSchedule, participantIds, club);
@@ -57,7 +57,7 @@ public class ScheduleService {
     // 모임 일정 단건 조회
     public ScheduleSearchDetailResponse get(Long scheduleId, String email) {
         // 일정 조회
-        Schedule schedule = scheduleRespsiroty.findById(scheduleId)
+        Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Schedule 객체를"));
 
         // 일정 생성자와 참가자 목록 확인
@@ -77,6 +77,16 @@ public class ScheduleService {
                 participants.stream().map(participant -> participant.getUser().getId()).toList());
     }
 
+    // 클럽의 모임 일정 목록 조회
+    public List<Schedule> search(Long clubId, String email) {
+        Club club = findClubById(clubId);
+        User user = findUserByEmail(email); // 이 부분은 한 번만 조회
+
+        validateClubMembership(user, club);
+
+        // 클럽의 일정 목록을 조회
+        return scheduleRepository.findByClub(club);
+    }
 
 
     // User 조회
@@ -143,4 +153,5 @@ public class ScheduleService {
             scheduleParticipantRepository.save(additionalParticipant);
         }
     }
+
 }
