@@ -50,4 +50,29 @@ public class Schedule extends TimeStamped {
         this.startTime = startTime;
         this.endTime = endTime;
     }
+
+    // 모임 일정 수정
+    public void updateSchedule(String title, String description, String region, LocalDateTime startTime, LocalDateTime endTime) {
+        this.title = title;
+        this.description = description;
+        this.region = region;
+        this.startTime = startTime;
+        this.endTime = endTime;
+
+//        if (title != null) {
+//            this.title = title;
+//        }
+//        if (description != null) {
+//            this.description = description;
+//        }
+//        if (region != null) {
+//            this.region = region;
+//        }
+//        if (startTime != null) {
+//            this.startTime = startTime;
+//        }
+//        if (endTime != null) {
+//            this.endTime = endTime;
+//        }
+    }
 }

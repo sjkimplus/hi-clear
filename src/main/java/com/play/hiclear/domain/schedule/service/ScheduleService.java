@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,6 +89,36 @@ public class ScheduleService {
         return scheduleRepository.findByClub(club);
     }
 
+    // 모임 일정 수정
+    @Transactional
+    public ScheduleSearchDetailResponse update(Long scheduleId, ScheduleRequest scheduleRequestDto, String email) {
+        // 일정 조회
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Schedule 객체를"));
+
+        // 생성자 권한 확인
+        if (!schedule.getUser().getEmail().equals(email)) {
+            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "모임 일정을 수정할 권한이 없습니다.");
+        }
+
+        // 일정 정보 수정
+        schedule.updateSchedule(
+                scheduleRequestDto.getTitle(),
+                scheduleRequestDto.getDescription(),
+                scheduleRequestDto.getRegion(),
+                scheduleRequestDto.getStartTime(),
+                scheduleRequestDto.getEndTime()
+        );
+
+        // 참가자 목록 업데이트
+        updateParticipants(schedule, scheduleRequestDto.getParticipants());
+
+        // 수정된 일정 반환 DTO 생성
+        return ScheduleSearchDetailResponse.from(schedule, email, schedule.getUser().getId(),
+                schedule.getScheduleParticipants().stream()
+                        .map(participant -> participant.getUser().getId())
+                        .toList());
+    }
 
     // User 조회
     private User findUserByEmail(String email) {
@@ -154,4 +185,39 @@ public class ScheduleService {
         }
     }
 
+    // 모임 일정에 참가자 수정
+    private void updateParticipants(Schedule schedule, List<Long> participantIds) {
+        // 기존 참가자 목록 가져오기
+        List<ScheduleParticipant> existingParticipants = scheduleParticipantRepository.findBySchedule(schedule);
+
+        // 기존 참가자 ID 리스트 생성
+        Set<Long> existingParticipantIds = existingParticipants.stream()
+                .map(participant -> participant.getUser().getId())
+                .collect(Collectors.toSet());
+
+        // 새로운 참가자 ID 집합, 현재 사용자 ID도 추가
+        Set<Long> newParticipantIds = new HashSet<>(participantIds);
+        newParticipantIds.add(schedule.getUser().getId()); // 현재 사용자 ID 추가
+
+        // 1. 기존 참가자 제거
+        for (ScheduleParticipant participant : existingParticipants) {
+            if (!newParticipantIds.contains(participant.getUser().getId())) {
+                scheduleParticipantRepository.delete(participant);
+            }
+        }
+
+        // 2. 새로운 참가자 추가
+        for (Long participantId : newParticipantIds) {
+            if (!existingParticipantIds.contains(participantId)) {
+                User participantUser = userRepository.findById(participantId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
+
+                // 클럽의 회원인지 확인
+                validateParticipant(participantId, schedule.getClub());
+
+                ScheduleParticipant newParticipant = new ScheduleParticipant(schedule, participantUser, schedule.getClub());
+                scheduleParticipantRepository.save(newParticipant);
+            }
+        }
+    }
 }
