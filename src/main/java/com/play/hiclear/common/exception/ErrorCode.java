@@ -33,8 +33,8 @@ public enum ErrorCode {
 
 
     // 기본 코드
-    NO_AUTHORITY(HttpStatus.FORBIDDEN, "%s 대한권한이 없습니다."),
-    NOT_FOUND(HttpStatus.NOT_FOUND, "%s 찾지못했습니다.");
+    NO_AUTHORITY(HttpStatus.FORBIDDEN, "%s에 대한권한이 없습니다."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "%s을(를) 찾지못했습니다.");
 
     private final HttpStatus status;
     private final String message;
