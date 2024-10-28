@@ -71,7 +71,7 @@ public class GymService {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Gym> gyms = gymRepository.findByUserId(authUser.getUserId(), pageable);
+        Page<Gym> gyms = gymRepository.findByUserIdAndDeletedAtIsNull(authUser.getUserId(), pageable);
 
         // 해당 계정으로 등록된 체육관이 없는경우
         if(gyms.getTotalElements() == 0){

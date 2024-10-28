@@ -1,5 +1,6 @@
 package com.play.hiclear.config;
 
+import com.play.hiclear.domain.user.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/v1/auth/**").permitAll()
-                        .requestMatchers("/v1/business/**").hasRole("BUSINESS")
+                        .requestMatchers("/v1/business/**").hasRole(UserRole.BUSINESS.name())
                         .anyRequest().authenticated()
                 )
                 .build();
