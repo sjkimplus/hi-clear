@@ -25,7 +25,6 @@ public class TimeStamped {
 
     private LocalDateTime deletedAt;
 
-    @PreRemove
     public void markDeleted() {
         this.deletedAt = LocalDateTime.now();
     }

@@ -4,10 +4,12 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.utils.JwtUtil;
-import com.play.hiclear.domain.auth.dto.request.LoginRequest;
-import com.play.hiclear.domain.auth.dto.request.SignupRequest;
-import com.play.hiclear.domain.auth.dto.response.LoginResponse;
-import com.play.hiclear.domain.auth.dto.response.SignupResponse;
+import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
+import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
+import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
+import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
+import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
@@ -28,14 +30,14 @@ public class AuthService {
     private final UserRepository userRepository;
 
     @Transactional
-    public SignupResponse signup(SignupRequest request) {
+    public AuthSignupResponse signup(AuthSignupRequest request) {
 
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
 
         // email을 통한 중복 가입 확인
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-        if(existingUser.isPresent()){
+        if (existingUser.isPresent()) {
             throw new CustomException(ErrorCode.AUTH_USER_EXISTING);
         }
 
@@ -45,7 +47,7 @@ public class AuthService {
                 request.getEmail(),
                 request.getRegion(),
                 encodePassword,
-                Ranks.of(request.getSelectRank()),
+                Ranks.of(request.getSelfRank()),
                 UserRole.of(request.getUserRole())
         );
 
@@ -53,29 +55,30 @@ public class AuthService {
         userRepository.save(user);
 
         // DTO 객체 생성 및 반환
-        return new SignupResponse(
+        return new AuthSignupResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
                 user.getRegion(),
-                user.getSelectRank(),
+                user.getSelfRank(),
                 user.getUserRole()
         );
     }
 
-    public LoginResponse login(LoginRequest request) {
+
+    public AuthLoginResponse login(AuthLoginRequest request) {
 
         // email으로 가입여부 홧인
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
 
         // 비밀번호 확인
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
         }
 
         // 탈퇴여부 확인
-        if(user.getDeletedAt() != null){
+        if (user.getDeletedAt() != null) {
             throw new CustomException(ErrorCode.AUTH_USER_DELETED);
         }
 
@@ -86,7 +89,22 @@ public class AuthService {
                 user.getUserRole()
         );
 
-        return new LoginResponse(token);
+        return new AuthLoginResponse(token);
     }
 
+
+    @Transactional
+    public void delete(AuthUser authUser, AuthDeleteRequest request) {
+
+        // 유저 조회
+        User user = userRepository.findById(authUser.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
+
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
+        }
+        user.markDeleted();
+
+    }
 }
