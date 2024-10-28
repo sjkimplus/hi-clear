@@ -27,7 +27,7 @@ public class ScheduleController {
 
     // 모임 일정 생성
     @PostMapping("/v1/clubs/{clubId}/schedules")
-    public ResponseEntity<ScheduleSearchDetailResponse> createSchedule(
+    public ResponseEntity<ScheduleSearchDetailResponse> create(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clubId,
             @RequestBody ScheduleRequest scheduleRequestDto) {
@@ -38,7 +38,7 @@ public class ScheduleController {
 
     // 모임 일정 단건 조회
     @GetMapping("/v1/schedules/{scheduleId}")
-    public ResponseEntity<ScheduleSearchDetailResponse> getSchedule(
+    public ResponseEntity<ScheduleSearchDetailResponse> get(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long scheduleId) {
 
@@ -48,7 +48,7 @@ public class ScheduleController {
 
     // 클럽의 모임 일정 목록 조회
     @GetMapping("/v1/clubs/{clubId}/schedules")
-    public ResponseEntity<List<ScheduleSearchResponse>> searchSchedule(
+    public ResponseEntity<List<ScheduleSearchResponse>> search(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clubId) {
 
@@ -63,7 +63,7 @@ public class ScheduleController {
 
     // 모임 일정 수정
     @PatchMapping("/v1/schedules/{scheduleId}")
-    public ScheduleSearchDetailResponse updateSchedule(
+    public ScheduleSearchDetailResponse update(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long scheduleId,
             @RequestBody ScheduleRequest scheduleRequestDto) {
@@ -73,7 +73,7 @@ public class ScheduleController {
 
     // 모임 일정 삭제
     @DeleteMapping("/v1/schedules/{scheduleId}")
-    public ResponseEntity<Map<String, Object>> deleteSchedule(
+    public ResponseEntity<Map<String, Object>> delete(
             @PathVariable Long scheduleId,
             @AuthenticationPrincipal AuthUser authUser) {
 
