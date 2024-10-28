@@ -7,13 +7,13 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SignupResponse {
+public class AuthSignupResponse {
 
     private final Long id;
     private final String name;
     private final String email;
     private final String region;
-    private final Ranks selectRank;
+    private final Ranks selfRank;
     private final UserRole userRole;
 
 }

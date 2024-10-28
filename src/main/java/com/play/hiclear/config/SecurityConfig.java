@@ -38,7 +38,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/v1/auth/**").permitAll()
+                        .requestMatchers("/v1/business/**").hasRole("BUSINESS")
                         .anyRequest().authenticated()
                 )
                 .build();

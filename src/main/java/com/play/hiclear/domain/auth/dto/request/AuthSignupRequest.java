@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignupRequest {
+public class AuthSignupRequest {
 
     @NotBlank(message = "이메일은 필수 입력 사항입니다.")
     @Email(message = "이메일 형식을 맞춰주세요.")
@@ -27,7 +27,7 @@ public class SignupRequest {
     private String region;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
-    private String selectRank;
+    private String selfRank;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
     private String userRole;
