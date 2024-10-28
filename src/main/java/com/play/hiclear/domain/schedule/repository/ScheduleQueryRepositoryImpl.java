@@ -2,10 +2,12 @@ package com.play.hiclear.domain.schedule.repository;
 
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schedule.entity.Schedule;
+import com.play.hiclear.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.play.hiclear.domain.schduleparticipant.entity.QScheduleParticipant.scheduleParticipant;

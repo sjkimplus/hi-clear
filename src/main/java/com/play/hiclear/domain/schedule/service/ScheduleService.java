@@ -120,6 +120,28 @@ public class ScheduleService {
                         .toList());
     }
 
+    // 모임 일정 삭제
+    @Transactional
+    public void delete(Long scheduleId, String email) {
+        // 일정 조회
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Schedule 객체를"));
+
+        // 생성자 권한 확인
+        if (!schedule.getUser().getEmail().equals(email)) {
+            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "모임 일정을 삭제할 권한이 없습니다.");
+        }
+
+        // 참가자 삭제
+        List<ScheduleParticipant> participants = scheduleParticipantRepository.findBySchedule(schedule);
+        for (ScheduleParticipant participant : participants) {
+            participant.markDeleted();
+        }
+
+        // 일정 삭제
+        schedule.markDeleted();
+    }
+
     // User 조회
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
@@ -144,7 +166,7 @@ public class ScheduleService {
     // 사용자가 Club의 회원인지 확인하고 유효한 참가자 ID를 반환
     private Set<Long> validateAndGetParticipants(List<Long> participantIds, Club club, Long currentUserId) {
         Set<Long> validParticipantIds = new HashSet<>();
-        validParticipantIds.add(currentUserId); // 현재 사용자 ID 추가
+        validParticipantIds.add(currentUserId);
 
         if (participantIds != null) {
             for (Long participantId : participantIds) {
@@ -197,7 +219,7 @@ public class ScheduleService {
 
         // 새로운 참가자 ID 집합, 현재 사용자 ID도 추가
         Set<Long> newParticipantIds = new HashSet<>(participantIds);
-        newParticipantIds.add(schedule.getUser().getId()); // 현재 사용자 ID 추가
+        newParticipantIds.add(schedule.getUser().getId());
 
         // 1. 기존 참가자 제거
         for (ScheduleParticipant participant : existingParticipants) {
