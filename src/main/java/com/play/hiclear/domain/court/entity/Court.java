@@ -30,4 +30,8 @@ public class Court {
         this.price = price;
         this.gym = gym;
     }
+
+    public void update(int price) {
+        this.price = price;
+    }
 }
