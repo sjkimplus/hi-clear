@@ -24,7 +24,7 @@ public class ReservationController {
 
     // 예약 생성
     @PostMapping("/v1/reservations")
-    public List<ReservationSearchDetailResponse> createReservation(
+    public List<ReservationSearchDetailResponse> create(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody ReservationRequest request) {
 
@@ -33,7 +33,7 @@ public class ReservationController {
 
     // 예약 조회(단건)
     @GetMapping("/v1/reservations/{reservationId}")
-    public ReservationSearchDetailResponse getReservation(
+    public ReservationSearchDetailResponse get(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal AuthUser authUser) {
 
@@ -42,7 +42,7 @@ public class ReservationController {
 
     // 예약 목록 조회(다건)
     @GetMapping("/v1/reservations")
-    public List<ReservationSearchResponse> searchReservations(
+    public List<ReservationSearchResponse> search(
             @AuthenticationPrincipal AuthUser authUser) {
 
         return reservationService.search(authUser.getEmail());
@@ -50,7 +50,7 @@ public class ReservationController {
 
     // 예약 수정
     @PatchMapping("/v1/reservations/{reservationId}")
-    public ReservationSearchDetailResponse updateReservation(
+    public ReservationSearchDetailResponse update(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody ReservationUpdateRequest request) {
@@ -60,7 +60,7 @@ public class ReservationController {
 
     // 예약 취소
     @DeleteMapping("/v1/reservations/{reservationId}")
-    public ResponseEntity<Map<String, Object>> deleteReservation(
+    public ResponseEntity<Map<String, Object>> delete(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal AuthUser authUser) {
 
