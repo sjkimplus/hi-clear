@@ -1,79 +1,71 @@
 package com.play.hiclear.domain.reservation.controller;
 
-import com.play.hiclear.common.exception.CustomException;
-import com.play.hiclear.common.exception.ErrorCode;
-import com.play.hiclear.common.utils.JwtUtil;
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
 import com.play.hiclear.domain.reservation.dto.request.ReservationUpdateRequest;
 import com.play.hiclear.domain.reservation.dto.response.ReservationSearchDetailResponse;
 import com.play.hiclear.domain.reservation.dto.response.ReservationSearchResponse;
 import com.play.hiclear.domain.reservation.service.ReservationService;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final JwtUtil jwtUtil;
 
     // 예약 생성
     @PostMapping("/v1/reservations")
     public List<ReservationSearchDetailResponse> createReservation(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody ReservationRequest request) {
 
-        String email = extractEmailFromToken(authorizationHeader);
-
-        return reservationService.create(email, request);
+        return reservationService.create(authUser.getEmail(), request);
     }
 
     // 예약 조회(단건)
     @GetMapping("/v1/reservations/{reservationId}")
     public ReservationSearchDetailResponse getReservation(
             @PathVariable Long reservationId,
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @AuthenticationPrincipal AuthUser authUser) {
 
-        String email = extractEmailFromToken(authorizationHeader);
-        return reservationService.get(reservationId, email);
+        return reservationService.get(reservationId, authUser.getEmail());
     }
 
     // 예약 목록 조회(다건)
     @GetMapping("/v1/reservations")
     public List<ReservationSearchResponse> searchReservations(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @AuthenticationPrincipal AuthUser authUser) {
 
-        String email = extractEmailFromToken(authorizationHeader);
-        return reservationService.search(email);
+        return reservationService.search(authUser.getEmail());
     }
 
     // 예약 수정
     @PatchMapping("/v1/reservations/{reservationId}")
     public ReservationSearchDetailResponse updateReservation(
             @PathVariable Long reservationId,
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestBody ReservationUpdateRequest request) {
 
-        String email = extractEmailFromToken(authorizationHeader);
-        return reservationService.update(reservationId, email, request);
+        return reservationService.update(reservationId, authUser.getEmail(), request);
     }
 
     // 예약 취소
     @DeleteMapping("/v1/reservations/{reservationId}")
     public ResponseEntity<Map<String, Object>> deleteReservation(
             @PathVariable Long reservationId,
-            @RequestHeader("Authorization") String authorizationHeader) {
-
-        String email = extractEmailFromToken(authorizationHeader);
+            @AuthenticationPrincipal AuthUser authUser) {
 
         // 예약 취소 서비스 호출
-        reservationService.delete(reservationId, email);
+        reservationService.delete(reservationId, authUser.getEmail());
 
         // 응답 생성
         Map<String, Object> response = new HashMap<>();
@@ -82,23 +74,5 @@ public class ReservationController {
         response.put("status", HttpStatus.OK.name());
 
         return ResponseEntity.ok(response);
-    }
-
-
-    // 토큰에서 email 추출
-    private String extractEmailFromToken(String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new CustomException(ErrorCode.AUTH_USER_NOT_FOUND, "사용자가 인증되지 않았습니다.");
-        }
-
-        String token = jwtUtil.substringToken(authorizationHeader);
-        Claims claims = jwtUtil.extractClaims(token);
-        String email = claims.get("email", String.class);
-
-        if (email == null) {
-            throw new CustomException(ErrorCode.AUTH_USER_NOT_FOUND, "사용자가 인증되지 않았습니다.");
-        }
-
-        return email;
     }
 }

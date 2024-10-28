@@ -20,17 +20,6 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public boolean existsByTimeSlotAndStatus(TimeSlot timeSlot, ReservationStatus status) {
-        QReservation reservation = QReservation.reservation;
-
-        return queryFactory.selectOne()
-                .from(reservation)
-                .where(reservation.timeSlot.eq(timeSlot)
-                        .and(reservation.status.eq(status)))
-                .fetchOne() != null;
-    }
-
-    @Override
     public Optional<Reservation> findByIdAndUserWithDetails(Long reservationId, User user) {
         QReservation reservation = QReservation.reservation;
 

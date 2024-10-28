@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReservationQueryRepository {
-    boolean existsByTimeSlotAndStatus(TimeSlot timeSlot, ReservationStatus status);
-
     Optional<Reservation> findByIdAndUserWithDetails(Long reservationId, User user);
 
     List<Reservation> findByUserWithDetails(User user);
