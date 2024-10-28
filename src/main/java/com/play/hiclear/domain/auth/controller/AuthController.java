@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +32,7 @@ public class AuthController {
     }
 
     // 회원탈퇴
-    @GetMapping("/v1/auth/withdrawals")
+    @DeleteMapping("/v1/auth/withdrawals")
     public ResponseEntity<String> delete(@AuthenticationPrincipal AuthUser authUser, @RequestBody AuthDeleteRequest request){
         authService.delete(authUser, request);
         return ResponseEntity.ok("탈퇴 처리가 완료되었습니다.");

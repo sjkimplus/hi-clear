@@ -1,9 +1,9 @@
 package com.play.hiclear.domain.gym.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.gym.dto.request.GymSaveRequest;
+import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
-import com.play.hiclear.domain.gym.dto.response.GymSaveResponse;
+import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.enums.GymType;
@@ -23,7 +23,7 @@ public class GymController {
 
     // 체육관 등록
     @PostMapping("/v1/business/gyms")
-    public ResponseEntity<GymSaveResponse> create(@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody GymSaveRequest request) {
+    public ResponseEntity<GymCreateResponse> create(@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody GymCreateRequest request) {
         return ResponseEntity.ok(gymService.create(authUser, request));
     }
 
@@ -65,7 +65,7 @@ public class GymController {
 
 
     // 체육관 삭제
-    @GetMapping("/v1/business/gyms/{gymId}")
+    @DeleteMapping("/v1/business/gyms/{gymId}")
     public ResponseEntity<String> delete(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId

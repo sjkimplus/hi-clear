@@ -3,9 +3,9 @@ package com.play.hiclear.domain.gym.service;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.gym.dto.request.GymSaveRequest;
+import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
-import com.play.hiclear.domain.gym.dto.response.GymSaveResponse;
+import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.entity.Gym;
@@ -31,7 +31,7 @@ public class GymService {
 
 
     @Transactional
-    public GymSaveResponse create(AuthUser authUser, GymSaveRequest request) {
+    public GymCreateResponse create(AuthUser authUser, GymCreateRequest request) {
 
         User user = userRepository.findById(authUser.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
@@ -46,7 +46,7 @@ public class GymService {
 
         gymRepository.save(gym);
 
-        return new GymSaveResponse(
+        return new GymCreateResponse(
                 gym.getId(),
                 gym.getName(),
                 gym.getDescription(),

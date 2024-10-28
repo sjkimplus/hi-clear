@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class GymSaveResponse {
+public class GymCreateResponse {
 
     private final Long id;
     private final String name;
