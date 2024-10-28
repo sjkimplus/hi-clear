@@ -69,7 +69,7 @@ public class ReservationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "User 객체를"));
 
         Reservation reservation = reservationRepository.findByIdAndUserWithDetails(reservationId, user)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Reservation 객체를"));
 
         return ReservationSearchDetailResponse.from(reservation);
     }
@@ -100,18 +100,18 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .filter(res -> res.getUser().equals(user))
-                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Reservation 객체를"));
 
         // 현재 예약 상태 체크
         if (reservation.getStatus() == ReservationStatus.ACCEPTED ||
                 reservation.getStatus() == ReservationStatus.REJECTED ||
                 reservation.getStatus() == ReservationStatus.CANCELED) {
-            throw new CustomException(ErrorCode.RESERVATION_MODIFICATION_NOT_ALLOWED);
+            throw new CustomException(ErrorCode.NO_AUTHORITY, "수락, 거절, 취소된 예약은 수정에");
         }
 
         // 새로운 시간 슬롯 확인
         TimeSlot newTimeSlot = timeSlotRepository.findById(request.getTimeId())
-                .orElseThrow(() -> new CustomException(ErrorCode.TIME_SLOT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "TimeSlot 객체를"));
 
         // 새로운 시간 슬롯의 상태를 한 번에 확인
         List<ReservationStatus> statuses = List.of(ReservationStatus.PENDING, ReservationStatus.ACCEPTED);
@@ -141,7 +141,7 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .filter(res -> res.getUser().equals(user))
-                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Reservation 객체를"));
 
         // 예약 상태를 CANCELED로 변경
         reservation.updateStatus(ReservationStatus.CANCELED);
