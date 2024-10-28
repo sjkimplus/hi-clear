@@ -2,6 +2,8 @@ package com.play.hiclear.domain.meeting.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
+import com.play.hiclear.domain.meeting.dto.response.MeetingDetailResponse;
+import com.play.hiclear.domain.meeting.dto.response.MyMeetingDetailResponse;
 import com.play.hiclear.domain.meeting.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,30 +36,29 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.delete(authUser, meetingId));
     }
 
-//    // 번개글 다건 조회
+//    // 번개글 다건 조회 - QueryDSL
 //    @GetMapping("/meetings")
-//    public ResponseEntity<Page<MeetingSearchResponse>> searchMeetings(@AuthenticationPrincipal AuthUser authUser,
+//    public ResponseEntity<Page<MeetingSearchResponse>> search(@AuthenticationPrincipal AuthUser authUser,
 //                                                                      @RequestParam(defaultValue = "LATEST") SortType sortType,
 //                                                                      @RequestParam Ranks rank,
 //                                                                      @RequestParam(defaultValue = "1") int page,
 //                                                                      @RequestParam(defaultValue = "10") int size) {
-//        return ResponseEntity.ok(meetingService.searchMeetings(authUser, sortType, rank, page, size));
+//        return ResponseEntity.ok(meetingService.search(authUser, sortType, rank, page, size));
 //    }
 
-//    // 번개글 단건 조회 + 신천한 번개 단건 조회
-//    @GetMapping("/meetings/{meetingId}")
-//    public ResponseEntity<MeetingSearchDetailResponse> searchMeeting(@AuthenticationPrincipal AuthUser authUser) {
-//        return ResponseEntity.ok(meetingService.searchMeeting(authUser));
-//    }
+    // 번개글 단건 조회 + 신천한 번개 단건 조회
+    @GetMapping("/v1/meetings/{meetingId}")
+    public ResponseEntity<MeetingDetailResponse> get(@PathVariable Long meetingId) {
+        return ResponseEntity.ok(meetingService.get(meetingId));
+    }
 
-    // 나의 번개 다건 조회
+    // 나의 번개 신청한 번개 다건 조회 - jpql
 
-    // 개최한 번개 단건 조호
 
-    // 번개 참여 신청
-
-    // 번개 참여 신청 철회/거절/승락/신청취소
-
-    // 번개 참여자 리스트 조회
+    // 개최한 번개 단건 조회
+    @GetMapping("/v1/my-meetings/{meetingId}")
+    public ResponseEntity<MyMeetingDetailResponse> getMyMeeting(@PathVariable Long meetingId) {
+        return ResponseEntity.ok(meetingService.getMyMeeting(meetingId));
+    }
 
 }

@@ -30,7 +30,10 @@ public enum ErrorCode {
     // Meeting
     MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
 
-
+    // Participant
+    DUPLICATE_PARTICIPANT(HttpStatus.CONFLICT, "이미 신청이 되어 있습니다."),
+    TOO_LATE(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
+    WRONG_STATUS(HttpStatus.BAD_REQUEST, "번개 참가자의 상태를 수정할 수 없습니다."),
 
     // 기본 코드
     NO_AUTHORITY(HttpStatus.FORBIDDEN, "%s 대한권한이 없습니다."),
