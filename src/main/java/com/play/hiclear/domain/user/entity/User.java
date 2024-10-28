@@ -73,12 +73,4 @@ public class User extends TimeStamped {
             this.selfRank = Ranks.of(selfRank);
         }
     }
-
-   /* public static User fromAuthUser(AuthUser authUser){
-        return new User(
-                authUser.getUserId(),
-                authUser.getName(),
-
-        );
-    }*/
 }

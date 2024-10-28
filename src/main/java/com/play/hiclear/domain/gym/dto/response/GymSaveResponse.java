@@ -8,9 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class GymSaveResponse {
 
-    private Long id;
-    private String name;
-    private String description;
-    private String address;
-    private GymType gymType;
+    private final Long id;
+    private final String name;
+    private final String description;
+    private final String address;
+    private final GymType gymType;
 }

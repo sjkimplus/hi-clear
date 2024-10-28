@@ -8,6 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserUpdateResponse {
 
-    private String region;
-    private Ranks selfRank;
+    private final String region;
+    private final Ranks selfRank;
 }

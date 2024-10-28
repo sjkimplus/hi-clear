@@ -8,9 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserDetailResponse {
 
-    private String nameEmail;
-    private String region;
-    private Ranks selfRank;
+    private final String nameEmail;
+    private final String region;
+    private final Ranks selfRank;
 //    private Ranks reviewRank;
 //    private Long stringTention;
 }

@@ -1,6 +1,5 @@
 package com.play.hiclear.domain.user.service;
 
-import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
@@ -47,7 +46,7 @@ public class UserService {
 
         // 유저 불러오기
         User user = userRepository.findById(authUser.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
 
 
         // 정보 업데이트
@@ -66,7 +65,7 @@ public class UserService {
 
         // 유저 불러오기
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
 
         // name(email)형태의 문자열 생성
         StringBuilder nameEmail = new StringBuilder();

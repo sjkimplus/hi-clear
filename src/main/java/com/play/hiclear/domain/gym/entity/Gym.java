@@ -1,11 +1,15 @@
 package com.play.hiclear.domain.gym.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
+import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,6 +34,9 @@ public class Gym extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "gym", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    List<Court> courts = new ArrayList<>();
 
 
     public Gym(String name, String description, String address, GymType gymType, User user) {
