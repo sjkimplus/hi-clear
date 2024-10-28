@@ -25,6 +25,7 @@ public enum ErrorCode {
 
 
     // User
+    NO_AUTHORITY(HttpStatus.FORBIDDEN, "이 번개일정에 대한권한이 없습니다."),
 
 
 
@@ -42,6 +43,15 @@ public enum ErrorCode {
     RESERVATION_MODIFICATION_NOT_ALLOWED(HttpStatus.FORBIDDEN, "수락, 거절, 취소된 예약은 수정할 수 없습니다."),
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
     TIME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 코트 시간을 찾을 수 없습니다."),
+
+
+
+    // Meeting
+    MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
+
+
+
+    //
 
 
     // 기본 코드
