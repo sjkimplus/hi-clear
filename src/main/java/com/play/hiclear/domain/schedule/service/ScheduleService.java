@@ -70,7 +70,7 @@ public class ScheduleService {
 
         // 사용자가 일정의 생성자거나 참가자인지 확인
         if (!creator.getEmail().equals(email) && !isParticipant) {
-            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "이 모임일정을 조회할 권한이 없습니다.");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, "모임일정에");
         }
 
         // 반환 DTO 생성
@@ -98,7 +98,7 @@ public class ScheduleService {
 
         // 생성자 권한 확인
         if (!schedule.getUser().getEmail().equals(email)) {
-            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "모임 일정을 수정할 권한이 없습니다.");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, "모임일정에");
         }
 
         // 일정 정보 수정
@@ -129,7 +129,7 @@ public class ScheduleService {
 
         // 생성자 권한 확인
         if (!schedule.getUser().getEmail().equals(email)) {
-            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "모임 일정을 삭제할 권한이 없습니다.");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, "모임일정에");
         }
 
         // 참가자 삭제
@@ -159,7 +159,7 @@ public class ScheduleService {
         boolean isMember = club.getClubMembers().stream()
                 .anyMatch(member -> member.getUser().getId().equals(user.getId()));
         if (!isMember) {
-            throw new CustomException(ErrorCode.SCHEDULE_FORBIDDEN, "사용자는 이 클럽의 회원이 아닙니다.");
+            throw new CustomException(ErrorCode.SCHEDULE_NOT_A_CLUB_MEMBER);
         }
     }
 
@@ -186,7 +186,7 @@ public class ScheduleService {
         boolean isMemberOfClub = club.getClubMembers().stream()
                 .anyMatch(member -> member.getUser().getId().equals(participantUser.getId()));
         if (!isMemberOfClub) {
-            throw new CustomException(ErrorCode.SCHEDULE_PARTICIPANT_NOT_FOUND, "사용자는 이 클럽의 회원이 아닙니다.");
+            throw new CustomException(ErrorCode.SCHEDULE_NOT_A_CLUB_MEMBER);
         }
     }
 
