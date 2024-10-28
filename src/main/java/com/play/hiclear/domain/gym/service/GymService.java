@@ -76,7 +76,7 @@ public class GymService {
         // 해당 계정으로 등록된 체육관이 없는경우
         if(gyms.getTotalElements() == 0){
             throw new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName());
-        };
+        }
 
         return gyms.map(this::convertGymSimpleResponse);
     }

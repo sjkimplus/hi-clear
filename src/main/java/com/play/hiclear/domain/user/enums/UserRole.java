@@ -20,7 +20,7 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 권한을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_BAD_REQUEST_ROLE));
     }
 
     public static class Authority {

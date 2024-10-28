@@ -20,7 +20,7 @@ public enum GymType {
         return Arrays.stream(GymType.values())
                 .filter(r -> r.name().equalsIgnoreCase(type))
                 .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당타입을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.GYM_BAD_REQUEST_TYPE));
     }
 
 }
