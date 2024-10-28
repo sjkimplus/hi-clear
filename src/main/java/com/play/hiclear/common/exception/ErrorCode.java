@@ -30,19 +30,14 @@ public enum ErrorCode {
 
 
     // Schedule
-    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 모임 일정을 찾을 수 없습니다."),
-    SCHEDULE_NOT_A_CLUB_MEMBER(HttpStatus.NOT_FOUND, "해당 모임에 참가자가 아닙니다."),
+    SCHEDULE_NOT_A_CLUB_MEMBER(HttpStatus.NOT_FOUND, "해당 모임에 멤버가 아닙니다."),
     SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 모임 일정입니다."),
-    SCHEDULE_FORBIDDEN(HttpStatus.FORBIDDEN, "이 모임일정을 조회할 권한이 없습니다."),
     SCHEDULE_TIME_CONFLICT(HttpStatus.CONFLICT, "이미 다른 모임이 있는 시간입니다."),
 
     // Reservation
-    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당예약을 찾을 수 없거나, 해당예약을 생성한 사용자가 아닙니다."),
     RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
     RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
-    RESERVATION_MODIFICATION_NOT_ALLOWED(HttpStatus.FORBIDDEN, "수락, 거절, 취소된 예약은 수정할 수 없습니다."),
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
-    TIME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 코트 시간을 찾을 수 없습니다."),
 
 
 
