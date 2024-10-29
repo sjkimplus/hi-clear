@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.participant.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.participant.dto.ParticipantListResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantUpdateRequest;
 import com.play.hiclear.domain.participant.service.ParticipantService;
@@ -24,16 +25,17 @@ public class ParticipantController {
     }
 
     // 번개 참여 신청 철회/거절/승락
-    @PatchMapping("/v1/meetings/{meetingId}/participants")
+    @PatchMapping("/v1/meetings/{meetingId}/participants/{participantId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable Long meetingId,
+                                         @PathVariable Long participantId,
                                          @RequestBody ParticipantUpdateRequest request) {
-        return ResponseEntity.ok(participantService.update(authUser, meetingId, request));
+        return ResponseEntity.ok(participantService.update(authUser, meetingId, participantId, request));
     }
 
     // 번개 참여자 리스트 조회
     @GetMapping("/v1/meetings/{meetingId}/participants")
-    public ResponseEntity<List<ParticipantResponse>> search(@PathVariable Long meetingId) {
+    public ResponseEntity<ParticipantListResponse> search(@PathVariable Long meetingId) {
         return ResponseEntity.ok(participantService.search(meetingId));
     }
 }

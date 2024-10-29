@@ -5,6 +5,7 @@ import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
+import com.play.hiclear.domain.participant.dto.ParticipantListResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantUpdateRequest;
 import com.play.hiclear.domain.participant.entity.Participant;
@@ -51,7 +52,7 @@ public class ParticipantService {
             }
             // 전에 취소 했던 경우 다시 신청 가능. 단, update 메서드로 status만 바꿈
             ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.PENDING);
-            update(authUser, meetingId, request);
+            update(authUser, meetingId, participant.getId(), request);
             return "참여자 신청 성공";
         }
 
@@ -83,36 +84,32 @@ public class ParticipantService {
     }
 
     @Transactional
-    public String update(AuthUser authUser, Long meetingId, ParticipantUpdateRequest request) {
+    public String update(AuthUser authUser, Long meetingId, Long participantId, ParticipantUpdateRequest request) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
         );
 
-        User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "User 객체를")
-        );
-
-        Participant participant = participantRepository.findByMeetingAndUser(meeting, user).orElseThrow(() ->
+        Participant participant = participantRepository.findById(participantId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
         );
 
         // 번개 신청 철회 - 신청자만 가능 CANCEL
         if (request.getStatus()==ParticipantStatus.CANCELED) {
             // 본인 확인
-            if (participant.getUser().getId()!=authUser.getUserId()) {
-                new CustomException(ErrorCode.NO_AUTHORITY, Participant.class.getSimpleName());
+            if (participantId!=authUser.getUserId()) {
+                throw new CustomException(ErrorCode.NO_AUTHORITY, Participant.class.getSimpleName());
             }
             // 번개 시작까지 24시간 이상 남았는지 확인
             LocalDateTime now = LocalDateTime.now();
             if (now.isAfter(meeting.getStartTime().minusHours(24))) {
-                new CustomException(ErrorCode.TOO_LATE);
+                throw new CustomException(ErrorCode.TOO_LATE);
             }
             participant.updateStatus(request.getStatus());
         } else if (request.getStatus()==ParticipantStatus.ACCEPTED || request.getStatus()==ParticipantStatus.REJECTED) {
             // 번개 거절/승락 - 개최자만 가능 ACCEPT/REJECT
             // 본인 확인
             if (meeting.getUser().getId()!=authUser.getUserId()) {
-                new CustomException(ErrorCode.NO_AUTHORITY, Participant.class.getSimpleName());
+                throw new CustomException(ErrorCode.NO_AUTHORITY, Participant.class.getSimpleName());
             }
             participant.updateStatus(request.getStatus());
         } else { // 기타는 불가
@@ -121,14 +118,15 @@ public class ParticipantService {
         return "참여자 status 수정 성공";
     }
 
-    public List<ParticipantResponse> search(Long meetingId) {
+    public ParticipantListResponse search(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
 
         List<Participant> joinedParticipants = participantRepository.participantsByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED);
-        return joinedParticipants.stream()
+        List<ParticipantResponse> list = joinedParticipants.stream()
                 .map(ParticipantResponse::new)
                 .collect(Collectors.toList());
+        return new ParticipantListResponse(list);
     }
 }
