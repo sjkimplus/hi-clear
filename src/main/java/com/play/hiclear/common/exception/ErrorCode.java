@@ -27,6 +27,20 @@ public enum ErrorCode {
 
 
 
+
+
+    // Schedule
+    SCHEDULE_NOT_A_CLUB_MEMBER(HttpStatus.NOT_FOUND, "해당 모임에 멤버가 아닙니다."),
+    SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 모임 일정입니다."),
+    SCHEDULE_TIME_CONFLICT(HttpStatus.CONFLICT, "이미 다른 모임이 있는 시간입니다."),
+
+    // Reservation
+    RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
+    RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
+    TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
+
+
+
     // Meeting
     MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
 
