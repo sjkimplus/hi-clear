@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.user.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
+import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.participant.entity.Participant;
@@ -29,6 +30,12 @@ public class User extends TimeStamped {
 
     private String password;
 
+    private String region;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Ranks selfRank;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole userRole;
@@ -42,19 +49,28 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<Participant> participants = new ArrayList<>();
 
-    public User(Long id, String name, String email, UserRole userRole){
-        this.id = id;
+    public User(String name, String email, String region, Ranks selfRank, UserRole userRole){
         this.name = name;
         this.email = email;
-        this.userRole = getUserRole();
+        this.region = region;
+        this.selfRank = selfRank;
+        this.userRole = userRole;
+    }
+    public User(String name, String email, String region, String encodePassword, Ranks selfRank, UserRole role) {
+        this.name = name;
+        this.email = email;
+        this.region = region;
+        this.password = encodePassword;
+        this.selfRank = selfRank;
+        this.userRole = role;
     }
 
-   /* public static User fromAuthUser(AuthUser authUser){
-        return new User(
-                authUser.getUserId(),
-                authUser.getName(),
-
-        );
-    }*/
-
+    public void update(String region, String selfRank) {
+        if(region != null){
+            this.region = region;
+        }
+        if(selfRank != null){
+            this.selfRank = Ranks.of(selfRank);
+        }
+    }
 }

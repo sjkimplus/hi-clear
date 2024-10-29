@@ -31,4 +31,22 @@ public class Reservation extends TimeStamped {
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;       // 예약 상태
+
+    public Reservation(User user, Court court, TimeSlot timeSlot, ReservationStatus status) {
+        this.user = user;
+        this.court = court;
+        this.timeSlot = timeSlot;
+        this.status = status;
+    }
+
+    // 예약 수정 메서드
+    public void update(TimeSlot newTimeSlot, Court newCourt) {
+        this.timeSlot = newTimeSlot;
+        this.court = newCourt;
+    }
+
+    // 상태 업데이트 메서드
+    public void updateStatus(ReservationStatus newStatus) {
+        this.status = newStatus;
+    }
 }
