@@ -4,7 +4,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
-import com.play.hiclear.domain.clubmember.dto.ClubMemberExpelRequest;
+import com.play.hiclear.domain.clubmember.dto.request.ClubMemberExpelRequest;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
 import com.play.hiclear.domain.clubmember.repository.ClubMemberRepository;
@@ -27,14 +27,14 @@ public class ClubMemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void join(Long userId, Long clubsId) {
+    public void join(Long userId, Long clubId) {
 
         User user = findUserById(userId);
-        Club club = findClubById(clubsId);
+        Club club = findClubById(clubId);
 
-        checkClubMember(userId, clubsId);
+        checkClubMember(userId, clubId);
 
-        long memberCount = clubMemberRepository.findAllByClubId(clubsId).size();
+        long memberCount = clubMemberRepository.findAllByClubId(clubId).size();
         if(memberCount + 1 > club.getClubSize()) {
             throw new CustomException(ErrorCode.CLUBMEMBER_OVER);
         }
@@ -49,23 +49,23 @@ public class ClubMemberService {
     }
 
     @Transactional
-    public void withdraw(Long userId, Long clubsId) {
+    public void withdraw(Long userId, Long clubId) {
 
-        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubsId);
+        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
 
         if(member.getClubMemberRole() == ClubMemberRole.ROLE_ADMIN){
             throw new IllegalArgumentException("모임장은 탈퇴할 수 없습니다");
         }
 
-        clubMemberRepository.deleteByUserIdAndClubId(userId, clubsId);
+        clubMemberRepository.deleteByUserIdAndClubId(userId, clubId);
     }
 
     @Transactional
-    public void expel(Long userId, Long clubsId, ClubMemberExpelRequest clubMemberExpelRequest) {
+    public void expel(Long userId, Long clubId, ClubMemberExpelRequest clubMemberExpelRequest) {
 
         User user = findUserById(userId);
 
-        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubsId);
+        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
 
         if(member.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN &&
                 member.getClubMemberRole() != ClubMemberRole.ROLE_MANAGER){
@@ -81,25 +81,25 @@ public class ClubMemberService {
             throw new IllegalArgumentException("자기 자신을 추방할 수 없습니다");
         }
 
-        clubMemberRepository.deleteByUserIdAndClubId(expelUser.getId(), clubsId);
+        clubMemberRepository.deleteByUserIdAndClubId(expelUser.getId(), clubId);
     }
 
     // User 조회
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 
     // Club 조회
     private Club findClubById(Long clubId) {
         return clubRepository.findById(clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 모임을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
     }
 
     // ClubMember 조회
     private ClubMember findClubMemberByUserIdAndClubId(Long userId, Long clubId) {
         return clubMemberRepository.findByUserIdAndClubId(userId, clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 멤버를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
     }
 
     // 비밀번호 확인

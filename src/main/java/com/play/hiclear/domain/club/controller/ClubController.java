@@ -1,7 +1,12 @@
 package com.play.hiclear.domain.club.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.club.dto.*;
+import com.play.hiclear.domain.club.dto.request.ClubCreateRequest;
+import com.play.hiclear.domain.club.dto.request.ClubDeleteRequest;
+import com.play.hiclear.domain.club.dto.request.ClubUpdateRequest;
+import com.play.hiclear.domain.club.dto.response.ClubGetResponse;
+import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
+import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

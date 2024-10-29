@@ -2,7 +2,7 @@ package com.play.hiclear.domain.thread.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.comment.entity.Comment;
-import com.play.hiclear.domain.thread.dto.ThreadUpdateRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadUpdateRequest;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class Thread extends TimeStamped {
 
     private String content;
 
-    public void updateThread(ThreadUpdateRequest threadUpdateRequest) {
+    public void update(ThreadUpdateRequest threadUpdateRequest) {
         this.content = threadUpdateRequest.getContent();
     }
 }

@@ -1,4 +1,4 @@
-package com.play.hiclear.domain.comment.dto;
+package com.play.hiclear.domain.comment.dto.request;
 
 import lombok.Getter;
 

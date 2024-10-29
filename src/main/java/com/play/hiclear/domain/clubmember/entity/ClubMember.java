@@ -33,8 +33,4 @@ public class ClubMember {
     @Enumerated(EnumType.STRING)
     private ClubMemberRole clubMemberRole;
 
-    @Column
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime deletedAt;
-
 }

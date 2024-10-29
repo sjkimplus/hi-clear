@@ -1,7 +1,7 @@
 package com.play.hiclear.domain.club.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
-import com.play.hiclear.domain.club.dto.ClubUpdateRequest;
+import com.play.hiclear.domain.club.dto.request.ClubUpdateRequest;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

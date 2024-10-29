@@ -1,4 +1,4 @@
-package com.play.hiclear.domain.thread.dto;
+package com.play.hiclear.domain.thread.dto.request;
 
 import lombok.Getter;
 

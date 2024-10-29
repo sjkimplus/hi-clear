@@ -4,9 +4,9 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.board.repository.BoardRepository;
-import com.play.hiclear.domain.comment.dto.CommentCreateRequest;
-import com.play.hiclear.domain.comment.dto.CommentDeleteRequest;
-import com.play.hiclear.domain.comment.dto.CommentUpdateRequest;
+import com.play.hiclear.domain.comment.dto.request.CommentCreateRequest;
+import com.play.hiclear.domain.comment.dto.request.CommentDeleteRequest;
+import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
 import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.comment.repository.CommentRepository;
 import com.play.hiclear.domain.user.entity.User;
@@ -28,9 +28,9 @@ public class CommentService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void create(Long userId, Long clubboardsId, CommentCreateRequest commentCreateRequest) {
+    public void create(Long userId, Long clubboardId, CommentCreateRequest commentCreateRequest) {
 
-        Board board = findBoardById(clubboardsId);
+        Board board = findBoardById(clubboardId);
         User user = findUserById(userId);
 
         Comment comment = Comment.builder()
@@ -69,19 +69,19 @@ public class CommentService {
     // User 조회
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 
     // Board 조회
     private Board findBoardById(Long boardId) {
         return boardRepository.findById(boardId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 게시글을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
     }
 
     // Comment 조회
     private Comment findCommentById(Long commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 댓글을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName()));
     }
 
     // 비밀번호 확인
@@ -94,7 +94,7 @@ public class CommentService {
     // 작성자 확인
     private void checkCommentUser(User user, Comment comment) {
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("작성자가 아닙니다.");
+            throw new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName());
         }
     }
 }

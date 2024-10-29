@@ -1,4 +1,4 @@
-package com.play.hiclear.domain.club.dto;
+package com.play.hiclear.domain.club.dto.response;
 
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
@@ -13,7 +13,7 @@ public class ClubGetResponse {
     private final Integer clubSize;
     private final String intro;
     private final String region;
-    private final List<ClubMemberDto> members;
+    private final List<ClubMemberDtoResponse> members;
 
     public ClubGetResponse(Club club) {
         this.clubname = club.getClubname();
@@ -23,7 +23,7 @@ public class ClubGetResponse {
         this.members = memberResponseList(club.getClubMembers());
     }
 
-    private List<ClubMemberDto> memberResponseList(List<ClubMember> memberList) {
-        return memberList.stream().map(ClubMemberDto::entityToDto).toList();
+    private List<ClubMemberDtoResponse> memberResponseList(List<ClubMember> memberList) {
+        return memberList.stream().map(ClubMemberDtoResponse::entityToDto).toList();
     }
 }

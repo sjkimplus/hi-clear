@@ -1,4 +1,4 @@
-package com.play.hiclear.domain.club.dto;
+package com.play.hiclear.domain.club.dto.response;
 
 import com.play.hiclear.domain.club.entity.Club;
 import lombok.Getter;

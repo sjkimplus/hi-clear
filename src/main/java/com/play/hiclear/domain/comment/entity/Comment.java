@@ -2,7 +2,7 @@ package com.play.hiclear.domain.comment.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.board.entity.Board;
-import com.play.hiclear.domain.comment.dto.CommentUpdateRequest;
+import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
 import com.play.hiclear.domain.thread.entity.Thread;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;

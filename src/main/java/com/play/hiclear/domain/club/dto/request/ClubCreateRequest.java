@@ -1,9 +1,9 @@
-package com.play.hiclear.domain.club.dto;
+package com.play.hiclear.domain.club.dto.request;
 
 import lombok.Getter;
 
 @Getter
-public class ClubUpdateRequest {
+public class ClubCreateRequest {
 
     private String clubname;
     private Integer clubSize;

@@ -4,9 +4,9 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.comment.repository.CommentRepository;
-import com.play.hiclear.domain.thread.dto.ThreadCreateRequest;
-import com.play.hiclear.domain.thread.dto.ThreadDeleteRequest;
-import com.play.hiclear.domain.thread.dto.ThreadUpdateRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadCreateRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadDeleteRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadUpdateRequest;
 import com.play.hiclear.domain.thread.entity.Thread;
 import com.play.hiclear.domain.thread.repository.ThreadRepository;
 import com.play.hiclear.domain.user.entity.User;
@@ -28,10 +28,10 @@ public class ThreadService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void create(Long userId, Long commentsId, ThreadCreateRequest threadCreateRequest) {
+    public void create(Long userId, Long commentId, ThreadCreateRequest threadCreateRequest) {
 
         User user = findUserById(userId);
-        Comment comment = findCommentById(commentsId);
+        Comment comment = findCommentById(commentId);
 
         Thread thread = Thread.builder()
                 .content(threadCreateRequest.getContent())
@@ -43,22 +43,22 @@ public class ThreadService {
     }
 
     @Transactional
-    public void update(Long userId, Long threadsId, ThreadUpdateRequest threadUpdateRequest) {
+    public void update(Long userId, Long threadId, ThreadUpdateRequest threadUpdateRequest) {
 
         User user = findUserById(userId);
-        Thread thread = findThreadById(threadsId);
+        Thread thread = findThreadById(threadId);
 
         checkThreadUser(user, thread);
         checkPassword(threadUpdateRequest.getPassword(), user.getPassword());
 
-        thread.updateThread(threadUpdateRequest);
+        thread.update(threadUpdateRequest);
     }
 
     @Transactional
-    public void delete(Long userId, Long threadsId, ThreadDeleteRequest threadDeleteRequest) {
+    public void delete(Long userId, Long threadId, ThreadDeleteRequest threadDeleteRequest) {
 
         User user = findUserById(userId);
-        Thread thread = findThreadById(threadsId);
+        Thread thread = findThreadById(threadId);
 
         checkThreadUser(user, thread);
         checkPassword(threadDeleteRequest.getPassword(), user.getPassword());
@@ -69,19 +69,19 @@ public class ThreadService {
     // User 조회
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 
     // Comment 조회
     private Comment findCommentById(Long commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 댓글을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName()));
     }
 
     // Thread 조회
     private Thread findThreadById(Long threadId) {
         return threadRepository.findById(threadId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 대댓글을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Thread.class.getSimpleName()));
     }
 
     // 비밀번호 확인
@@ -94,7 +94,7 @@ public class ThreadService {
     // 작성자 확인
     private void checkThreadUser(User user, Thread thread) {
         if (!thread.getUser().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("작성자가 아닙니다.");
+            throw new CustomException(ErrorCode.NOT_FOUND, Thread.class.getSimpleName());
         }
     }
 }

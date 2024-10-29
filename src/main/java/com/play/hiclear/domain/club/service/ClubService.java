@@ -2,7 +2,12 @@ package com.play.hiclear.domain.club.service;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
-import com.play.hiclear.domain.club.dto.*;
+import com.play.hiclear.domain.club.dto.request.ClubCreateRequest;
+import com.play.hiclear.domain.club.dto.request.ClubDeleteRequest;
+import com.play.hiclear.domain.club.dto.request.ClubUpdateRequest;
+import com.play.hiclear.domain.club.dto.response.ClubGetResponse;
+import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
+import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
@@ -61,10 +66,10 @@ public class ClubService {
     }
 
     @Transactional
-    public ClubUpdateResponse update(Long userId, Long clubsId, ClubUpdateRequest clubUpdateRequest) {
+    public ClubUpdateResponse update(Long userId, Long clubId, ClubUpdateRequest clubUpdateRequest) {
 
-        Club club = findClubById(clubsId);
-        ClubMember clubMember = findClubMemberByUserIdAndClubId(userId, clubsId);
+        Club club = findClubById(clubId);
+        ClubMember clubMember = findClubMemberByUserIdAndClubId(userId, clubId);
 
         checkClubAdmin(clubMember);
         checkPassword(clubUpdateRequest.getPassword(), club.getPassword());
@@ -82,10 +87,10 @@ public class ClubService {
     }
 
     @Transactional
-    public void delete(Long userId, Long clubsId, ClubDeleteRequest clubDeleteRequest) {
+    public void delete(Long userId, Long clubId, ClubDeleteRequest clubDeleteRequest) {
 
-        Club club = findClubById(clubsId);
-        ClubMember clubMember = findClubMemberByUserIdAndClubId(userId, clubsId);
+        Club club = findClubById(clubId);
+        ClubMember clubMember = findClubMemberByUserIdAndClubId(userId, clubId);
 
         checkClubAdmin(clubMember);
         checkPassword(clubDeleteRequest.getPassword(), club.getPassword());
@@ -96,19 +101,19 @@ public class ClubService {
     // User 조회
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 
     // Club 조회
     private Club findClubById(Long clubId) {
         return clubRepository.findById(clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 모임을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
     }
 
     // ClubMember 조회
     private ClubMember findClubMemberByUserIdAndClubId(Long userId, Long clubId) {
         return clubMemberRepository.findByUserIdAndClubId(userId, clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 멤버를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
     }
 
     // 비밀번호 확인
@@ -121,7 +126,7 @@ public class ClubService {
     // 모임장 권한 확인
     private void checkClubAdmin(ClubMember clubMember) {
         if (clubMember.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "해당 기능");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Club.class.getSimpleName());
         }
     }
 }

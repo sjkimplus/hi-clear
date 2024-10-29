@@ -1,9 +1,9 @@
 package com.play.hiclear.domain.thread.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.thread.dto.ThreadCreateRequest;
-import com.play.hiclear.domain.thread.dto.ThreadDeleteRequest;
-import com.play.hiclear.domain.thread.dto.ThreadUpdateRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadCreateRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadDeleteRequest;
+import com.play.hiclear.domain.thread.dto.request.ThreadUpdateRequest;
 import com.play.hiclear.domain.thread.service.ThreadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
