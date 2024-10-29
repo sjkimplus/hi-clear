@@ -37,5 +37,5 @@ public class AuthSignupRequest {
         this.region = region;
         this.selfRank = selfRank;
         this.userRole = userRole;
-    };
+    }
 }

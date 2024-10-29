@@ -103,7 +103,6 @@ class GymServiceTest {
         // given
         Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
         Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울특별시", GymType.PUBLIC, user);
-        Gym gym3 = new Gym("사설체육관1", "사설체육관 설명1", "서울특별시", GymType.PRIVATE, user);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Gym> gymPage = new PageImpl<>(Arrays.asList(gym1, gym2), PageRequest.of(0, 10), 3);
         when(gymRepository.searchGyms("공공", null, null, pageable)).thenReturn(gymPage);
