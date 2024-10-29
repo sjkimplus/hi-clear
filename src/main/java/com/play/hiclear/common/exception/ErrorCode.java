@@ -47,11 +47,18 @@ public enum ErrorCode {
     SCHEDULE_NOT_A_CLUB_MEMBER(HttpStatus.NOT_FOUND, "해당 모임에 멤버가 아닙니다."),
     SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 모임 일정입니다."),
     SCHEDULE_TIME_CONFLICT(HttpStatus.CONFLICT, "이미 다른 모임이 있는 시간입니다."),
+    DUPLICATE_SCHEDULE(HttpStatus.CONFLICT, "같은 클럽에서 동일한 시작 시간과 제목을 가진 일정이 이미 존재합니다."),
+    INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "시작 시간이 종료 시간보다 늦을 수 없습니다."),
+    ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
 
     // Reservation
     RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
     RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
+    RESERVATION_CANT_CANCELED(HttpStatus.CONFLICT, "예약을 취소할 수 없습니다."),
+    RESERVATION_BAD_REQUEST_ROLE(HttpStatus.BAD_REQUEST,
+            String.format("ReservationStatus 입력이 올바르지 않습니다. 가능한 값: %s",
+                    Arrays.toString(new String[]{"ACCEPTED", "REJECTED"}))),
 
 
 
