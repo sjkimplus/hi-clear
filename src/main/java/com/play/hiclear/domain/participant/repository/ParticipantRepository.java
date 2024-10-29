@@ -18,7 +18,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     @Query("SELECT COUNT(p) FROM Participant p WHERE p.meeting.id = :meetingId")
     int countParticipantsByMeetingId(@Param("meetingId") Long meetingId);
 
-    @Query("SELECT p.user FROM Participant p WHERE p.meeting = :meeting AND p.status = :status")
+    @Query("SELECT p FROM Participant p WHERE p.meeting = :meeting AND p.status = :status")
     List<Participant> participantsByMeetingAndStatus(@Param("meeting") Meeting meeting, @Param("status") ParticipantStatus status);
 
 

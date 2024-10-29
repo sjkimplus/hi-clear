@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,11 +123,11 @@ public class ParticipantService {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
-
         List<Participant> joinedParticipants = participantRepository.participantsByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED);
-        List<ParticipantResponse> list = joinedParticipants.stream()
-                .map(ParticipantResponse::new)
-                .collect(Collectors.toList());
+        List<ParticipantResponse> list = new ArrayList<>();
+        for (Participant p : joinedParticipants) {
+            list.add(new ParticipantResponse(p));
+        }
         return new ParticipantListResponse(list);
     }
 }

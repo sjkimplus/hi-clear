@@ -3,7 +3,9 @@ package com.play.hiclear.domain.participant.dto;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 public class ParticipantResponse {
