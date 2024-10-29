@@ -2,6 +2,7 @@ package com.play.hiclear.domain.participant.repository;
 
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.participant.entity.Participant;
+import com.play.hiclear.domain.participant.enums.ParticipantRole;
 import com.play.hiclear.domain.participant.enums.ParticipantStatus;
 import com.play.hiclear.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +22,6 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     @Query("SELECT p FROM Participant p WHERE p.meeting = :meeting AND p.status = :status")
     List<Participant> participantsByMeetingAndStatus(@Param("meeting") Meeting meeting, @Param("status") ParticipantStatus status);
 
-
+    @Query("SELECT p FROM Participant p WHERE p.user.id = :userId AND p.role = :role")
+    List<Participant> findAllMeetingsByUserIdAndStatus(@Param("userId") Long userId, @Param("role") ParticipantRole role);
 }

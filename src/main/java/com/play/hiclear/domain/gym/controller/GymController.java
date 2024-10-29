@@ -74,5 +74,8 @@ public class GymController {
         return ResponseEntity.ok("체육관이 삭제됐습니다.");
     }
 
+    // 체육관 단건 조회
+
+
 
 }
