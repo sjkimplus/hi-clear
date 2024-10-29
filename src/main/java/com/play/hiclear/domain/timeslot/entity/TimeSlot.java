@@ -2,6 +2,7 @@ package com.play.hiclear.domain.timeslot.entity;
 
 import com.play.hiclear.domain.court.entity.Court;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "timeslots")
 public class TimeSlot {
 

@@ -11,6 +11,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "reservations")
 public class Reservation extends TimeStamped {
     @Id
