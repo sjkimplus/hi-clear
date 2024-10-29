@@ -8,4 +8,8 @@ import lombok.NoArgsConstructor;
 public class AuthDeleteRequest {
 
     private String password;
+
+    public AuthDeleteRequest(String password) {
+        this.password = password;
+    }
 }
