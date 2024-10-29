@@ -1,5 +1,7 @@
 package com.play.hiclear.domain.gym.enums;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +20,7 @@ public enum GymType {
         return Arrays.stream(GymType.values())
                 .filter(r -> r.name().equalsIgnoreCase(type))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 타입입니다, [PUBLIC, PRIVATE]중 하나를 입력해주세요"));
+                .orElseThrow(() -> new CustomException(ErrorCode.GYM_BAD_REQUEST_TYPE));
     }
 
 }

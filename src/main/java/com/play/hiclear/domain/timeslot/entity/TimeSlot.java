@@ -24,14 +24,16 @@ public class TimeSlot {
     @Column(nullable = false)
     private LocalTime  endTime;
 
+    private Long gymId;
+
     @ManyToOne
     @JoinColumn(name = "court_id")
     private Court court;
 
-    public TimeSlot(Long id, LocalTime  startTime, LocalTime  endTime, Court court) {
-        this.id = id;
+    public TimeSlot(LocalTime  startTime, Long gymId, Court court) {
         this.startTime = startTime;
-        this.endTime = endTime;
+        this.endTime = startTime.plusHours(1);
+        this.gymId = gymId;
         this.court = court;
     }
 }
