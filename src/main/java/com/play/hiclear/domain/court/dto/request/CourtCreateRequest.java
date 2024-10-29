@@ -7,4 +7,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CourtCreateRequest {
     private int price;
+
+    public CourtCreateRequest(int price) {
+        this.price = price;
+    }
 }

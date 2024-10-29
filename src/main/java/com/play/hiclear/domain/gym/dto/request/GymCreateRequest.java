@@ -17,4 +17,11 @@ public class GymCreateRequest {
     private String description;
 
     private String gymType;
+
+    public GymCreateRequest(String name, String address, String description, String gymType){
+        this.name = name;
+        this.address = address;
+        this. description = description;
+        this.gymType = gymType;
+    }
 }
