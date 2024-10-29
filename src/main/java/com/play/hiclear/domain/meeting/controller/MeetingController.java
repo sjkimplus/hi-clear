@@ -9,11 +9,13 @@ import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.meeting.service.MeetingService;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class MeetingController {
@@ -41,13 +43,12 @@ public class MeetingController {
     }
 
     // 번개글 다건 조회
-    @GetMapping("/meetings")
-    public ResponseEntity<Page<MeetingSearchResponse>> search(
-                                                              @RequestParam(defaultValue = "LATEST") SortType sortType,
-                                                              @RequestParam(required = false) Ranks rank,
+    @GetMapping("/v1/meetings")
+    public ResponseEntity<Page<MeetingSearchResponse>> search(@RequestParam(defaultValue = "LATEST") SortType sortType,
+                                                              @RequestParam(required = false) Ranks ranks,
                                                               @RequestParam(defaultValue = "1") int page,
                                                               @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(meetingService.search(sortType, rank, page, size));
+        return ResponseEntity.ok(meetingService.search(sortType, ranks, page, size));
     }
 
     // 번개글 단건 조회 + 신청한 번개 단건 조회

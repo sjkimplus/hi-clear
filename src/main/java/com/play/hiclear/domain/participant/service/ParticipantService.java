@@ -69,6 +69,7 @@ public class ParticipantService {
         }
 
         Participant participant = new Participant(meeting, user, role, status);
+        participantRepository.save(participant);
         return "참여자 신청 성공";
     }
 

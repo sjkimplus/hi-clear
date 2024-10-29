@@ -8,6 +8,7 @@ import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.enums.SortType;
+import com.play.hiclear.domain.meeting.repository.MeetingQueryDslRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.participant.dto.ParticipantResponse;
 import com.play.hiclear.domain.participant.entity.Participant;
@@ -18,6 +19,8 @@ import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,7 @@ public class MeetingService {
     private final UserRepository userRepository;
     private final ParticipantService participantService;
     private final ParticipantRepository participantRepository;
+    private final MeetingQueryDslRepository meetingQueryDslRepository;
 
     @Transactional
     public String create(AuthUser authUser, MeetingCreateEditRequest request) {
@@ -132,6 +136,7 @@ public class MeetingService {
     }
 
     public Page<MeetingSearchResponse> search(SortType sortType, Ranks rank, int page, int size) {
-        return null;
+        Pageable pageable = PageRequest.of(page -1, size);
+        return meetingQueryDslRepository.search(sortType, rank, pageable);
     }
 }

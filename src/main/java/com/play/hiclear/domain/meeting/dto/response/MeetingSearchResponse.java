@@ -2,9 +2,10 @@ package com.play.hiclear.domain.meeting.dto.response;
 
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.meeting.entity.Meeting;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
-
+@Getter
 public class MeetingSearchResponse {
     private Long id;
     private String title;
@@ -13,9 +14,9 @@ public class MeetingSearchResponse {
     private LocalDateTime endTime;
     private Ranks ranks;
     private int groupSize;
-    private int numberJoined;
+    private long numberJoined;
 
-    public MeetingSearchResponse(Meeting meeting, int numberJoined) {
+    public MeetingSearchResponse(Meeting meeting, long numberJoined) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
         this.region = meeting.getRegion();
