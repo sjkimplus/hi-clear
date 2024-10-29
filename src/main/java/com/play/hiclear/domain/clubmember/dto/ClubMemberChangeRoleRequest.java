@@ -7,5 +7,6 @@ import lombok.Getter;
 public class ClubMemberChangeRoleRequest {
 
     private ClubMemberRole role;
+    private String email;
     private String password;
 }

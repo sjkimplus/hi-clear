@@ -64,6 +64,7 @@ public enum ErrorCode {
     CLUBMEMBER_OVER(HttpStatus.CONFLICT, "정원 초과입니다"),
     CLUBMEMBER_NOT_EXPEL_ONESELF(HttpStatus.CONFLICT, "자기 자신을 추방할 수 없습니다"),
     CLUBMEMBER_ADMIN_NOT_WITHDRAW(HttpStatus.CONFLICT, "자기 자신을 추방할 수 없습니다"),
+    CLUBMEMBER_ADMIN_ONLY_ONE(HttpStatus.CONFLICT, "모임장은 한 명만 존재할 수 있습니다."),
 
 
 

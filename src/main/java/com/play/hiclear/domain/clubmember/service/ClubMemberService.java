@@ -4,6 +4,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
+import com.play.hiclear.domain.clubmember.dto.ClubMemberChangeRoleRequest;
 import com.play.hiclear.domain.clubmember.dto.request.ClubMemberExpelRequest;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
@@ -82,6 +83,32 @@ public class ClubMemberService {
         }
 
         clubMemberRepository.deleteByUserIdAndClubId(expelUser.getId(), clubId);
+    }
+
+    @Transactional
+    public void change(Long userId, Long clubId, ClubMemberChangeRoleRequest clubMemberChangeRoleRequest) {
+
+        // 현재 로그인된 유저의 권한 확인
+        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
+        if(member.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN){
+            throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
+        }
+
+        // 비밀번호 확인
+        User user = findUserById(userId);
+        checkPassword(clubMemberChangeRoleRequest.getPassword(), user.getPassword());
+
+        // 변경할 권한 확인
+        if (clubMemberChangeRoleRequest.getRole() == ClubMemberRole.ROLE_ADMIN) {
+            throw new CustomException(ErrorCode.CLUBMEMBER_ADMIN_ONLY_ONE);
+        }
+
+        // 권한 변경을 할 유저
+        User changeUser = userRepository.findByEmail(clubMemberChangeRoleRequest.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
+        ClubMember changeMember = findClubMemberByUserIdAndClubId(changeUser.getId(), clubId);
+
+        changeMember.change(clubMemberChangeRoleRequest.getRole());
     }
 
     // User 조회

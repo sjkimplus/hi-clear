@@ -32,4 +32,10 @@ public class ClubMemberController {
         clubMemberService.expel(authUser.getUserId(), clubId, clubMemberExpelRequest);
         return ResponseEntity.ok("모임에서 추방했습니다.");
     }
+
+    @PatchMapping("/v1/clubs/{clubId}/role")
+    public ResponseEntity<String> change(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubMemberChangeRoleRequest clubMemberChangeRoleRequest) {
+        clubMemberService.change(authUser.getUserId(), clubId, clubMemberChangeRoleRequest);
+        return ResponseEntity.ok("권한을 변경했습니다.");
+    }
 }
