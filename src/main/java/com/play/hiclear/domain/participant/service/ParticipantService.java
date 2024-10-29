@@ -36,11 +36,11 @@ public class ParticipantService {
     public String add(AuthUser authUser, Long meetingId) {
 
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "User 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName())
         );
 
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
 
         // 이미 추가된 유저인 경우 중복추가 방지
@@ -88,7 +88,7 @@ public class ParticipantService {
     @Transactional
     public String update(AuthUser authUser, Long meetingId, Long participantId, ParticipantUpdateRequest request) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
 
         Participant participant = participantRepository.findById(participantId).orElseThrow(() ->

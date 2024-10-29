@@ -69,7 +69,6 @@ public class MeetingService {
         }
         
         meeting.edit(request);
-        meetingRepository.save(meeting);
         return "번개 수정 성공";
     }
 
@@ -77,7 +76,7 @@ public class MeetingService {
     public String delete(AuthUser authUser, Long meetingId) {
         // 업로드한 번개 일정 찾기
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
 
         // 작성자가 맞는지 체크
@@ -92,7 +91,7 @@ public class MeetingService {
     public MeetingDetailResponse get(Long meetingId) {
         // 번개 일정 찾기
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
 
         int numberJoined = participantService.getJoinedNumber(meeting.getId());
@@ -102,7 +101,7 @@ public class MeetingService {
     public MyMeetingDetailResponse getMyMeeting(Long meetingId) {
         // 번개 일정 찾기
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
 
         // 번개 신청자들 중 APPROVE 된 신청자들 수

@@ -4,11 +4,13 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
+import com.play.hiclear.domain.gym.dto.response.GymDetailResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.service.GymService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +77,10 @@ public class GymController {
     }
 
     // 체육관 단건 조회
-
+    @GetMapping("/v1/gyms/{gymId}")
+    public ResponseEntity<GymDetailResponse> get(@PathVariable Long gymId) {
+        return ResponseEntity.ok(gymService.get(gymId));
+    }
 
 
 }
