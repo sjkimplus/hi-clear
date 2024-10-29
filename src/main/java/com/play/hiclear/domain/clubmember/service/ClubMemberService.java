@@ -69,13 +69,13 @@ public class ClubMemberService {
 
         if(member.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN &&
                 member.getClubMemberRole() != ClubMemberRole.ROLE_MANAGER){
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "추방에");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
         }
 
         checkPassword(clubMemberExpelRequest.getPassword(), user.getPassword());
 
         User expelUser = userRepository.findByEmail(clubMemberExpelRequest.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
 
         if (user.getId().equals(expelUser.getId())) {
             throw new CustomException(ErrorCode.CLUBMEMBER_NOT_EXPEL_ONESELF);
