@@ -23,6 +23,8 @@ public class TimeStamped {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime modifiedAt;
 
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime deletedAt;
 
     public void markDeleted() {

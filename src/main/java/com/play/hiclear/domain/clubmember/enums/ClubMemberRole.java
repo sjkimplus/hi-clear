@@ -1,6 +1,5 @@
 package com.play.hiclear.domain.clubmember.enums;
 
-import com.sun.jdi.request.InvalidRequestStateException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +23,7 @@ public enum ClubMemberRole {
     }
 
     public static class ClubMemberAuthority {
-        public static final String MEMBER = "ROLE_USER";
+        public static final String MEMBER = "ROLE_MEMBER";
         public static final String MANAGER = "ROLE_MANAGER";
         public static final String ADMIN = "ROLE_ADMIN";
     }
