@@ -1,5 +1,7 @@
 package com.play.hiclear.domain.user.enums;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +20,7 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 권한입니다, [USER, BUSINESS]중 하나를 입력해주세요"));
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_BAD_REQUEST_ROLE));
     }
 
     public static class Authority {
