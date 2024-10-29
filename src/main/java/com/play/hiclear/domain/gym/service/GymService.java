@@ -34,7 +34,7 @@ public class GymService {
     public GymCreateResponse create(AuthUser authUser, GymCreateRequest request) {
 
         User user = userRepository.findById(authUser.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
         Gym gym = new Gym(
                 request.getName(),
@@ -71,12 +71,12 @@ public class GymService {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Gym> gyms = gymRepository.findByUserId(authUser.getUserId(), pageable);
+        Page<Gym> gyms = gymRepository.findByUserIdAndDeletedAtIsNull(authUser.getUserId(), pageable);
 
         // 해당 계정으로 등록된 체육관이 없는경우
         if(gyms.getTotalElements() == 0){
-            throw new CustomException(ErrorCode.NOT_FOUND, "해당 계정으로 등록된 체육관을");
-        };
+            throw new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName());
+        }
 
         return gyms.map(this::convertGymSimpleResponse);
     }
@@ -86,11 +86,11 @@ public class GymService {
     public GymUpdateResponse update(AuthUser authUser, Long gymId, GymUpdateRequest gymUpdateRequest) {
 
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "체육관을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
 
         // 해당 체육관 사업주가 아닌경우 예외 발생
         if (!Objects.equals(gym.getUser().getId(), authUser.getUserId())){
-            throw new CustomException(ErrorCode.NO_AUTHORITY); // NO_AUTHORITY도 메세지를 입력받아범용적으로 사용하도록 제안
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Gym.class.getSimpleName());
         }
 
         gym.update(
@@ -110,7 +110,7 @@ public class GymService {
     public void delete(AuthUser authUser, Long gymId) {
 
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "체육관을"));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
 
         // 해당 체육관 사업주가 아닌경우 예외 발생
         if (!Objects.equals(gym.getUser().getId(), authUser.getUserId())){
