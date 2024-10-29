@@ -16,21 +16,21 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/v1/clubboards/{clubboardsId}/comments")
-    public ResponseEntity<String> create(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubboardsId, @RequestBody CommentCreateRequest commentCreateRequest) {
-        commentService.create(authUser.getUserId(), clubboardsId, commentCreateRequest);
+    @PostMapping("/v1/clubboards/{clubboardId}/comments")
+    public ResponseEntity<String> create(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubboardId, @RequestBody CommentCreateRequest commentCreateRequest) {
+        commentService.create(authUser.getUserId(), clubboardId, commentCreateRequest);
         return ResponseEntity.ok("댓글을 작성하였습니다");
     }
 
-    @PatchMapping("/v1/clubboards/{clubboardsId}/comments/{commentsId}")
-    public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentsId, @RequestBody CommentUpdateRequest commentUpdateRequest) throws Exception {
-        commentService.update(authUser.getUserId(), commentsId, commentUpdateRequest);
+    @PatchMapping("/v1/clubboards/{clubboardId}/comments/{commentId}")
+    public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentId, @RequestBody CommentUpdateRequest commentUpdateRequest) throws Exception {
+        commentService.update(authUser.getUserId(), commentId, commentUpdateRequest);
         return ResponseEntity.ok("댓글 수정이 완료되었습니다");
     }
 
-    @DeleteMapping("/v1/clubboards/{clubboardsId}/comments/{commentsId}")
-    public ResponseEntity<String> delete(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentsId, @RequestBody CommentDeleteRequest commentDeleteRequest) {
-        commentService.delete(authUser.getUserId(), commentsId, commentDeleteRequest);
+    @DeleteMapping("/v1/clubboards/{clubboardId}/comments/{commentId}")
+    public ResponseEntity<String> delete(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentId, @RequestBody CommentDeleteRequest commentDeleteRequest) {
+        commentService.delete(authUser.getUserId(), commentId, commentDeleteRequest);
         return ResponseEntity.ok("댓글을 삭제했습니다.");
     }
 }

@@ -54,7 +54,7 @@ public class ClubMemberService {
         ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
 
         if(member.getClubMemberRole() == ClubMemberRole.ROLE_ADMIN){
-            throw new IllegalArgumentException("모임장은 탈퇴할 수 없습니다");
+            throw new CustomException(ErrorCode.CLUBMEMBER_ADMIN_NOT_WITHDRAW);
         }
 
         clubMemberRepository.deleteByUserIdAndClubId(userId, clubId);
@@ -78,7 +78,7 @@ public class ClubMemberService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를"));
 
         if (user.getId().equals(expelUser.getId())) {
-            throw new IllegalArgumentException("자기 자신을 추방할 수 없습니다");
+            throw new CustomException(ErrorCode.CLUBMEMBER_NOT_EXPEL_ONESELF);
         }
 
         clubMemberRepository.deleteByUserIdAndClubId(expelUser.getId(), clubId);
@@ -115,5 +115,4 @@ public class ClubMemberService {
             throw new CustomException(ErrorCode.CLUBMEMBER_ALREADY_EXISTS);
         }
     }
-
 }
