@@ -3,14 +3,12 @@ package com.play.hiclear.domain.auth.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-public class SignupRequest {
+public class AuthSignupRequest {
 
     @NotBlank(message = "이메일은 필수 입력 사항입니다.")
     @Email(message = "이메일 형식을 맞춰주세요.")
@@ -27,7 +25,7 @@ public class SignupRequest {
     private String region;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
-    private String selectRank;
+    private String selfRank;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
     private String userRole;

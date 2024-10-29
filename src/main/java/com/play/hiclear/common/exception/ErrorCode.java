@@ -1,7 +1,11 @@
 package com.play.hiclear.common.exception;
 
+import com.play.hiclear.domain.gym.enums.GymType;
+import com.play.hiclear.domain.user.enums.UserRole;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
+import java.util.Arrays;
 
 @Getter
 public enum ErrorCode {
@@ -15,27 +19,50 @@ public enum ErrorCode {
 
     // Auth
     AUTH_USER_EXISTING(HttpStatus.CONFLICT, "해당 이메일으로 가입된 유저가 이미 존재합니다."),
-    AUTH_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "가입되지 않은 유저입니다."),
     AUTH_USER_DELETED(HttpStatus.NOT_FOUND, "탈퇴한 유저 입니다."),
     AUTH_BAD_REQUEST_PASSWORD(HttpStatus.BAD_REQUEST, "입력하신 비밀번호가 올바르지 않습니다. 비밀번호를 다시 확인하고 입력해 주세요."),
+    AUTH_BAD_REQUEST_ROLE(HttpStatus.BAD_REQUEST,
+            String.format("UserRole 입력이 올바르지 않습니다. 가능한 값: %s",
+                    Arrays.toString(UserRole.values()))),
 
 
+    // Gym
+    GYM_BAD_REQUEST_TYPE(HttpStatus.BAD_REQUEST,
+            String.format("GymType 입력이 올바르지 않습니다. 가능한 값: %s",
+                    Arrays.toString(GymType.values()))),
 
+
+    // Timeslot
+    TIME_SLOT_ALREADY_EXIST(HttpStatus.ALREADY_REPORTED, "코트에 이미 해당 시간대가 등록돼있습니다."),
 
 
 
     // User
-    NO_AUTHORITY(HttpStatus.FORBIDDEN, "이 번개일정에 대한권한이 없습니다."),
+
+
+
+
+
+    // Schedule
+    SCHEDULE_NOT_A_CLUB_MEMBER(HttpStatus.NOT_FOUND, "해당 모임에 멤버가 아닙니다."),
+    SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 모임 일정입니다."),
+    SCHEDULE_TIME_CONFLICT(HttpStatus.CONFLICT, "이미 다른 모임이 있는 시간입니다."),
+
+    // Reservation
+    RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
+    RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
+    TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
+
+
 
     // Meeting
     MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
 
 
 
-    //
-
     // 기본 코드
-    NOT_FOUND(HttpStatus.NOT_FOUND, "%s 찾지못했습니다.");
+    NO_AUTHORITY(HttpStatus.FORBIDDEN, "%s에 대한권한이 없습니다."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "%s을(를) 찾지못했습니다.");
 
     private final HttpStatus status;
     private final String message;

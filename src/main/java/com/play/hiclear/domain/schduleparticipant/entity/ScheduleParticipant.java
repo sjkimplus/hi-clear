@@ -27,4 +27,10 @@ public class ScheduleParticipant extends TimeStamped {
     @ManyToOne
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;      // 참가한 모임 일정
+
+    public ScheduleParticipant(Schedule savedSchedule, User user, Club club) {
+        this.schedule = savedSchedule;
+        this.user = user;
+        this.club = club;
+    }
 }
