@@ -2,9 +2,12 @@ package com.play.hiclear.domain.comment.entity;
 
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.board.entity.Board;
+import com.play.hiclear.domain.comment.dto.CommentUpdateRequest;
 import com.play.hiclear.domain.thread.entity.Thread;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +16,9 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Comment extends TimeStamped {
 
     @Id
@@ -32,4 +37,8 @@ public class Comment extends TimeStamped {
     private List<Thread> threads = new ArrayList<>();
 
     private String content;
+
+    public void updateComment(CommentUpdateRequest commentUpdateRequest) {
+        this.content = commentUpdateRequest.getContent();
+    }
 }

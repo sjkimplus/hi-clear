@@ -4,12 +4,18 @@ import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ClubMember {
 
     @Id
@@ -26,5 +32,9 @@ public class ClubMember {
 
     @Enumerated(EnumType.STRING)
     private ClubMemberRole clubMemberRole;
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime deletedAt;
 
 }

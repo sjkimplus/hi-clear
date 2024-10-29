@@ -45,6 +45,12 @@ public enum ErrorCode {
     MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
 
 
+    // ClubMember
+    CLUBMEMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 멤버입니다."),
+    CLUBMEMBER_OVER(HttpStatus.CONFLICT, "정원 초과입니다"),
+
+
+
 
     // 기본 코드
     NO_AUTHORITY(HttpStatus.FORBIDDEN, "%s 대한권한이 없습니다."),
