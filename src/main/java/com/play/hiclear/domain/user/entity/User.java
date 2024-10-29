@@ -40,7 +40,7 @@ public class User extends TimeStamped {
     @Column(nullable = false)
     private UserRole userRole;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "owner")
     private List<Club> clubs = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
