@@ -75,7 +75,7 @@ public class ScheduleService {
 
         // 사용자가 일정의 생성자거나 참가자인지 확인
         if (!creator.getEmail().equals(email) && !isParticipant) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "모임일정");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Schedule.class.getSimpleName());
         }
 
         // 반환 DTO 생성
@@ -108,7 +108,7 @@ public class ScheduleService {
 
         // 생성자 권한 확인
         if (!schedule.getUser().getEmail().equals(email)) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "모임일정");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Schedule.class.getSimpleName());
         }
 
         // 클럽 ID 가져오기
@@ -121,10 +121,9 @@ public class ScheduleService {
         }
 
         // 유효성 검증: 시작 시간이 종료 시간보다 이전인지 확인
-        if (scheduleRequestDto.getStartTime() != null && scheduleRequestDto.getEndTime() != null) {
-            if (scheduleRequestDto.getStartTime().isAfter(scheduleRequestDto.getEndTime())) {
-                throw new CustomException(ErrorCode.INVALID_SCHEDULE_TIME);
-            }
+        if (scheduleRequestDto.getStartTime() != null && scheduleRequestDto.getEndTime() != null
+                && scheduleRequestDto.getStartTime().isAfter(scheduleRequestDto.getEndTime())) {
+            throw new CustomException(ErrorCode.INVALID_SCHEDULE_TIME);
         }
 
         // 일정 정보 수정
@@ -149,7 +148,7 @@ public class ScheduleService {
 
         // 생성자 권한 확인
         if (!schedule.getUser().getEmail().equals(email)) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "모임일정에");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Schedule.class.getSimpleName());
         }
 
         // 이미 삭제된 일정인지 확인
