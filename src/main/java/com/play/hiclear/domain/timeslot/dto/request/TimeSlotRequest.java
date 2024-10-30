@@ -10,4 +10,8 @@ import java.time.LocalTime;
 public class TimeSlotRequest {
 
     private LocalTime startTime;
+
+    public TimeSlotRequest(LocalTime startTime) {
+        this.startTime = startTime;
+    }
 }

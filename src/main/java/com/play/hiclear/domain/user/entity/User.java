@@ -40,7 +40,7 @@ public class User extends TimeStamped {
     @Column(nullable = false)
     private UserRole userRole;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "owner")
     private List<Club> clubs = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
@@ -63,6 +63,15 @@ public class User extends TimeStamped {
         this.password = encodePassword;
         this.selfRank = selfRank;
         this.userRole = role;
+    }
+
+    public User(Long id, String name, String email, String region, Ranks selfRank, UserRole userRole) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.region = region;
+        this.selfRank = selfRank;
+        this.userRole = userRole;
     }
 
     public void update(String region, String selfRank) {

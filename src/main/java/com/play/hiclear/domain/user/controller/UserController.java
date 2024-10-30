@@ -20,29 +20,29 @@ public class UserController {
 
     // 유저 전체 조회
     @GetMapping("/v1/users")
-    public ResponseEntity<Page<UserSimpleResponse>> searchUsers(
+    public ResponseEntity<Page<UserSimpleResponse>> search(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return ResponseEntity.ok(userService.searchUsers(page, size));
+        return ResponseEntity.ok(userService.search(page, size));
     }
 
     // 유조 상세 조회
     @GetMapping("/v1/users/{userId}")
-    public ResponseEntity<UserDetailResponse> detailSearchUser(
+    public ResponseEntity<UserDetailResponse> get(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long userId
     ){
-        return ResponseEntity.ok(userService.detailSearchUser(authUser, userId));
+        return ResponseEntity.ok(userService.get(authUser, userId));
     }
 
 
     // 유저 정보 수정
     @PatchMapping("/v1/users")
-    public ResponseEntity<UserUpdateResponse> updateUser(
+    public ResponseEntity<UserUpdateResponse> update(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody UserUpdateRequest request
     ){
-        return ResponseEntity.ok(userService.updateUser(authUser, request));
+        return ResponseEntity.ok(userService.update(authUser, request));
     }
 }

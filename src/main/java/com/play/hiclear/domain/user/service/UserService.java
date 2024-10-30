@@ -26,7 +26,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public Page<UserSimpleResponse> searchUsers(int page, int size) {
+    public Page<UserSimpleResponse> search(int page, int size) {
 
         Pageable pageable = PageRequest.of(page - 1 , size);
 
@@ -42,7 +42,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserUpdateResponse updateUser(AuthUser authUser, UserUpdateRequest request) {
+    public UserUpdateResponse update(AuthUser authUser, UserUpdateRequest request) {
 
         // 유저 불러오기
         User user = userRepository.findById(authUser.getUserId())
@@ -61,7 +61,7 @@ public class UserService {
                 user.getSelfRank());
     }
 
-    public UserDetailResponse detailSearchUser(AuthUser authUser, Long userId) {
+    public UserDetailResponse get(AuthUser authUser, Long userId) {
 
         // 유저 불러오기
         User user = userRepository.findById(userId)

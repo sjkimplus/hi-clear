@@ -15,4 +15,9 @@ public class AuthLoginRequest {
 
     @NotBlank
     private String password;
+
+    public AuthLoginRequest(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 }

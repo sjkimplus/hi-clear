@@ -10,7 +10,7 @@ import java.util.Arrays;
 public enum AlarmType {
 
     JOIN("맴버를 추가하였습니다."),
-    SCHEDULE("카드를 변경하였습니다."),
+    THREAD("대댓글을 추가하였습니다."),
     COMMENT("댓글을 추가하였습니다.");
 
     private final String message;

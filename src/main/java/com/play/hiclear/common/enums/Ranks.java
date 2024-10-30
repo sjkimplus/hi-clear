@@ -1,6 +1,5 @@
 package com.play.hiclear.common.enums;
 
-import com.play.hiclear.domain.user.enums.UserRole;
 import lombok.Getter;
 
 import java.util.Arrays;
