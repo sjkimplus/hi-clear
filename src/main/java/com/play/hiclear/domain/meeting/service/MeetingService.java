@@ -116,7 +116,7 @@ public class MeetingService {
     public MyMeetingResponses searchMyMeetings(AuthUser authUser, ParticipantRole role) {
         List<Participant> participantList = new ArrayList<>();
         List<MyMeetingResponse> responseList = new ArrayList<>();
-        participantList = participantRepository.findAllMeetingsByUserIdAndStatus(authUser.getUserId(), role);
+        participantList = participantRepository.findByUserIdAndRole(authUser.getUserId(), role);
 
         if (role==ParticipantRole.HOST) { // role = HOST인 경우
             // meetingList를 DTO로 변환

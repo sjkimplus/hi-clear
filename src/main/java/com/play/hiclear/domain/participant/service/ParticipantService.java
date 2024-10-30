@@ -79,7 +79,7 @@ public class ParticipantService {
 
     public List<ParticipantResponse> getPendingParticipants(Meeting meeting) {
 
-        List<Participant> pendingUsers = participantRepository.participantsByMeetingAndStatus(meeting, ParticipantStatus.PENDING);
+        List<Participant> pendingUsers = participantRepository.findByMeetingAndStatus(meeting, ParticipantStatus.PENDING);
         return pendingUsers.stream()
                 .map(ParticipantResponse::new)
                 .collect(Collectors.toList());
@@ -124,7 +124,7 @@ public class ParticipantService {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
-        List<Participant> joinedParticipants = participantRepository.participantsByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED);
+        List<Participant> joinedParticipants = participantRepository.findByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED);
         List<ParticipantResponse> list = new ArrayList<>();
         for (Participant p : joinedParticipants) {
             list.add(new ParticipantResponse(p));
