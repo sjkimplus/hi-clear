@@ -65,6 +65,15 @@ public class User extends TimeStamped {
         this.userRole = role;
     }
 
+    public User(Long id, String name, String email, String region, Ranks selfRank, UserRole userRole) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.region = region;
+        this.selfRank = selfRank;
+        this.userRole = userRole;
+    }
+
     public void update(String region, String selfRank) {
         if(region != null){
             this.region = region;
