@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface ScheduleQueryRepository {
     List<Schedule> findByClub(Club club);
+//    List<String> findFrequentClub();
 }

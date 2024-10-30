@@ -27,7 +27,7 @@ public class Alarm {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
-    private Boolean read;
+    private Boolean checked;
 
     @ManyToOne
     @JoinColumn(name = "send_user_id")
@@ -38,9 +38,8 @@ public class Alarm {
     private User receiveUser;
 
 
-
     public Long getIdRead() {
-        this.read = true;
+        this.checked = true;
         return this.id;
     }
 }

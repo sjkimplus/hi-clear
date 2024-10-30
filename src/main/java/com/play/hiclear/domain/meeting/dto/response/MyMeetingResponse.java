@@ -1,29 +1,35 @@
 package com.play.hiclear.domain.meeting.dto.response;
 
-import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.meeting.entity.Meeting;
+import com.play.hiclear.domain.participant.enums.ParticipantStatus;
 import lombok.Getter;
-
 import java.time.LocalDateTime;
+
 @Getter
-public class MeetingSearchResponse {
+public class MyMeetingResponse {
+
     private Long id;
     private String title;
     private String region;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Ranks ranks;
-    private int groupSize;
-    private long numberJoined;
+    private ParticipantStatus status;
 
-    public MeetingSearchResponse(Meeting meeting, long numberJoined) {
+
+    public MyMeetingResponse(Meeting meeting) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
         this.region = meeting.getRegion();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
-        this.ranks = meeting.getRanks();
-        this.groupSize = meeting.getGroupSize();
-        this.numberJoined = numberJoined;
+    }
+
+    public MyMeetingResponse(Meeting meeting, ParticipantStatus status) {
+        this.id = meeting.getId();
+        this.title = meeting.getTitle();
+        this.region = meeting.getRegion();
+        this.startTime = meeting.getStartTime();
+        this.endTime = meeting.getEndTime();
+        this.status = status;
     }
 }
