@@ -36,6 +36,15 @@ public class Club extends TimeStamped {
     @OneToMany(mappedBy = "club")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
+    public Club(User owner, String clubname, Integer clubSize, String intro, String region, String password) {
+        this.owner = owner;
+        this.clubname = clubname;
+        this.clubSize = clubSize;
+        this.intro = intro;
+        this.region = region;
+        this.password = password;
+    }
+
     public void updateClub(ClubUpdateRequest clubUpdateRequest) {
         this.clubname = clubUpdateRequest.getClubname();
         this.clubSize = clubUpdateRequest.getClubSize();
