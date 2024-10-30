@@ -10,6 +10,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "schduleparticipants")
 public class ScheduleParticipant extends TimeStamped {
     @Id
