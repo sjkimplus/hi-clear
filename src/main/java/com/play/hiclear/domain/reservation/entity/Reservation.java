@@ -46,7 +46,7 @@ public class Reservation extends TimeStamped {
     }
 
     // 예약 수정 메서드(코트 시간)
-    public void update(TimeSlot newTimeSlot, Court newCourt) {
+    public void updateTime(TimeSlot newTimeSlot, Court newCourt) {
         this.timeSlot = newTimeSlot;
         this.court = newCourt;
     }

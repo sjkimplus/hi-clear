@@ -15,7 +15,6 @@ import com.play.hiclear.domain.reservation.repository.ReservationRepository;
 import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import com.play.hiclear.domain.timeslot.repository.TimeSlotRepository;
 import com.play.hiclear.domain.user.entity.User;
-import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -95,7 +94,7 @@ public class ReservationService {
         checkDuplicateReservation(newCourt, updatedDate, List.of(updatedTimeSlot), reservationId);
 
         if (request.getTimeId() != null) {
-            reservation.update(updatedTimeSlot, newCourt);
+            reservation.updateTime(updatedTimeSlot, newCourt);
         }
         if (request.getDate() != null) {
             reservation.updateDate(updatedDate);
