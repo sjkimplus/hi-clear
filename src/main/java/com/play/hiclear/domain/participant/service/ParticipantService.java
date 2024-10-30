@@ -74,7 +74,7 @@ public class ParticipantService {
     }
 
     public int getJoinedNumber(Long meetingId) {
-        return participantRepository.countParticipantsByMeetingId(meetingId);
+        return participantRepository.countByMeetingId(meetingId);
     }
 
     public List<ParticipantResponse> getPendingParticipants(Meeting meeting) {

@@ -40,7 +40,7 @@ public class MeetingService {
     @Transactional
     public String create(AuthUser authUser, MeetingCreateEditRequest request) {
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "User 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName())
         );
 
         // the end time has to be greater than the start time by one hour
@@ -60,12 +60,12 @@ public class MeetingService {
     public String update(AuthUser authUser, MeetingCreateEditRequest request, Long meetingId) {
         // 업로드한 번개 일정 찾기
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "Meeting 객체를")
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
         );
         
         // 작성자가 맞는지 체크
         if (authUser.getUserId()!=meeting.getUser().getId()){
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "이 번개에");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Meeting.class.getSimpleName());
         }
         
         meeting.edit(request);
