@@ -11,24 +11,27 @@ import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LikesService {
 
     private final LikesRepository likesRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void toggleLike(Long commentId, AuthUser authUser) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() ->
-                        new CustomException(ErrorCode.NOT_FOUND, "해당 댓글"));
+                        new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName()));
 
         Long userId = authUser.getUserId();
 
         // 사용자 확인
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "해당 사용자"));
+                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
 
         // 기존 좋아요 상태 확인

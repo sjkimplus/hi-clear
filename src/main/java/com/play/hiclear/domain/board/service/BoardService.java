@@ -13,6 +13,7 @@ import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.board.repository.BoardRepository;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
+import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,21 +21,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BoardService {
 
     private final BoardRepository boardRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public BoardCreateResponse create(Long clubId, BoardCreateRequest request, AuthUser authUser) {
         Club club = clubRepository.findById(clubId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "해당 모임"));
+                new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
 
         User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, "해당 사용자"));
+                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
         Board board = new Board(
                 request.getTitle(),
@@ -71,10 +75,10 @@ public class BoardService {
 
     public BoardSearchDetailResponse get(Long clubId, Long clubboardId) {
         Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new CustomException(ErrorCode.NOT_FOUND, "해당 게시글"));
+                new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
 
         if(!board.getClub().getId().equals(clubId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND, "해당 모임에 속하는 게시글");
+            throw new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName());
         }
 
         User user = board.getUser();
@@ -90,16 +94,17 @@ public class BoardService {
         );
     }
 
+    @Transactional
     public BoardUpdateResponse update(Long clubId, Long clubboardId, BoardUpdateRequest request, AuthUser authUser) {
         Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new CustomException(ErrorCode.NOT_FOUND, "해당 게시글"));
+                new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
 
         if(!board.getClub().getId().equals(clubId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND, "해당 모임에 속하는 게시글");
+            throw new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName());
         }
 
         if (!board.getUser().getId().equals(authUser.getUserId())) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "게시글 수정");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Board.class.getSimpleName());
         }
 
         board.update(
@@ -107,21 +112,21 @@ public class BoardService {
                 request.getContext()
         );
 
-        Board updateBoard = boardRepository.save(board);
 
-        return new BoardUpdateResponse(updateBoard.getId(), updateBoard.getTitle(), updateBoard.getContext());
+        return new BoardUpdateResponse(board.getId(), board.getTitle(), board.getContext());
     }
 
+    @Transactional
     public void delete(Long clubId, Long clubboardId, AuthUser authUser) {
         Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new CustomException(ErrorCode.NOT_FOUND, "해당 게시글"));
+                new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
 
         if(!board.getClub().getId().equals(clubId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND, "해당 모임에 속하는 게시글");
+            throw new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName());
         }
 
         if (!board.getUser().getId().equals(authUser.getUserId())) {  // authUser.getUserId() 사용
-            throw new CustomException(ErrorCode.NO_AUTHORITY, "게시글 삭제");
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Board.class.getSimpleName());
         }
 
         boardRepository.deleteById(clubboardId);
