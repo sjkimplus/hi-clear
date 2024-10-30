@@ -6,6 +6,7 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
+import com.play.hiclear.domain.gym.dto.response.GymDetailResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.entity.Gym;
@@ -121,7 +122,6 @@ public class GymService {
 
     }
 
-
     // GymSimpleResponse 객체 변환 메서드
     private GymSimpleResponse convertGymSimpleResponse(Gym gym){
         return new GymSimpleResponse(
@@ -129,4 +129,19 @@ public class GymService {
                 gym.getAddress());
     }
 
+    public GymDetailResponse get(Long gymId) {
+        Gym gym = gymRepository.findById(gymId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
+
+        if (gym.getGymType()==GymType.PRIVATE) {
+            return new GymDetailResponse(gym);
+        } else { // public 인 경우 모임 리스트와 당날 스케줄 정보 가져오기
+            // 공립 체육관의 모임 리스트 가져오기
+
+
+            // 당날 스케줄 정보가져오기
+
+            return new GymDetailResponse(gym);
+        }
+    }
 }
