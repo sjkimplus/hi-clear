@@ -90,7 +90,7 @@ class ReservationControllerTest {
     }
 
     @Test
-    void update_success() {
+    void update_Time_success() {
         // given
         Long reservationId = 1L;
         ReservationUpdateRequest request = new ReservationUpdateRequest();

@@ -220,7 +220,7 @@ class ReservationServiceTest {
 
     // 예약 수정 성공 테스트 케이스
     @Test
-    void updateReservation_success() {
+    void updateTimeReservation_success() {
         // Given
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.of(2024, 11, 4));
 
@@ -240,7 +240,7 @@ class ReservationServiceTest {
         // 예약 업데이트 로직 Mock
         when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> {
             Reservation savedReservation = invocation.getArgument(0);
-            savedReservation.update(timeSlot2, court);
+            savedReservation.updateTime(timeSlot2, court);
             return savedReservation;
         });
 
