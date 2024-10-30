@@ -8,6 +8,8 @@ import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -33,18 +35,24 @@ public class Reservation extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;       // 예약 상태
 
-    public Reservation(User user, Court court, TimeSlot timeSlot, ReservationStatus status) {
+    private LocalDate date;
+
+    public Reservation(User user, Court court, TimeSlot timeSlot, ReservationStatus status, LocalDate date) {
         this.user = user;
         this.court = court;
         this.timeSlot = timeSlot;
         this.status = status;
+        this.date = date;
     }
 
-    // 예약 수정 메서드
+    // 예약 수정 메서드(코트 시간)
     public void update(TimeSlot newTimeSlot, Court newCourt) {
         this.timeSlot = newTimeSlot;
         this.court = newCourt;
     }
+
+    // 예약 수정 메서드(날짜)
+    public void updateDate(LocalDate updatedDate) { this.date = updatedDate; }
 
     // 상태 업데이트 메서드
     public void updateStatus(ReservationStatus newStatus) {
