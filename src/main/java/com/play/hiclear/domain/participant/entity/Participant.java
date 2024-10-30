@@ -42,6 +42,10 @@ public class Participant extends TimeStamped {
         this.role = role;
         this.status = status;
     }
+
+    public void updateStatus(ParticipantStatus status) {
+        this.status = status;
+    }
 }
 
 

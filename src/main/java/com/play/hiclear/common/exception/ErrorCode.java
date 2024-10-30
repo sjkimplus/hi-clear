@@ -47,11 +47,19 @@ public enum ErrorCode {
     SCHEDULE_NOT_A_CLUB_MEMBER(HttpStatus.NOT_FOUND, "해당 모임에 멤버가 아닙니다."),
     SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 모임 일정입니다."),
     SCHEDULE_TIME_CONFLICT(HttpStatus.CONFLICT, "이미 다른 모임이 있는 시간입니다."),
+    DUPLICATE_SCHEDULE(HttpStatus.CONFLICT, "같은 클럽에서 동일한 시작 시간과 제목을 가진 일정이 이미 존재합니다."),
+    INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "시작 시간이 종료 시간보다 늦을 수 없습니다."),
+    ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
 
     // Reservation
     RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
     RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
+    RESERVATION_CANT_CANCELED(HttpStatus.CONFLICT, "예약을 취소할 수 없습니다."),
+    INVALID_DATE(HttpStatus.CONFLICT, "예약 날짜는 현재 시간 이후여야 합니다."),
+    RESERVATION_BAD_REQUEST_ROLE(HttpStatus.BAD_REQUEST,
+            String.format("ReservationStatus 입력이 올바르지 않습니다. 가능한 값: %s",
+                    Arrays.toString(new String[]{"ACCEPTED", "REJECTED"}))),
 
 
 
@@ -59,6 +67,18 @@ public enum ErrorCode {
     MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
 
 
+    // ClubMember
+    CLUBMEMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 멤버입니다."),
+    CLUBMEMBER_OVER(HttpStatus.CONFLICT, "정원 초과입니다"),
+    CLUBMEMBER_NOT_EXPEL_ONESELF(HttpStatus.CONFLICT, "자기 자신을 추방할 수 없습니다"),
+    CLUBMEMBER_ADMIN_NOT_WITHDRAW(HttpStatus.CONFLICT, "자기 자신을 추방할 수 없습니다"),
+
+
+
+    // Participant
+    DUPLICATE_PARTICIPANT(HttpStatus.CONFLICT, "이미 신청이 되어 있습니다."),
+    TOO_LATE(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
+    WRONG_STATUS(HttpStatus.BAD_REQUEST, "번개 참가자의 상태를 수정할 수 없습니다."),
 
     // 기본 코드
     NO_AUTHORITY(HttpStatus.FORBIDDEN, "%s에 대한권한이 없습니다."),

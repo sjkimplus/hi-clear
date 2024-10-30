@@ -9,14 +9,14 @@ public class BoardCreateResponse {
     private final String title;
     private final String content;
     private final Long userId;
-    private final Long boardId;
+    private final Long clubId;
 
 
-    public BoardCreateResponse(Long id, String title, String content, Long userId, Long boardId) {
+    public BoardCreateResponse(Long id, String title, String content, Long userId, Long clubId) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.userId = userId;
-        this.boardId = boardId;
+        this.clubId = clubId;
     }
 }

@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.board.controller;
 
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.board.dto.request.BoardCreateRequest;
 import com.play.hiclear.domain.board.dto.request.BoardUpdateRequest;
 import com.play.hiclear.domain.board.dto.response.BoardCreateResponse;
@@ -10,6 +11,7 @@ import com.play.hiclear.domain.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,9 +22,11 @@ public class BoardController {
 
     // 보드 생성
     @PostMapping("/v1/clubs/{clubId}/clubboards")
-    public ResponseEntity<BoardCreateResponse> create(@PathVariable Long clubId,
-                                                           @RequestBody BoardCreateRequest request) {
-        return ResponseEntity.ok(boardService.create(clubId, request));
+    public ResponseEntity<BoardCreateResponse> create(
+            @PathVariable Long clubId,
+            @RequestBody BoardCreateRequest request,
+            @AuthenticationPrincipal AuthUser authUser) {
+        return ResponseEntity.ok(boardService.create(clubId, request, authUser));
     }
 
     // 보드 다건 조회
@@ -49,16 +53,18 @@ public class BoardController {
     public ResponseEntity<BoardUpdateResponse> update(
             @PathVariable Long clubId,
             @PathVariable Long clubboardId,
-            @RequestBody BoardUpdateRequest request
+            @RequestBody BoardUpdateRequest request,
+            @AuthenticationPrincipal AuthUser authUser
     ){
-        return ResponseEntity.ok(boardService.update(clubId, clubboardId, request));
+        return ResponseEntity.ok(boardService.update(clubId, clubboardId, request, authUser));
     }
 
     @DeleteMapping("/v1/clubs/{clubId}/clubboards/{clubboardId}")
     public void delete(
             @PathVariable Long clubId,
-            @PathVariable Long clubboardId
+            @PathVariable Long clubboardId,
+            @AuthenticationPrincipal AuthUser authUser
     ){
-        boardService.delete(clubId, clubboardId);
+        boardService.delete(clubId, clubboardId, authUser);
     }
 }

@@ -1,5 +1,8 @@
 package com.play.hiclear.domain.board.service;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.board.dto.request.BoardCreateRequest;
 import com.play.hiclear.domain.board.dto.request.BoardUpdateRequest;
 import com.play.hiclear.domain.board.dto.response.BoardSearchDetailResponse;
@@ -12,14 +15,11 @@ import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +29,12 @@ public class BoardService {
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
 
-    public BoardCreateResponse create(Long clubId, BoardCreateRequest request) {
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new NullPointerException("모임을 찾을 수 없습니다."));
+    public BoardCreateResponse create(Long clubId, BoardCreateRequest request, AuthUser authUser) {
+        Club club = clubRepository.findById(clubId).orElseThrow(() ->
+                new CustomException(ErrorCode.NOT_FOUND, "해당 모임"));
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new NullPointerException("사용자를 찾을수 없습니다."));
+        User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
+                new CustomException(ErrorCode.NOT_FOUND, "해당 사용자"));
 
         Board board = new Board(
                 request.getTitle(),
@@ -61,6 +61,9 @@ public class BoardService {
                 board.getId(),
                 board.getTitle(),
                 board.getContext(),
+                board.getUser().getId(),
+                board.getUser().getName(),
+                board.getUser().getEmail(),
                 board.getCreatedAt(),
                 board.getModifiedAt()
         ));
@@ -68,10 +71,10 @@ public class BoardService {
 
     public BoardSearchDetailResponse get(Long clubId, Long clubboardId) {
         Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new NullPointerException("해당 게시글을 찾지 못하였습니다."));
+                new CustomException(ErrorCode.NOT_FOUND, "해당 게시글"));
 
         if(!board.getClub().getId().equals(clubId)) {
-            throw new NullPointerException("해당 모임에 속하는 게시글을 찾을 수 없습니다.");
+            throw new CustomException(ErrorCode.NOT_FOUND, "해당 모임에 속하는 게시글");
         }
 
         User user = board.getUser();
@@ -81,16 +84,22 @@ public class BoardService {
                 board.getTitle(),
                 board.getContext(),
                 user.getId(),
+                user.getName(),
+                user.getEmail(),
                 board.getClub().getId()
         );
     }
 
-    public BoardUpdateResponse update(Long clubId, Long clubboardId, BoardUpdateRequest request) {
+    public BoardUpdateResponse update(Long clubId, Long clubboardId, BoardUpdateRequest request, AuthUser authUser) {
         Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new NullPointerException("해당 게시글을 찾지 못하였습니다."));
+                new CustomException(ErrorCode.NOT_FOUND, "해당 게시글"));
 
         if(!board.getClub().getId().equals(clubId)) {
-            throw new NullPointerException("해당 게시글은 이 클럽에 속해있지 않습니다.");
+            throw new CustomException(ErrorCode.NOT_FOUND, "해당 모임에 속하는 게시글");
+        }
+
+        if (!board.getUser().getId().equals(authUser.getUserId())) {
+            throw new CustomException(ErrorCode.NO_AUTHORITY, "게시글 수정");
         }
 
         board.update(
@@ -103,12 +112,16 @@ public class BoardService {
         return new BoardUpdateResponse(updateBoard.getId(), updateBoard.getTitle(), updateBoard.getContext());
     }
 
-    public void delete(Long clubId, Long clubboardId) {
+    public void delete(Long clubId, Long clubboardId, AuthUser authUser) {
         Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new NullPointerException("해당 게시글을 찾지 못하였습니다."));
+                new CustomException(ErrorCode.NOT_FOUND, "해당 게시글"));
 
         if(!board.getClub().getId().equals(clubId)) {
-            throw new NullPointerException("해당 게시글은 이 클럽에 속해있지 않습니다.");
+            throw new CustomException(ErrorCode.NOT_FOUND, "해당 모임에 속하는 게시글");
+        }
+
+        if (!board.getUser().getId().equals(authUser.getUserId())) {  // authUser.getUserId() 사용
+            throw new CustomException(ErrorCode.NO_AUTHORITY, "게시글 삭제");
         }
 
         boardRepository.deleteById(clubboardId);

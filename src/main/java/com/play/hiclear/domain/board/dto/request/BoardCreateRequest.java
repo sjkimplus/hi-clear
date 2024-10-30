@@ -7,6 +7,4 @@ import lombok.Getter;
 public class BoardCreateRequest {
     private String title;
     private String context;
-    private Long userId;
-
 }

@@ -32,10 +32,9 @@ public class Likes extends TimeStamped {
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
-    public Likes(User user, Comment comment, Club club) {
+    public Likes(User user, Comment comment) {
         this.user = user;
         this.comment = comment;
-        this.club = club;
         this.status = true;
     }
 

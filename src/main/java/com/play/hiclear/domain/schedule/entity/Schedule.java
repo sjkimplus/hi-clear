@@ -3,8 +3,10 @@ package com.play.hiclear.domain.schedule.entity;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
+import com.play.hiclear.domain.schedule.dto.request.ScheduleRequest;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "schedules")
 public class Schedule extends TimeStamped {
@@ -37,7 +40,7 @@ public class Schedule extends TimeStamped {
     @OneToMany(mappedBy = "schedule")
     private List<ScheduleParticipant> scheduleParticipants;         // 참가자 목록
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -52,21 +55,21 @@ public class Schedule extends TimeStamped {
     }
 
     // 모임 일정 수정
-    public void updateSchedule(String title, String description, String region, LocalDateTime startTime, LocalDateTime endTime) {
-        if (title != null && !title.isEmpty()) {
-            this.title = title;
+    public void updateSchedule(ScheduleRequest scheduleRequestDto) {
+        if (scheduleRequestDto.getTitle() != null && !scheduleRequestDto.getTitle().isEmpty()) {
+            this.title = scheduleRequestDto.getTitle();
         }
-        if (description != null && !description.isEmpty()) {
-            this.description = description;
+        if (scheduleRequestDto.getDescription() != null && !scheduleRequestDto.getDescription().isEmpty()) {
+            this.description = scheduleRequestDto.getDescription();
         }
-        if (region != null && !region.isEmpty()) {
-            this.region = region;
+        if (scheduleRequestDto.getRegion() != null && !scheduleRequestDto.getRegion().isEmpty()) {
+            this.region = scheduleRequestDto.getRegion();
         }
-        if (startTime != null) {
-            this.startTime = startTime;
+        if (scheduleRequestDto.getStartTime() != null) {
+            this.startTime = scheduleRequestDto.getStartTime();
         }
-        if (endTime != null) {
-            this.endTime = endTime;
+        if (scheduleRequestDto.getEndTime() != null) {
+            this.endTime = scheduleRequestDto.getEndTime();
         }
     }
 }

@@ -6,6 +6,7 @@ import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
@@ -16,6 +17,7 @@ public class ReservationSearchDetailResponse {
     private TimeSlotResponse timeSlot;
     private CourtResponse court;
     private String status;
+    private LocalDate date;
 
     public static ReservationSearchDetailResponse from(Reservation reservation) {
         ReservationSearchDetailResponse response = new ReservationSearchDetailResponse();
@@ -24,6 +26,7 @@ public class ReservationSearchDetailResponse {
         response.timeSlot = new TimeSlotResponse(reservation.getTimeSlot());
         response.court = new CourtResponse(reservation.getCourt());
         response.status = reservation.getStatus().name();
+        response.date = reservation.getDate();
         return response;
     }
 

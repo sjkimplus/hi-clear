@@ -45,7 +45,7 @@ class UserServiceTest {
 
 
     @Test
-    void searchUsers_success() {
+    void search_success() {
         // given
         List<User> userList = new ArrayList<>();
         User user1 = new User("홍길동", "test1@gmail.com", "경기도 화성시", "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
@@ -60,7 +60,7 @@ class UserServiceTest {
 
 
         // when
-        Page<UserSimpleResponse> result = userService.searchUsers(page, size);
+        Page<UserSimpleResponse> result = userService.search(page, size);
 
         // then
         assertNotNull(result);
@@ -75,7 +75,7 @@ class UserServiceTest {
 
 
     @Test
-    void updateUser_successs() {
+    void update_successs() {
         // given
         User user = new User("홍길동", "test1@gmail.com", "경기도 화성시", "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
@@ -83,7 +83,7 @@ class UserServiceTest {
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("서울특별시 강서구", "RANK_C");
 
         // when
-        userService.updateUser(authUser, userUpdateRequest);
+        userService.update(authUser, userUpdateRequest);
 
         // then
         assertEquals("서울특별시 강서구", user.getRegion());
@@ -92,14 +92,14 @@ class UserServiceTest {
 
 
     @Test
-    void detailSearchUser_success() {
+    void get_success() {
         // given
         User user = new User("홍길동", "test1@gmail.com", "경기도 화성시", "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // when
-        UserDetailResponse result = userService.detailSearchUser(authUser, 1L);
+        UserDetailResponse result = userService.get(authUser, 1L);
 
         // then
         assertNotNull(result);

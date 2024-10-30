@@ -1,4 +1,8 @@
 package com.play.hiclear.domain.review.repository;
 
-public interface ReviewRepository {
+import com.play.hiclear.domain.review.entity.Review;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ReviewRepository extends CrudRepository<Review, Long> {
+
 }

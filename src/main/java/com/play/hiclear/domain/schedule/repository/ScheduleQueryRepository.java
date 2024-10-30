@@ -9,5 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ScheduleQueryRepository {
-    List<Schedule> findByClub(Club club);
+    boolean existsByClubIdAndStartTimeAndTitleAndDeletedAtIsNull(Long clubId, LocalDateTime startTime, String title);
+
+    List<Schedule> findByClubAndDeletedAtIsNull(Club club);
 }

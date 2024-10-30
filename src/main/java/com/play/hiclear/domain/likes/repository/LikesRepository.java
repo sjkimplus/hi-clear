@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface LikesRepository extends CrudRepository<Likes, Long> {
     Optional<Likes> findByCommentIdAndUserId(Long commentId, Long userId);
-    List<Likes> findByCommentId(Long commentId);
+    Long countByCommentId(Long commentId);
 }
