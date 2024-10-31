@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.reservation.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.reservation.dto.request.ReservationChangeStatusRequest;
 import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
 import com.play.hiclear.domain.reservation.dto.request.ReservationUpdateRequest;
 import com.play.hiclear.domain.reservation.dto.response.ReservationSearchDetailResponse;
@@ -70,7 +71,26 @@ public class ReservationController {
         // 응답 생성
         Map<String, Object> response = new HashMap<>();
         response.put("code", HttpStatus.OK.value());
-        response.put("message", "예약이 성공적으로 취소되었습니다.");  // 사용자 친화적인 메시지
+        response.put("message", "예약이 성공적으로 취소되었습니다.");
+        response.put("status", HttpStatus.OK.name());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 사장님 예약 수락/거절
+    @PatchMapping("/v1/reservations/{reservationId}/status")
+    public ResponseEntity<Map<String, Object>> change(
+            @PathVariable Long reservationId,
+            @RequestBody ReservationChangeStatusRequest request,
+            @AuthenticationPrincipal AuthUser authUser) {
+
+        // 예약 상태 변경 서비스 호출
+        reservationService.change(reservationId, authUser.getEmail(), request);
+
+        // 응답 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", HttpStatus.OK.value());
+        response.put("message", "예약 상태가 성공적으로 변경되었습니다.");
         response.put("status", HttpStatus.OK.name());
 
         return ResponseEntity.ok(response);

@@ -31,4 +31,15 @@ public class Board extends TimeStamped {
     @JoinColumn( name = "club_id", nullable = false)
     private Club club;
 
+    public Board(String title, String context, User user, Club club) {
+        this.title = title;
+        this.context = context;
+        this.user = user;
+        this.club = club;
+    }
+
+    public void update(String title, String context) {
+        this.title = title;
+        this.context = context;
+    }
 }
