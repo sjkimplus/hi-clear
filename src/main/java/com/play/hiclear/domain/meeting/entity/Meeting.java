@@ -67,4 +67,5 @@ public class Meeting extends TimeStamped {
         this.ranks = request.getRanks();
         this.groupSize = request.getGroupSize();
     }
+
 }

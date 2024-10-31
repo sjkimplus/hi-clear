@@ -98,7 +98,7 @@ public class ParticipantService {
         // 번개 신청 철회 - 신청자만 가능 CANCEL
         if (request.getStatus()==ParticipantStatus.CANCELED) {
             // 본인 확인
-            if (participantId!=authUser.getUserId()) {
+            if (participant.getUser().getId()!=authUser.getUserId()) {
                 throw new CustomException(ErrorCode.NO_AUTHORITY, Participant.class.getSimpleName());
             }
             // 번개 시작까지 24시간 이상 남았는지 확인

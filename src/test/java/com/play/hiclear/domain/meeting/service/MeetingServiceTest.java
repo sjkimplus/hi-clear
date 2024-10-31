@@ -36,7 +36,6 @@ import java.util.Optional;
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-//Initializes mocks annotated with Mock
 class MeetingServiceTest {
 
     @InjectMocks
@@ -253,23 +252,4 @@ class MeetingServiceTest {
         assertEquals(1, response.getList().size());
         assertEquals(meeting.getId(), response.getList().get(0).getId());
     }
-
-//    @Test
-//    void search_success() {
-//        // given
-//        SortType sortType = SortType.EARLIEST;
-//        Ranks rank = Ranks.RANK_A;
-//        int page = 1;
-//        int size = 10;
-//
-//        // when
-//        when(meetingQueryDslRepository.search(sortType, rank, PageRequest.of(page - 1, size)))
-//                .thenReturn(new PageImpl<>(new ArrayList<>()));
-//
-//        // then
-//        Page<MeetingSearchResponse> response = meetingService.search(sortType, rank, page, size);
-//
-//        assertNotNull(response);
-//    }
-
 }
