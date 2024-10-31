@@ -70,5 +70,11 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.getMyMeeting(meetingId));
     }
 
+    // 나의 번개 활동 완료
+    @PatchMapping("v1/my-meetings/{meetingId}")
+    public ResponseEntity<String> updateMyMeeting(@PathVariable Long meetingId) {
+        return ResponseEntity.ok(meetingService.updateMyMeeting(meetingId));
+    }
+
 }
 
