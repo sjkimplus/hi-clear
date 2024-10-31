@@ -18,7 +18,7 @@ public class ClubMemberController {
     @PostMapping("/v1/clubs/{clubId}/join")
     public ResponseEntity<String> join(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId) {
         clubMemberService.join(authUser.getUserId(), clubId);
-        return ResponseEntity.ok("모임 가입 완료했습니다.");
+        return ResponseEntity.ok("모임 가입을 완료했습니다.");
     }
 
     @DeleteMapping("/v1/clubs/{clubId}/withdraw")
@@ -33,7 +33,7 @@ public class ClubMemberController {
         return ResponseEntity.ok("모임에서 추방했습니다.");
     }
 
-    @PatchMapping("/v1/clubs/{clubId}/role")
+    @PutMapping("/v1/clubs/{clubId}/role")
     public ResponseEntity<String> change(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubMemberChangeRoleRequest clubMemberChangeRoleRequest) {
         clubMemberService.change(authUser.getUserId(), clubId, clubMemberChangeRoleRequest);
         return ResponseEntity.ok("권한을 변경했습니다.");

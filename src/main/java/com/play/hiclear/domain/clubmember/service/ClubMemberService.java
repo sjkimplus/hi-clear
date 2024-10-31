@@ -27,14 +27,23 @@ public class ClubMemberService {
 
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * 
+     * @param userId    가입하려는 userId
+     * @param clubId    가입하려는 clubId
+     */
     @Transactional
     public void join(Long userId, Long clubId) {
 
+        //  유저 조회
         User user = findUserById(userId);
+        //  모임 조회
         Club club = findClubById(clubId);
 
+        // 모임 가입 여부 확인
         checkClubMember(userId, clubId);
 
+        //  모임 정원 확인 로직
         long memberCount = clubMemberRepository.findAllByClubId(clubId).size();
         if (memberCount >= club.getClubSize()) {
             throw new CustomException(ErrorCode.CLUBMEMBER_OVER);
@@ -49,32 +58,56 @@ public class ClubMemberService {
         );
     }
 
+    /**
+     *
+     * @param userId    모임 탈퇴할 userId
+     * @param clubId    모임 탈퇴할 clubId
+     */
     @Transactional
     public void withdraw(Long userId, Long clubId) {
 
-        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
+        //  유저 조회
+        User user = findUserById(userId);
+        //  모임 조회
+        Club club = findClubById(clubId);
+        //  모임 멤버 조회
+        ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
 
+        //  모임장 확인
         if(member.getClubMemberRole() == ClubMemberRole.ROLE_MASTER){
             throw new CustomException(ErrorCode.CLUBMEMBER_ADMIN_NOT_WITHDRAW);
         }
 
-        clubMemberRepository.deleteByUserIdAndClubId(userId, clubId);
+        clubMemberRepository.deleteByUserIdAndClubId(user.getId(), club.getId());
     }
 
+    /**
+     *
+     * @param userId    로그인 된 userId
+     * @param clubId    clubId
+     * @param clubMemberExpelRequest    탈퇴시킬 member의 email과 비밀번호를 담은 DTO
+     */
     @Transactional
     public void expel(Long userId, Long clubId, ClubMemberExpelRequest clubMemberExpelRequest) {
 
+        // 유저 조회
         User user = findUserById(userId);
+        // 모임 조회
+        Club club = findClubById(clubId);
 
-        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
+        //  모임 멤버 조회
+        ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
 
+        // 추방할 권한 유무 확인
         if(member.getClubMemberRole() != ClubMemberRole.ROLE_MASTER &&
                 member.getClubMemberRole() != ClubMemberRole.ROLE_MANAGER){
             throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
         }
 
+        //  비밀번호 확인
         checkPassword(clubMemberExpelRequest.getPassword(), user.getPassword());
 
+        // 추방할 유저 조회
         User expelUser = userRepository.findByEmail(clubMemberExpelRequest.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
 
@@ -82,16 +115,24 @@ public class ClubMemberService {
             throw new CustomException(ErrorCode.CLUBMEMBER_NOT_EXPEL_ONESELF);
         }
 
-        clubMemberRepository.deleteByUserIdAndClubId(expelUser.getId(), clubId);
+        clubMemberRepository.deleteByUserIdAndClubId(expelUser.getId(), club.getId());
     }
 
+    /**
+     *
+     * @param userId    로그인 된 userId
+     * @param clubId    clubId
+     * @param clubMemberChangeRoleRequest   권한 변경할 member의 email과 비밀번호를 담은 DTO
+     */
     @Transactional
     public void change(Long userId, Long clubId, ClubMemberChangeRoleRequest clubMemberChangeRoleRequest) {
 
+        // 유저 조회
         User user = findUserById(userId);
+        // 모임 조회
         Club club = findClubById(clubId);
 
-        // 현재 로그인된 유저의 권한 확인
+        // 현재 로그인된 유저의 모임 멤버 권한 확인
         ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
         if(member.getClubMemberRole() != ClubMemberRole.ROLE_MASTER){
             throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
@@ -108,7 +149,7 @@ public class ClubMemberService {
         // 권한 변경을 할 유저
         User changeUser = userRepository.findByEmail(clubMemberChangeRoleRequest.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
-        ClubMember changeMember = findClubMemberByUserIdAndClubId(changeUser.getId(), clubId);
+        ClubMember changeMember = findClubMemberByUserIdAndClubId(changeUser.getId(), club.getId());
 
         changeMember.change(clubMemberChangeRoleRequest.getRole());
     }
@@ -119,13 +160,13 @@ public class ClubMemberService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 
-    // Club 조회
+    // 모임 조회
     private Club findClubById(Long clubId) {
-        return clubRepository.findById(clubId)
+        return clubRepository.findByIdAndDeletedAtIsNull(clubId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
     }
 
-    // ClubMember 조회
+    // 모임 멤버 조회
     private ClubMember findClubMemberByUserIdAndClubId(Long userId, Long clubId) {
         return clubMemberRepository.findByUserIdAndClubId(userId, clubId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
@@ -138,7 +179,7 @@ public class ClubMemberService {
         }
     }
 
-    // ClubMember 조회
+    // 모임 멤버 유효성 검사
     private void checkClubMember(Long userId, Long clubId) {
         if (clubMemberRepository.existsByUserIdAndClubId(userId, clubId)) {
             throw new CustomException(ErrorCode.CLUBMEMBER_ALREADY_EXISTS);

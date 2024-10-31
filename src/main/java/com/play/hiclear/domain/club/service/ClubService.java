@@ -43,7 +43,7 @@ public class ClubService {
     @Transactional
     public void create(Long userId, ClubCreateRequest clubCreateRequest) {
 
-        //  유저 유효성 검사
+        //  유저 조회
         User user = findUserById(userId);
 
         //  모임 생성
@@ -91,10 +91,12 @@ public class ClubService {
     @Transactional
     public ClubUpdateResponse update(Long userId, Long clubId, ClubUpdateRequest clubUpdateRequest) {
 
-        //  모임 유효성 검사
+        //  유저 조회
+        User user = findUserById(userId);
+        //  모임 조회
         Club club = findClub(clubId);
-        //  현재 로그인된 유저의 모임멤버 유효성 검사
-        ClubMember clubMember = findClubMember(userId, club.getId());
+        //  현재 로그인된 유저의 모임멤버 조회
+        ClubMember clubMember = findClubMember(user.getId(), club.getId());
 
         //  모임 권한 확인
         checkClubAdmin(clubMember);
@@ -122,10 +124,12 @@ public class ClubService {
     @Transactional
     public void delete(Long userId, Long clubId, ClubDeleteRequest clubDeleteRequest) {
 
-        //  모임 유효성 검사
+        //  유저 조회
+        User user = findUserById(userId);
+        //  모임 조회
         Club club = findClub(clubId);
-        //  모임 멤버 유효성 검사
-        ClubMember clubMember = findClubMember(userId, club.getId());
+        //  모임 멤버 조회
+        ClubMember clubMember = findClubMember(user.getId(), club.getId());
 
         //  모임 권한 확인
         checkClubAdmin(clubMember);
