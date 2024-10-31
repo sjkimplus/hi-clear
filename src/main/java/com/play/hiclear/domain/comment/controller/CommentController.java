@@ -22,7 +22,7 @@ public class CommentController {
         return ResponseEntity.ok("댓글을 작성하였습니다");
     }
 
-    @PatchMapping("/v1/clubboards/{clubboardId}/comments/{commentId}")
+    @PutMapping("/v1/clubboards/{clubboardId}/comments/{commentId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentId, @RequestBody CommentUpdateRequest commentUpdateRequest) throws Exception {
         commentService.update(authUser.getUserId(), commentId, commentUpdateRequest);
         return ResponseEntity.ok("댓글 수정이 완료되었습니다");

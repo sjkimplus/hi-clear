@@ -4,7 +4,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
-import com.play.hiclear.domain.clubmember.dto.ClubMemberChangeRoleRequest;
+import com.play.hiclear.domain.clubmember.dto.request.ClubMemberChangeRoleRequest;
 import com.play.hiclear.domain.clubmember.dto.request.ClubMemberExpelRequest;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;

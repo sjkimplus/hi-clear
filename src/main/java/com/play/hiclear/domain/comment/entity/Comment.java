@@ -6,6 +6,7 @@ import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
 import com.play.hiclear.domain.thread.entity.Thread;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +37,7 @@ public class Comment extends TimeStamped {
     @OneToMany(mappedBy = "comment")
     private List<Thread> threads = new ArrayList<>();
 
+    @NotBlank
     private String content;
 
     public void updateComment(CommentUpdateRequest commentUpdateRequest) {

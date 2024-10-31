@@ -6,7 +6,6 @@ import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,14 +28,14 @@ public class Club extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
-    @NotNull @NotBlank
+    @NotBlank
     private String clubname;
-    @NotNull @NotBlank
+    @NotBlank
     private Integer clubSize;
     private String intro;
-    @NotNull @NotBlank
+    @NotBlank
     private String region;
-    @NotNull @NotBlank
+    @NotBlank
     private String password;
 
     @OneToMany(mappedBy = "club")

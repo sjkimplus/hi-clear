@@ -1,20 +1,19 @@
 package com.play.hiclear.domain.club.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class ClubUpdateRequest {
 
-    @NotNull @NotBlank
+    @NotBlank
     private String clubname;
-    @NotNull @NotBlank
+    @NotBlank
     private Integer clubSize;
-    @NotNull @NotBlank
+    @NotBlank
     private String intro;
-    @NotNull @NotBlank
+    @NotBlank
     private String region;
-    @NotNull @NotBlank
+    @NotBlank
     private String password;
 }

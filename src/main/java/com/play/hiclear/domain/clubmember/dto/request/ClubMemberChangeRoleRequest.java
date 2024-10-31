@@ -1,17 +1,16 @@
-package com.play.hiclear.domain.clubmember.dto;
+package com.play.hiclear.domain.clubmember.dto.request;
 
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class ClubMemberChangeRoleRequest {
 
-    @NotNull @NotBlank
+    @NotBlank
     private ClubMemberRole role;
-    @NotNull @NotBlank
+    @NotBlank
     private String email;
-    @NotNull @NotBlank
+    @NotBlank
     private String password;
 }
