@@ -4,7 +4,6 @@ import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
-import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
 import com.play.hiclear.domain.schduleparticipant.repository.ScheduleParticipantRepository;
 import com.play.hiclear.domain.schedule.dto.request.ScheduleRequest;
 import com.play.hiclear.domain.schedule.dto.response.ScheduleSearchDetailResponse;
@@ -21,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +59,7 @@ class ScheduleServiceTest {
 
         club = new Club(1L, admin, "Test Club", 10, "A great club", "Seoul", "secret", new ArrayList<>());
         club.getClubMembers().add(new ClubMember(1L, user, club, ClubMemberRole.ROLE_MEMBER));
-        club.getClubMembers().add(new ClubMember(2L, admin, club, ClubMemberRole.ROLE_ADMIN));
+        club.getClubMembers().add(new ClubMember(2L, admin, club, ClubMemberRole.ROLE_MASTER));
 
         schedule = new Schedule(1L, "Test Schedule Title", "This is a test description.", "Seoul",
                 LocalDateTime.of(2024, 10, 1, 10, 0), LocalDateTime.of(2024, 10, 1, 12, 0),

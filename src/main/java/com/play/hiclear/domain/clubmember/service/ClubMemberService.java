@@ -36,7 +36,7 @@ public class ClubMemberService {
         checkClubMember(userId, clubId);
 
         long memberCount = clubMemberRepository.findAllByClubId(clubId).size();
-        if(memberCount + 1 > club.getClubSize()) {
+        if (memberCount >= club.getClubSize()) {
             throw new CustomException(ErrorCode.CLUBMEMBER_OVER);
         }
 
@@ -54,7 +54,7 @@ public class ClubMemberService {
 
         ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
 
-        if(member.getClubMemberRole() == ClubMemberRole.ROLE_ADMIN){
+        if(member.getClubMemberRole() == ClubMemberRole.ROLE_MASTER){
             throw new CustomException(ErrorCode.CLUBMEMBER_ADMIN_NOT_WITHDRAW);
         }
 
@@ -68,7 +68,7 @@ public class ClubMemberService {
 
         ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
 
-        if(member.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN &&
+        if(member.getClubMemberRole() != ClubMemberRole.ROLE_MASTER &&
                 member.getClubMemberRole() != ClubMemberRole.ROLE_MANAGER){
             throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
         }
@@ -88,18 +88,20 @@ public class ClubMemberService {
     @Transactional
     public void change(Long userId, Long clubId, ClubMemberChangeRoleRequest clubMemberChangeRoleRequest) {
 
+        User user = findUserById(userId);
+        Club club = findClubById(clubId);
+
         // 현재 로그인된 유저의 권한 확인
-        ClubMember member = findClubMemberByUserIdAndClubId(userId, clubId);
-        if(member.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN){
+        ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
+        if(member.getClubMemberRole() != ClubMemberRole.ROLE_MASTER){
             throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
         }
 
         // 비밀번호 확인
-        User user = findUserById(userId);
         checkPassword(clubMemberChangeRoleRequest.getPassword(), user.getPassword());
 
         // 변경할 권한 확인
-        if (clubMemberChangeRoleRequest.getRole() == ClubMemberRole.ROLE_ADMIN) {
+        if (clubMemberChangeRoleRequest.getRole() == ClubMemberRole.ROLE_MASTER) {
             throw new CustomException(ErrorCode.CLUBMEMBER_ADMIN_ONLY_ONE);
         }
 

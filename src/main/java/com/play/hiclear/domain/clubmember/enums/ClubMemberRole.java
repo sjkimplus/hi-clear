@@ -11,7 +11,7 @@ public enum ClubMemberRole {
 
     ROLE_MEMBER(ClubMemberAuthority.MEMBER),
     ROLE_MANAGER(ClubMemberAuthority.MANAGER),
-    ROLE_ADMIN(ClubMemberAuthority.ADMIN);
+    ROLE_MASTER(ClubMemberAuthority.MASTER);
 
     private final String clubMemberRole;
 
@@ -25,6 +25,6 @@ public enum ClubMemberRole {
     public static class ClubMemberAuthority {
         public static final String MEMBER = "ROLE_MEMBER";
         public static final String MANAGER = "ROLE_MANAGER";
-        public static final String ADMIN = "ROLE_ADMIN";
+        public static final String MASTER = "ROLE_MASTER";
     }
 }

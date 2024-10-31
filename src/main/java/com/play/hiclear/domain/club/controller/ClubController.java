@@ -9,11 +9,10 @@ import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
 import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.service.ClubService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public class ClubController {
         return ResponseEntity.ok(clubService.get(clubId));
     }
 
-    @PatchMapping("/v1/clubs/{clubId}")
+    @PutMapping("/v1/clubs/{clubId}")
     public ResponseEntity<ClubUpdateResponse> update(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clubId,
@@ -42,8 +41,11 @@ public class ClubController {
     }
 
     @GetMapping("/v1/clubs")
-    public ResponseEntity<List<ClubSearchResponse>> search() {
-        return ResponseEntity.ok(clubService.search());
+    public ResponseEntity<Page<ClubSearchResponse>> search(
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        return ResponseEntity.ok(clubService.search(page, size));
     }
 
     @DeleteMapping("/v1/clubs/{clubId}")

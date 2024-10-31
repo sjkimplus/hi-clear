@@ -80,7 +80,7 @@ public class CommentService {
 
     // Comment 조회
     private Comment findCommentById(Long commentId) {
-        return commentRepository.findById(commentId)
+        return commentRepository.findByIdAndDeletedAtIsNull(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName()));
     }
 
