@@ -46,9 +46,6 @@ public class MeetingService {
         // the end time has to be greater than the start time by one hour
 
         Meeting meeting = new Meeting(request, user);
-        if (meeting==null) {
-            throw new CustomException(ErrorCode.MEETING_CREATION_FAIL);
-        }
         meetingRepository.save(meeting);
 
         // participant 에 추가
