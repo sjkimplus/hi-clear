@@ -59,9 +59,9 @@ class TimeSlotServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
         gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
         ReflectionTestUtils.setField(gym, "id", 1L);
-        when(gymRepository.findById(1L)).thenReturn(Optional.of(gym));
+        when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
         court = new Court(1L, 10000, gym);
-        when(courtRepository.findByCourtNumAndGymId(1L, 1L)).thenReturn(Optional.of(court));
+        when(courtRepository.findByCourtNumAndGymIdOrThrow(1L, 1L)).thenReturn(court);
     }
 
 
@@ -120,8 +120,8 @@ class TimeSlotServiceTest {
         // given
         TimeSlotRequest timeSlotRequest = new TimeSlotRequest(LocalTime.of(10, 00));
         TimeSlot timeSlot = new TimeSlot(timeSlotRequest.getStartTime(), 1L, court);
-        when(timeSlotRepository.findByStartTimeAndCourt_CourtNum(timeSlotRequest.getStartTime(), 1L))
-                .thenReturn(Optional.of(timeSlot));
+        when(timeSlotRepository.findByStartTimeAndCourt_CourtNumOrThrow(timeSlotRequest.getStartTime(), 1L))
+                .thenReturn(timeSlot);
 
         // when
         timeSlotService.delete(authUser, 1L, 1L, timeSlotRequest);

@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.auth.service;
 
+import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
@@ -29,17 +30,22 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
+    /**
+     * 회원가입기능
+     * @param request
+     * @return AuthSignupResponse
+     */
     @Transactional
     public AuthSignupResponse signup(AuthSignupRequest request) {
-
-        // 비밀번호 암호화
-        String encodePassword = passwordEncoder.encode(request.getPassword());
 
         // email을 통한 중복 가입 확인
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
             throw new CustomException(ErrorCode.AUTH_USER_EXISTING);
         }
+
+        // 비밀번호 암호화
+        String encodePassword = passwordEncoder.encode(request.getPassword());
 
         // 유저 객체 생성
         User user = new User(
@@ -66,21 +72,24 @@ public class AuthService {
     }
 
 
+    /**
+     * 로그인(token 반환)
+     * @param request
+     * @return AuthLoginResponse(bearerToken)
+     */
     public AuthLoginResponse login(AuthLoginRequest request) {
 
         // email으로 가입여부 홧인
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
-        // 비밀번호 확인
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
-        }
-
         // 탈퇴여부 확인
         if (user.getDeletedAt() != null) {
             throw new CustomException(ErrorCode.AUTH_USER_DELETED);
         }
+
+        // 비밀번호 확인
+        checkPassword(request.getPassword(), user.getPassword());
 
         // 토큰 생성
         String token = jwtUtil.createToken(
@@ -93,18 +102,28 @@ public class AuthService {
     }
 
 
+    /**
+     * 회원 탈퇴(Soft Delete)
+     * @param authUser
+     * @param request
+     */
     @Transactional
     public void delete(AuthUser authUser, AuthDeleteRequest request) {
 
         // 유저 조회
-        User user = userRepository.findById(authUser.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         // 비밀번호 확인
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        checkPassword(request.getPassword(), user.getPassword());
+
+        // 회원 삭제
+        user.markDeleted();
+    }
+
+    // 비밀번호 확인 메서드
+    private void checkPassword(String requestPassword, String userPassword) {
+        if (!passwordEncoder.matches(requestPassword, userPassword)) {
             throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
         }
-        user.markDeleted();
-
     }
 }
