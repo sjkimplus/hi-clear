@@ -46,6 +46,9 @@ public class Meeting extends TimeStamped {
     @Column(nullable = false)
     private int groupSize;
 
+    @Column(nullable = false)
+    private boolean finished;
+
 
     public Meeting(MeetingCreateEditRequest request, User user) {
         this.user = user;
@@ -66,5 +69,11 @@ public class Meeting extends TimeStamped {
         this.endTime = request.getEndTime();
         this.ranks = request.getRanks();
         this.groupSize = request.getGroupSize();
+        this.finished = false;
     }
+
+    public void markFinished() {
+        this.finished = true;
+    }
+
 }

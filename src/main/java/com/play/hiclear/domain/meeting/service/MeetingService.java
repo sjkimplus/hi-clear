@@ -46,9 +46,6 @@ public class MeetingService {
         // the end time has to be greater than the start time by one hour
 
         Meeting meeting = new Meeting(request, user);
-        if (meeting==null) {
-            throw new CustomException(ErrorCode.MEETING_CREATION_FAIL);
-        }
         meetingRepository.save(meeting);
 
         // participant 에 추가
@@ -137,5 +134,15 @@ public class MeetingService {
     public Page<MeetingSearchResponse> search(SortType sortType, Ranks rank, int page, int size) {
         Pageable pageable = PageRequest.of(page -1, size);
         return meetingQueryDslRepository.search(sortType, rank, pageable);
+    }
+
+    public String updateMyMeeting(Long meetingId) {
+        // 번개 일정 찾기
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
+                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
+        );
+
+        meeting.markFinished();
+        return "번개 완료 성공";
     }
 }

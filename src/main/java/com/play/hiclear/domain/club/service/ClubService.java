@@ -16,11 +16,13 @@ import com.play.hiclear.domain.clubmember.repository.ClubMemberRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +35,18 @@ public class ClubService {
 
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     *
+     * @param userId    로그인한 유저의 Id
+     * @param clubCreateRequest DTO
+     */
     @Transactional
     public void create(Long userId, ClubCreateRequest clubCreateRequest) {
 
+        //  유저 조회
         User user = findUserById(userId);
 
+        //  모임 생성
         Club club = clubRepository.save(
                 Club.builder()
                 .clubname(clubCreateRequest.getClubname())
@@ -49,29 +58,49 @@ public class ClubService {
                 .build()
         );
 
+        //  모임 개설자를 모임장으로 클럽멤버 추가
         clubMemberRepository.save(
                 ClubMember.builder()
                         .user(user)
                         .club(club)
-                        .clubMemberRole(ClubMemberRole.ROLE_ADMIN)
+                        .clubMemberRole(ClubMemberRole.ROLE_MASTER)
                         .build()
         );
     }
 
+    /**
+     * 
+     * @param clubId    조회하려는 clubId
+     * @return          모임 이름, 모임 정원, 모임 소개글, 모임 지역, 회원들
+     */
     public ClubGetResponse get(Long clubId) {
 
-        Club club = findClubById(clubId);
+        //  모임 유효성 검사
+        Club club = findClub(clubId);
 
         return new ClubGetResponse(club);
     }
 
+    /**
+     *
+     * @param userId    현재 로그인된 userId
+     * @param clubId    변경할 클럽의 clubId
+     * @param clubUpdateRequest 변경할 내용을 담은 DTO
+     * @return  모임 이름, 모임 정원, 모임 소개글, 모임 지역
+     */
     @Transactional
     public ClubUpdateResponse update(Long userId, Long clubId, ClubUpdateRequest clubUpdateRequest) {
 
-        Club club = findClubById(clubId);
-        ClubMember clubMember = findClubMemberByUserIdAndClubId(userId, clubId);
+        //  유저 조회
+        User user = findUserById(userId);
+        //  모임 조회
+        Club club = findClub(clubId);
+        //  현재 로그인된 유저의 모임멤버 조회
+        ClubMember clubMember = findClubMember(user.getId(), club.getId());
 
+        //  모임 권한 확인
         checkClubAdmin(clubMember);
+        //  비밀번호 확인
         checkPassword(clubUpdateRequest.getPassword(), club.getPassword());
 
         club.updateClub(clubUpdateRequest);
@@ -79,20 +108,32 @@ public class ClubService {
         return new ClubUpdateResponse(club);
     }
 
-    public List<ClubSearchResponse> search() {
+    /**
+     *
+     * @return 모임 이름, 모임 소개글
+     */
+    public Page<ClubSearchResponse> search(int size, int page) {
 
-        List<Club> clubList = clubRepository.findAll();
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedAt").descending());
 
-        return clubList.stream().map(ClubSearchResponse::new).toList();
+        Page<Club> clubList = clubRepository.findAll(pageable);
+
+        return clubList.map(ClubSearchResponse::new);
     }
 
     @Transactional
     public void delete(Long userId, Long clubId, ClubDeleteRequest clubDeleteRequest) {
 
-        Club club = findClubById(clubId);
-        ClubMember clubMember = findClubMemberByUserIdAndClubId(userId, clubId);
+        //  유저 조회
+        User user = findUserById(userId);
+        //  모임 조회
+        Club club = findClub(clubId);
+        //  모임 멤버 조회
+        ClubMember clubMember = findClubMember(user.getId(), club.getId());
 
+        //  모임 권한 확인
         checkClubAdmin(clubMember);
+        //  비밀번호 확인
         checkPassword(clubDeleteRequest.getPassword(), club.getPassword());
 
         club.markDeleted();
@@ -100,18 +141,16 @@ public class ClubService {
 
     // User 조회
     private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
     }
 
-    // Club 조회
-    private Club findClubById(Long clubId) {
-        return clubRepository.findById(clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
+    // 모임 조회
+    private Club findClub(Long clubId) {
+        return clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
     }
 
-    // ClubMember 조회
-    private ClubMember findClubMemberByUserIdAndClubId(Long userId, Long clubId) {
+    // 모임 멤버 조회
+    private ClubMember findClubMember(Long userId, Long clubId) {
         return clubMemberRepository.findByUserIdAndClubId(userId, clubId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
     }
@@ -125,7 +164,7 @@ public class ClubService {
 
     // 모임장 권한 확인
     private void checkClubAdmin(ClubMember clubMember) {
-        if (clubMember.getClubMemberRole() != ClubMemberRole.ROLE_ADMIN) {
+        if (clubMember.getClubMemberRole() != ClubMemberRole.ROLE_MASTER) {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Club.class.getSimpleName());
         }
     }
