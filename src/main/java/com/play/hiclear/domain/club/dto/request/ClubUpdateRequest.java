@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.club.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
@@ -8,7 +9,7 @@ public class ClubUpdateRequest {
 
     @NotBlank
     private String clubname;
-    @NotBlank
+    @NotNull
     private Integer clubSize;
     @NotBlank
     private String intro;
