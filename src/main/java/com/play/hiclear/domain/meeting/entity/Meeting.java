@@ -61,7 +61,7 @@ public class Meeting extends TimeStamped {
         this.groupSize = request.getGroupSize();
     }
 
-    public void edit(MeetingCreateEditRequest request) {
+    public void update(MeetingCreateEditRequest request) {
         this.title = request.getTitle();
         this.region = request.getRegion();
         this.content = request.getContent();

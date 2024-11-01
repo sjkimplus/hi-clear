@@ -7,7 +7,6 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.entity.Meeting;
-import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.meeting.repository.MeetingQueryDslRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.participant.entity.Participant;
@@ -23,9 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -73,7 +69,7 @@ class MeetingServiceTest {
         Meeting meeting = new Meeting(request, user);
 
         // when
-        when(userRepository.findById(authUser.getUserId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenReturn(user);
 
         // then
         String result = meetingService.create(authUser, request);
@@ -84,7 +80,7 @@ class MeetingServiceTest {
     @Test
     void create_fail_user_not_found() {
         // when
-        when(userRepository.findById(authUser.getUserId())).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         // throws a custom exception when trying to create a meeting
         CustomException exception = assertThrows(CustomException.class, () ->
@@ -100,7 +96,7 @@ class MeetingServiceTest {
         ReflectionTestUtils.setField(meeting, "id", 1L);
 
         // when
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
 
         // then
         String result = meetingService.update(authUser, request, meeting.getId());
@@ -111,7 +107,7 @@ class MeetingServiceTest {
     @Test
     void update_fail_meeting_not_found() {
         // when
-        when(meetingRepository.findById(1L)).thenReturn(Optional.empty());
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         CustomException exception = assertThrows(CustomException.class, () ->
                 meetingService.update(authUser, request, 1L)
@@ -126,7 +122,7 @@ class MeetingServiceTest {
         ReflectionTestUtils.setField(meeting, "id", 1L);
 
         // when
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
 
         // then
         String result = meetingService.delete(authUser, meeting.getId());
@@ -137,7 +133,7 @@ class MeetingServiceTest {
     @Test
     void delete_fail_meeting_not_found() {
         // when
-        when(meetingRepository.findById(1L)).thenReturn(Optional.empty());
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         // throws a custom exception when trying to delete a non-existent meeting
         CustomException exception = assertThrows(CustomException.class, () ->
@@ -153,7 +149,7 @@ class MeetingServiceTest {
         ReflectionTestUtils.setField(meeting, "id", 1L);
 
         // when
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantService.getJoinedNumber(meeting.getId())).thenReturn(5);
 
         // then
@@ -166,7 +162,7 @@ class MeetingServiceTest {
     @Test
     void get_fail_meeting_not_found() {
         // when
-        when(meetingRepository.findById(1L)).thenReturn(Optional.empty());
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         // throws a custom exception when trying to get a non-existent meeting
         CustomException exception = assertThrows(CustomException.class, () ->
@@ -182,12 +178,12 @@ class MeetingServiceTest {
         ReflectionTestUtils.setField(meeting, "id", 1L);
 
         // when
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantService.getJoinedNumber(meeting.getId())).thenReturn(5);
         when(participantService.getPendingParticipants(meeting)).thenReturn(new ArrayList<>());
 
         // then
-        MyMeetingDetailResponse response = meetingService.getMyMeeting(meeting.getId());
+        MyMeetingDetailResponse response = meetingService.getMyMeeting(authUser, meeting.getId());
 
         assertEquals(meeting.getId(), response.getId());
         assertEquals(5, response.getNumberJoined());
@@ -197,11 +193,12 @@ class MeetingServiceTest {
     @Test
     void getMyMeeting_fail_meeting_not_found() {
         // when
-        when(meetingRepository.findById(1L)).thenReturn(Optional.empty());
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(1L))
+                .thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         // throws a custom exception when trying to get a non-existent meeting
         CustomException exception = assertThrows(CustomException.class, () ->
-                meetingService.getMyMeeting(1L)
+                meetingService.getMyMeeting(authUser, 1L)
         );
 
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
@@ -221,10 +218,10 @@ class MeetingServiceTest {
         responseList.add(new MyMeetingResponse(meeting));
 
         // when
-        when(participantRepository.findByUserIdAndRole(authUser.getUserId(), ParticipantRole.HOST)).thenReturn(participants);
+        when(participantRepository.findByUserIdAndRoleWithConditionalEndTime(authUser.getUserId(), ParticipantRole.HOST, true)).thenReturn(participants);
 
         // then
-        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.HOST);
+        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.HOST, true);
 
         assertEquals(1, response.getList().size());
         assertEquals(meeting.getId(), response.getList().get(0).getId());
@@ -244,10 +241,10 @@ class MeetingServiceTest {
         responseList.add(new MyMeetingResponse(meeting, participant.getStatus()));
 
         // when
-        when(participantRepository.findByUserIdAndRole(authUser.getUserId(), ParticipantRole.GUEST)).thenReturn(participants);
+        when(participantRepository.findByUserIdAndRoleWithConditionalEndTime(authUser.getUserId(), ParticipantRole.GUEST, true)).thenReturn(participants);
 
         // then
-        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.GUEST);
+        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.GUEST, true);
 
         assertEquals(1, response.getList().size());
         assertEquals(meeting.getId(), response.getList().get(0).getId());

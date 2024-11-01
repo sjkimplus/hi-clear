@@ -49,7 +49,7 @@ public class MeetingQueryDslRepositoryImpl implements MeetingQueryDslRepository 
                 .limit(pageable.getPageSize());
 
         // Adjust sorting based on sortType
-        if (sortType == SortType.EARLIEST) {
+        if (sortType == SortType.EARLIEST) { // 이미 찬 인원 정렬기능
             query.orderBy(meeting.startTime.asc()); // Sort by earliest startTime
         } else {
             query.orderBy(meeting.id.desc()); // LATEST sort if not EARLIEST

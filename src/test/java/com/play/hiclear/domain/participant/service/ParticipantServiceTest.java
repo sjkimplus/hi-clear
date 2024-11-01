@@ -82,8 +82,8 @@ public class ParticipantServiceTest {
 
     @Test
     void add_success() {
-        when(userRepository.findById(user1.getId())).thenReturn(Optional.of(user1));
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(user1.getId())).thenReturn(user1);
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantRepository.findByMeetingAndUser(meeting, user1)).thenReturn(Optional.empty());
 
         String result = participantService.add(authUser1, meeting.getId());
@@ -92,8 +92,8 @@ public class ParticipantServiceTest {
 
     @Test
     void add_fail_duplicate_participant() {
-        when(userRepository.findById(user1.getId())).thenReturn(Optional.of(user1));
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(user1.getId())).thenReturn(user1);
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantRepository.findByMeetingAndUser(meeting, user1)).thenReturn(Optional.of(participant));
 
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -132,7 +132,7 @@ public class ParticipantServiceTest {
     void update_success_guest() {
         ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.CANCELED);
 
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantRepository.findById(participant.getId())).thenReturn(Optional.of(participant));
 
         String result = participantService.update(authUser2, meeting.getId(), participant.getId(), request);
@@ -149,7 +149,7 @@ public class ParticipantServiceTest {
         MeetingCreateEditRequest lateRequest = new MeetingCreateEditRequest("title", "region", "content", now, now.plusHours(1), Ranks.RANK_A, 12);
         Meeting lateMeeting = new Meeting(lateRequest, user2);
 
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(lateMeeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(lateMeeting);
         when(participantRepository.findById(participant.getId())).thenReturn(Optional.of(participant));
 
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -177,7 +177,7 @@ public class ParticipantServiceTest {
     void update_success_host() {
         ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.ACCEPTED);
 
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantRepository.findById(participant.getId())).thenReturn(Optional.of(participant));
 
         String result = participantService.update(authUser1, meeting.getId(), participant.getId(), request);
@@ -190,7 +190,7 @@ public class ParticipantServiceTest {
     void update_fail_no_authority_not_the_host() {
         ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.ACCEPTED);
 
-        when(meetingRepository.findById(meeting.getId())).thenReturn(Optional.of(meeting));
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
         when(participantRepository.findById(participant.getId())).thenReturn(Optional.of(participant));
 
         CustomException exception = assertThrows(CustomException.class, () -> {

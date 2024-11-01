@@ -57,23 +57,24 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.get(meetingId));
     }
 
-    // 나의 번개 신청한 번개/개최한 번개 다건 조회 - 구분은 role 이 HOST/GUEST로 구분
+    // 나의 번개 (신청/개최) 다건 조회 - 구분은 role 이 HOST/GUEST로 구분
     @GetMapping("/v1/my-meetings")
     public ResponseEntity<MyMeetingResponses> searchMyMeetings(@AuthenticationPrincipal AuthUser authUser,
-                                                               @RequestParam ParticipantRole role){
-        return ResponseEntity.ok(meetingService.searchMyMeetings(authUser, role));
+                                                               @RequestParam ParticipantRole role,
+                                                               @RequestParam Boolean includePassed){
+        return ResponseEntity.ok(meetingService.searchMyMeetings(authUser, role, includePassed));
     }
 
     // 개최한 번개 단건 조회
     @GetMapping("/v1/my-meetings/{meetingId}")
-    public ResponseEntity<MyMeetingDetailResponse> getMyMeeting(@PathVariable Long meetingId) {
-        return ResponseEntity.ok(meetingService.getMyMeeting(meetingId));
+    public ResponseEntity<MyMeetingDetailResponse> getMyMeeting(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long meetingId) {
+        return ResponseEntity.ok(meetingService.getMyMeeting(authUser, meetingId));
     }
 
     // 나의 번개 활동 완료
     @PatchMapping("v1/my-meetings/{meetingId}")
-    public ResponseEntity<String> updateMyMeeting(@PathVariable Long meetingId) {
-        return ResponseEntity.ok(meetingService.updateMyMeeting(meetingId));
+    public ResponseEntity<String> finishMyMeeting(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long meetingId) {
+        return ResponseEntity.ok(meetingService.finishMyMeeting(authUser, meetingId));
     }
 
 }

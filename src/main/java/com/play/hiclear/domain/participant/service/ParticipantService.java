@@ -35,13 +35,9 @@ public class ParticipantService {
     @Transactional
     public String add(AuthUser authUser, Long meetingId) {
 
-        User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName())
-        );
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         // 이미 추가된 유저인 경우 중복추가 방지
         Optional<Participant> existingParticipant = participantRepository.findByMeetingAndUser(meeting, user);
@@ -74,7 +70,7 @@ public class ParticipantService {
     }
 
     public int getJoinedNumber(Long meetingId) {
-        return participantRepository.countByMeetingId(meetingId);
+        return participantRepository.countByMeetingId(meetingId); // 참여확정자만으로 수정
     }
 
     public List<ParticipantResponse> getPendingParticipants(Meeting meeting) {
@@ -87,9 +83,7 @@ public class ParticipantService {
 
     @Transactional
     public String update(AuthUser authUser, Long meetingId, Long participantId, ParticipantUpdateRequest request) {
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         Participant participant = participantRepository.findById(participantId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
