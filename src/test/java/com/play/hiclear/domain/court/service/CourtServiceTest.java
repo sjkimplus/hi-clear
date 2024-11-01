@@ -3,6 +3,7 @@ package com.play.hiclear.domain.court.service;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.dto.request.CourtCreateRequest;
+import com.play.hiclear.domain.court.dto.request.CourtUpdateRequest;
 import com.play.hiclear.domain.court.dto.response.CourtCreateResponse;
 import com.play.hiclear.domain.court.dto.response.CourtSearchResponse;
 import com.play.hiclear.domain.court.entity.Court;
@@ -22,11 +23,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,14 +51,14 @@ class CourtServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
         gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
         ReflectionTestUtils.setField(gym, "id", 1L);
-        when(gymRepository.findById(1L)).thenReturn(Optional.of(gym));
+        when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
     }
 
 
     @Test
     void create_success() {
         // given
-        CourtCreateRequest courtCreateRequest = new CourtCreateRequest(10000);
+        CourtCreateRequest courtCreateRequest = new CourtCreateRequest(1L, 10000);
 
         // when
         CourtCreateResponse result =courtService.create(authUser, 1L, courtCreateRequest);
@@ -94,8 +93,8 @@ class CourtServiceTest {
     void update_success() {
         // given
         Court court = new Court(1L, 10000, gym);
-        CourtCreateRequest courtUpdateRequest = new CourtCreateRequest(20000);
-        when(courtRepository.findByCourtNumAndGymId(1L, 1L)).thenReturn(Optional.of(court));
+        CourtUpdateRequest courtUpdateRequest = new CourtUpdateRequest(20000);
+        when(courtRepository.findByCourtNumAndGymIdOrThrow(1L, 1L)).thenReturn(court);
 
         // when
         CourtCreateResponse result = courtService.update(authUser, 1L, 1L, courtUpdateRequest);
@@ -108,16 +107,13 @@ class CourtServiceTest {
     void delete_success() {
         // given
         Court court = new Court(1L, 10000, gym);
-        CourtCreateRequest courtUpdateRequest = new CourtCreateRequest(20000);
-        when(courtRepository.findByCourtNumAndGymId(1L, 1L)).thenReturn(Optional.of(court));
+        when(courtRepository.findByCourtNumAndGymIdOrThrow(1L, 1L)).thenReturn(court);
 
         // when
         courtService.delete(authUser, 1L, 1L);
 
         // then
-        verify(courtRepository).delete(court);
-        when(courtRepository.findByCourtNumAndGymId(1L, 1L)).thenReturn(Optional.empty());
-        Optional<Court> result = courtRepository.findByCourtNumAndGymId(1L, 1L);
-        assertTrue(result.isEmpty());
+        Court result = courtRepository.findByCourtNumAndGymIdOrThrow(1L, 1L);
+        assertNotNull(result.getDeletedAt());
     }
 }

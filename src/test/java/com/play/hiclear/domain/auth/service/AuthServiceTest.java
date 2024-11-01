@@ -3,9 +3,9 @@ package com.play.hiclear.domain.auth.service;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.utils.JwtUtil;
+import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
-import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
 import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
 import com.play.hiclear.domain.auth.entity.AuthUser;
@@ -127,7 +127,7 @@ class AuthServiceTest {
         // given
         AuthDeleteRequest authDeleteRequest = new AuthDeleteRequest("Password!!");
         when(passwordEncoder.matches("Password!!", user.getPassword())).thenReturn(true);
-        when(userRepository.findById(authUser.getUserId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenReturn(user);
 
         // when
         authService.delete(authUser, authDeleteRequest);
@@ -140,7 +140,7 @@ class AuthServiceTest {
     void delete_fail_mismatch_password() {
         // given
         AuthDeleteRequest authDeleteRequest = new AuthDeleteRequest("PassworD@@");
-        when(userRepository.findById(authUser.getUserId())).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenReturn(user);
         when(passwordEncoder.matches("Password!!", user.getPassword())).thenReturn(true);
 
         // when & then

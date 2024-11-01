@@ -5,12 +5,10 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CourtCreateRequest {
-    private Long courtNum;
+public class CourtUpdateRequest {
     private int price;
 
-    public CourtCreateRequest(Long courtNum, int price) {
-        this.courtNum = courtNum;
+    public CourtUpdateRequest(int price) {
         this.price = price;
     }
 }

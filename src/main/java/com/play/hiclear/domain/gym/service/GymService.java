@@ -27,15 +27,22 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GymService {
+
     private final UserRepository userRepository;
     private final GymRepository gymRepository;
 
-
+    /**
+     * 체육관 생성
+     *
+     * @param authUser
+     * @param request
+     * @return GymCreateResponse
+     */
     @Transactional
     public GymCreateResponse create(AuthUser authUser, GymCreateRequest request) {
 
-        User user = userRepository.findById(authUser.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        // 유저 확인
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         Gym gym = new Gym(
                 request.getName(),
@@ -57,42 +64,56 @@ public class GymService {
     }
 
 
+    /**
+     * 체육관 검색 기능(체육관명, 주소, 타입으로 조건가능)
+     *
+     * @param page
+     * @param size
+     * @param name
+     * @param address
+     * @param gymType
+     * @return
+     */
     public Page<GymSimpleResponse> search(int page, int size, String name, String address, GymType gymType) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Gym> gyms = gymRepository.searchGyms(name, address, gymType, pageable);
 
-
         return gyms.map(this::convertGymSimpleResponse);
     }
 
 
+    /**
+     * 사업자 본인소유 체육관 조회
+     * @param authUser
+     * @param page
+     * @param size
+     * @return Page<GymSimpleResponse>
+     */
     public Page<GymSimpleResponse> businessSearch(AuthUser authUser, int page, int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Gym> gyms = gymRepository.findByUserIdAndDeletedAtIsNull(authUser.getUserId(), pageable);
 
-        // 해당 계정으로 등록된 체육관이 없는경우
-        if(gyms.getTotalElements() == 0){
-            throw new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName());
-        }
-
         return gyms.map(this::convertGymSimpleResponse);
     }
 
-
+    /**
+     * 체육관 정보 수정
+     * @param authUser
+     * @param gymId
+     * @param gymUpdateRequest
+     * @return GymUpdateResponse
+     */
     @Transactional
     public GymUpdateResponse update(AuthUser authUser, Long gymId, GymUpdateRequest gymUpdateRequest) {
 
-        Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
+        Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 해당 체육관 사업주가 아닌경우 예외 발생
-        if (!Objects.equals(gym.getUser().getId(), authUser.getUserId())){
-            throw new CustomException(ErrorCode.NO_AUTHORITY, Gym.class.getSimpleName());
-        }
+        checkBusinessAuth(gym.getUser().getId(), authUser.getUserId());
 
         gym.update(
                 gymUpdateRequest.getUpdateName(),
@@ -107,33 +128,29 @@ public class GymService {
         );
     }
 
+
+    /**
+     * 체육관 삭제(Soft)
+     * @param authUser
+     * @param gymId
+     */
     @Transactional
     public void delete(AuthUser authUser, Long gymId) {
 
-        Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
+        Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 해당 체육관 사업주가 아닌경우 예외 발생
-        if (!Objects.equals(gym.getUser().getId(), authUser.getUserId())){
-            throw new CustomException(ErrorCode.NO_AUTHORITY); // NO_AUTHORITY도 메세지를 입력받아범용적으로 사용하도록 제안
-        }
+        checkBusinessAuth(gym.getUser().getId(), authUser.getUserId());
 
         gym.markDeleted();
-
     }
 
-    // GymSimpleResponse 객체 변환 메서드
-    private GymSimpleResponse convertGymSimpleResponse(Gym gym){
-        return new GymSimpleResponse(
-                gym.getName(),
-                gym.getAddress());
-    }
 
     public GymDetailResponse get(Long gymId) {
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
 
-        if (gym.getGymType()==GymType.PRIVATE) {
+        if (gym.getGymType() == GymType.PRIVATE) {
             return new GymDetailResponse(gym);
         } else { // public 인 경우 모임 리스트와 당날 스케줄 정보 가져오기
             // 공립 체육관의 모임 리스트 가져오기
@@ -143,5 +160,21 @@ public class GymService {
 
             return new GymDetailResponse(gym);
         }
+    }
+
+
+    // GymSimpleResponse 객체 변환 메서드
+    private GymSimpleResponse convertGymSimpleResponse(Gym gym) {
+        return new GymSimpleResponse(
+                gym.getName(),
+                gym.getAddress());
+    }
+
+
+    private void checkBusinessAuth(Long gymOwnerId, Long userId){
+        if (!Objects.equals(gymOwnerId, userId)) {
+            throw new CustomException(ErrorCode.NO_AUTHORITY);
+        }
+
     }
 }

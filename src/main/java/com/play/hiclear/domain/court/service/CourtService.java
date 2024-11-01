@@ -4,6 +4,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.dto.request.CourtCreateRequest;
+import com.play.hiclear.domain.court.dto.request.CourtUpdateRequest;
 import com.play.hiclear.domain.court.dto.response.CourtCreateResponse;
 import com.play.hiclear.domain.court.dto.response.CourtSearchResponse;
 import com.play.hiclear.domain.court.entity.Court;
@@ -14,10 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,31 +26,25 @@ public class CourtService {
     private final GymRepository gymRepository;
     private final CourtRepository courtRepository;
 
+
+    /**
+     * 코트 등록
+     * @param authUser
+     * @param gymId
+     * @param courtCreateRequest
+     * @return CourtCreateResponse
+     */
     @Transactional
     public CourtCreateResponse create(AuthUser authUser, Long gymId, CourtCreateRequest courtCreateRequest) {
 
         // 체육관 정보 불러오기
-        Gym gym = loadGym(gymId);
+        Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 체육관 소유 사업자 확인
-        checkBusinessAuth(authUser.getUserId(), gym.getUser().getId(), Court.class.getSimpleName());
-
-        // 코트 번호 자동지정
-        Long courtNum = 1L;
-        if (!gym.getCourts().isEmpty()) {
-            List<Court> courtList = gym.getCourts();
-            courtList.sort(Comparator.comparing(Court::getCourtNum));
-            for (Court court : courtList) {
-                if (Objects.equals(court.getCourtNum(), courtNum)) {
-                    courtNum++;
-                } else {
-                    break;
-                }
-            }
-        }
+        checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
         Court court = new Court(
-                courtNum,
+                courtCreateRequest.getCourtNum(),
                 courtCreateRequest.getPrice(),
                 gym
         );
@@ -65,43 +58,56 @@ public class CourtService {
     }
 
 
+    /**
+     * 해당 체육관 코트 불러오기
+     * @param authUser
+     * @param gymId
+     * @return List<CourtSearchResponse>
+     */
     public List<CourtSearchResponse> search(AuthUser authUser, Long gymId) {
 
         // 체육관 정보 불러오기
-        Gym gym = loadGym(gymId);
+        Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
+        // 해당 체육관의 코트 불러오기
         List<Court> courtList = courtRepository.findAllByGymId(gymId);
-        List<CourtSearchResponse> courtSearchResponseList = new ArrayList<>();
 
-        for (Court court : courtList) {
-            courtSearchResponseList.add(new CourtSearchResponse(
-                    court.getCourtNum(),
-                    court.getPrice(),
-                    court.getCourtStatus()
-            ));
-        }
-        courtSearchResponseList.sort(Comparator.comparing(CourtSearchResponse::getCourtNum));
-
-        return courtSearchResponseList;
+        // 불러온 코트 정보 DTO로 반환
+        return courtList.stream()
+                .map(c -> new CourtSearchResponse(
+                        c.getCourtNum(),
+                        c.getPrice(),
+                        c.getCourtStatus()
+                )).collect(Collectors.toList());
     }
 
 
+    /**
+     * 코트 정보 수정(가격 변경)
+     * @param authUser
+     * @param gymId
+     * @param courtNum
+     * @param courtUpdateRequest
+     * @return CourtCreateResponse
+     */
     @Transactional
-    public CourtCreateResponse update(AuthUser authUser, Long gymId, Long courtNum, CourtCreateRequest courtCreateRequest) {
+    public CourtCreateResponse update(AuthUser authUser, Long gymId, Long courtNum, CourtUpdateRequest courtUpdateRequest) {
 
         // 체육관 정보 불러오기
-        Gym gym = loadGym(gymId);
+        Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 체육관 소유 사업자 확인
-        checkBusinessAuth(authUser.getUserId(), gym.getUser().getId(), Court.class.getSimpleName());
+        checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
         // 코트 불러오기
-        Court court = loadCourt(courtNum, gymId);
+        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
 
+        // 코트 정보 수정
         court.update(
-                courtCreateRequest.getPrice()
+                courtUpdateRequest.getPrice()
         );
 
+        // DTO 객체 반환
         return new CourtCreateResponse(
                 court.getCourtNum(),
                 court.getPrice()
@@ -109,40 +115,33 @@ public class CourtService {
     }
 
 
+    /**
+     * 코트 삭제(Soft)
+     * @param authUser
+     * @param gymId
+     * @param courtNum
+     */
     @Transactional
     public void delete(AuthUser authUser, Long gymId, Long courtNum) {
 
         // 체육관 정보 불러오기
-        Gym gym = loadGym(gymId);
+        Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 체육관 소유 사업자 확인
-        checkBusinessAuth(authUser.getUserId(), gym.getUser().getId(), Court.class.getSimpleName());
+        checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
-        Court court = loadCourt(courtNum, gymId);
+        // 코트 정보 불러오기
+        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
 
-        courtRepository.delete(court);
+        // 코트 삭제
+        court.markDeleted();
     }
-
-
-
-    // 체육관 불러오기
-    private Gym loadGym(Long gymId) {
-        return gymRepository.findById(gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
-    }
-
 
     // 체육관 소유 사업자 확인
-    private void checkBusinessAuth(Long userId, Long gymUserId, String message) {
+    private void checkBusinessAuth(Long userId, Long gymUserId) {
         if (!userId.equals(gymUserId)) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, message);
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Gym.class.getSimpleName());
         }
-    }
-
-    // 코트 불러오기
-    private Court loadCourt(Long courtNum, Long gymId){
-        return courtRepository.findByCourtNumAndGymId(courtNum, gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Court.class.getSimpleName()));
     }
 
 }
