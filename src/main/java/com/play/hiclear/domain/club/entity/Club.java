@@ -6,6 +6,7 @@ import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Club extends TimeStamped {
     private User owner;
     @NotBlank
     private String clubname;
-    @NotBlank
+    @NotNull
     private Integer clubSize;
     private String intro;
     @NotBlank
