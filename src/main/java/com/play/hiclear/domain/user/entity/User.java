@@ -4,11 +4,13 @@ import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
+import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,9 @@ public class User extends TimeStamped {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole userRole;
+
+    @OneToMany(mappedBy = "user")
+    private List<Gym> gyms = new ArrayList<>();
 
     @OneToMany(mappedBy = "owner")
     private List<Club> clubs = new ArrayList<>();

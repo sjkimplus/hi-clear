@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.court.entity;
 
+import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.gym.entity.Gym;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "courts")
-public class Court {
+public class Court extends TimeStamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +22,7 @@ public class Court {
 
     private int price;
 
-    private Boolean courtStatus = true; // 코트 활성화 여부(OPEN, CLOSE)
+    private Boolean courtStatus = true; // 코트 활성화 여부(true = OPEN, false = CLOSE)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gym_id", nullable = false)

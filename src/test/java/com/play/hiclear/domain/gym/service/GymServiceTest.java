@@ -142,7 +142,7 @@ class GymServiceTest {
     void update_success() {
         // given
         Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
-        when(gymRepository.findById(1L)).thenReturn(Optional.of(gym));
+        when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
         GymUpdateRequest gymUpdateRequest = new GymUpdateRequest("수정체육관", "수정설명", "수정주소");
         // when
         GymUpdateResponse result = gymService.update(authUser, 1L, gymUpdateRequest);
@@ -160,7 +160,7 @@ class GymServiceTest {
         AuthUser authUser2 = new AuthUser(2L, "사업자2", "test2@gmail.com", UserRole.BUSINESS);
         Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
         GymUpdateRequest gymUpdateRequest = new GymUpdateRequest("수정체육관", "수정설명", "수정주소");
-        when(gymRepository.findById(1L)).thenReturn(Optional.of(gym));
+        when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
 
         // when && then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -173,7 +173,7 @@ class GymServiceTest {
     void delete_success() {
         // given
         Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
-        when(gymRepository.findById(1L)).thenReturn(Optional.of(gym));
+        when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
 
         // when
         gymService.delete(authUser, 1L);
@@ -189,7 +189,7 @@ class GymServiceTest {
         // given
         AuthUser authUser2 = new AuthUser(2L, "사업자2", "test2@gmail.com", UserRole.BUSINESS);
         Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
-        when(gymRepository.findById(1L)).thenReturn(Optional.of(gym));
+        when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
 
         // when && then
         CustomException exception = assertThrows(CustomException.class, () -> {
