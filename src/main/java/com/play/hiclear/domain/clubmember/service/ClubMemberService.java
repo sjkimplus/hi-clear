@@ -108,8 +108,7 @@ public class ClubMemberService {
         checkPassword(clubMemberExpelRequest.getPassword(), user.getPassword());
 
         // 추방할 유저 조회
-        User expelUser = userRepository.findByEmail(clubMemberExpelRequest.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
+        User expelUser = userRepository.findByEmailAndDeletedAtIsNullOrThrow(clubMemberExpelRequest.getEmail());
 
         if (user.getId().equals(expelUser.getId())) {
             throw new CustomException(ErrorCode.CLUBMEMBER_NOT_EXPEL_ONESELF);
@@ -147,8 +146,7 @@ public class ClubMemberService {
         }
 
         // 권한 변경을 할 유저
-        User changeUser = userRepository.findByEmail(clubMemberChangeRoleRequest.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
+        User changeUser = userRepository.findByEmailAndDeletedAtIsNullOrThrow(clubMemberChangeRoleRequest.getEmail());
         ClubMember changeMember = findClubMemberByUserIdAndClubId(changeUser.getId(), club.getId());
 
         changeMember.change(clubMemberChangeRoleRequest.getRole());
