@@ -68,20 +68,18 @@ public class ThreadService {
 
     // User 조회
     private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
     }
 
     // Comment 조회
     private Comment findCommentById(Long commentId) {
-        return commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName()));
+        return commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
+
     }
 
     // Thread 조회
     private Thread findThreadById(Long threadId) {
-        return threadRepository.findById(threadId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Thread.class.getSimpleName()));
+        return threadRepository.findByIdAndDeletedAtIsNullOrThrow(threadId);
     }
 
     // 비밀번호 확인

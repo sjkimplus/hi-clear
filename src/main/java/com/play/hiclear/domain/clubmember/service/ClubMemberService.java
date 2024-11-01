@@ -156,14 +156,12 @@ public class ClubMemberService {
 
     // User 조회
     private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
     }
 
     // 모임 조회
     private Club findClubById(Long clubId) {
-        return clubRepository.findByIdAndDeletedAtIsNull(clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
+        return clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
     }
 
     // 모임 멤버 조회

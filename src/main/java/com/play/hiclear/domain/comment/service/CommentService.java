@@ -96,8 +96,7 @@ public class CommentService {
 
     // User 조회
     private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
     }
 
     // Board 조회
@@ -108,8 +107,7 @@ public class CommentService {
 
     // Comment 조회
     private Comment findCommentById(Long commentId) {
-        return commentRepository.findByIdAndDeletedAtIsNull(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Comment.class.getSimpleName()));
+        return commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
     }
 
     // 비밀번호 확인
