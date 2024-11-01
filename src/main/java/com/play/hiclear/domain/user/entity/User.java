@@ -34,6 +34,8 @@ public class User extends TimeStamped {
 
     private String region;
 
+    private String imgUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Ranks selfRank;
@@ -86,5 +88,9 @@ public class User extends TimeStamped {
         if(selfRank != null){
             this.selfRank = Ranks.of(selfRank);
         }
+    }
+
+    public void updateImage(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 }

@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,5 +47,21 @@ public class UserController {
             @RequestBody UserUpdateRequest request
     ){
         return ResponseEntity.ok(userService.update(authUser, request));
+    }
+
+    // 유저 프로필 사진 등록
+    @PostMapping("/v1/users/images")
+    public ResponseEntity<String> updateImage(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam("image") MultipartFile image) {
+        return ResponseEntity.ok(userService.updateImage(authUser, image));
+    }
+
+    // 유저 프로필 사진 등록
+    @DeleteMapping("/v1/users/images")
+    public ResponseEntity<String> deleteImage(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam String fileName) {
+        return ResponseEntity.ok(userService.delete(authUser, fileName));
     }
 }

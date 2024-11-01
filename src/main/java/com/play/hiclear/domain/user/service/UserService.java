@@ -2,6 +2,7 @@ package com.play.hiclear.domain.user.service;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.service.AwsS3Service;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.dto.response.UserDetailResponse;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AwsS3Service s3Service;
 
     public Page<UserSimpleResponse> search(int page, int size) {
 
@@ -77,5 +80,28 @@ public class UserService {
                 user.getRegion(),
                 user.getSelfRank()
         );
+    }
+
+    @Transactional
+    public String updateImage(AuthUser authUser, MultipartFile image) {
+
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
+        user.updateImage(s3Service.uploadFile(image));
+
+        return "프로필 사진 변경 완료";
+    }
+
+
+    @Transactional
+    public String delete(AuthUser authUser, String fileName) {
+
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
+        s3Service.deleteFile(fileName);
+
+        user.updateImage(null);
+
+        return "프로필 사진 삭제 완료";
     }
 }
