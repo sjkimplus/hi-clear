@@ -113,7 +113,7 @@ public class GymService {
         Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 해당 체육관 사업주가 아닌경우 예외 발생
-        checkBusinessAuth(gym.getUser().getId(), authUser.getUserId());
+        checkBusinessAuth(gym.getUser(), authUser);
 
         gym.update(
                 gymUpdateRequest.getUpdateName(),
@@ -140,7 +140,7 @@ public class GymService {
         Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 해당 체육관 사업주가 아닌경우 예외 발생
-        checkBusinessAuth(gym.getUser().getId(), authUser.getUserId());
+        checkBusinessAuth(gym.getUser(), authUser);
 
         gym.markDeleted();
     }
@@ -171,8 +171,8 @@ public class GymService {
     }
 
 
-    private void checkBusinessAuth(Long gymOwnerId, Long userId){
-        if (!Objects.equals(gymOwnerId, userId)) {
+    private void checkBusinessAuth(User ownUser, AuthUser requestUser){
+        if (!Objects.equals(ownUser.getId(), requestUser.getUserId())) {
             throw new CustomException(ErrorCode.NO_AUTHORITY);
         }
 

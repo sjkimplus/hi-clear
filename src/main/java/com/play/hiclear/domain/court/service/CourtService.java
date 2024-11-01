@@ -70,7 +70,7 @@ public class CourtService {
         Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
 
         // 해당 체육관의 코트 불러오기
-        List<Court> courtList = courtRepository.findAllByGymId(gymId);
+        List<Court> courtList = courtRepository.findAllByGymId(gym.getId());
 
         // 불러온 코트 정보 DTO로 반환
         return courtList.stream()
@@ -100,7 +100,7 @@ public class CourtService {
         checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
         // 코트 불러오기
-        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
+        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gym.getId());
 
         // 코트 정보 수정
         court.update(
@@ -131,7 +131,7 @@ public class CourtService {
         checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
         // 코트 정보 불러오기
-        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
+        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gym.getId());
 
         // 코트 삭제
         court.markDeleted();
