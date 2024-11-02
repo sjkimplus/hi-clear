@@ -96,7 +96,7 @@ public class ReservationService {
         log.info("예약 조회 요청 - 예약 ID: {}, 사용자: {}", reservationId, authUser.getEmail());
 
         User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
-        Reservation reservation = reservationRepository.findByIdOrThrow(reservationId);
+        Reservation reservation = reservationRepository.findByIdAndDeletedAtIsNullOrThrow(reservationId);
 
         // 사용자가 예약 소유자이거나 코트의 사장님인지 확인
         checkReservationAuthority(reservation, user);
@@ -128,10 +128,10 @@ public class ReservationService {
         if (user.getUserRole() == UserRole.BUSINESS) {
             Gym gym = gymRepository.findByUserAndDeletedAtIsNullOrThrow(user);
             // 코트 소유자는 자신이 소속된 모든 코트의 예약을 조회
-            reservations = reservationRepository.findByGymUser(gym.getUser(), courtId, status, date, pageable);
+            reservations = reservationRepository.findByGymUserAndDeletedAtIsNull(gym.getUser(), courtId, status, date, pageable);
         } else {
             // 일반 사용자는 자신의 예약만 조회
-            reservations = reservationRepository.findByUserAndCriteria(user, courtId, status, date, pageable);
+            reservations = reservationRepository.findByUserAndCriteriaAndDeletedAtIsNull(user, courtId, status, date, pageable);
         }
 
         log.info("예약 목록 조회 완료 - 예약 수: {}", reservations.getTotalElements());
@@ -152,7 +152,7 @@ public class ReservationService {
         User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
         Reservation reservation = reservationRepository.findByIdAndUserOrThrow(reservationId, user);
 
-        // 현재 예약이 이미 수락/취소/거절됬는지 확인
+        // 현재 예약이 이미 수락/삭제/거절됬는지 확인
         checkStatus(reservation);
 
         // 현재 예약의 시간 슬롯과 날짜
@@ -188,13 +188,13 @@ public class ReservationService {
     }
 
     /**
-     * 예약 취소
+     * 예약 삭제
      * @param reservationId
      * @param authUser
      */
     @Transactional
     public void delete(Long reservationId, AuthUser authUser) {
-        log.info("예약 취소 요청 - 예약 ID: {}, 사용자: {}", reservationId, authUser.getEmail());
+        log.info("예약 삭제 요청 - 예약 ID: {}, 사용자: {}", reservationId, authUser.getEmail());
 
         User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
         Reservation reservation = reservationRepository.findByIdAndUserOrThrow(reservationId, user);
@@ -203,16 +203,16 @@ public class ReservationService {
 
         switch (reservation.getStatus()) {
             case PENDING -> {
-                // PENDING 상태에서는 예약 취소 가능
-                cancelReservation(reservation);
-                log.info("예약 취소 완료 - 예약 ID: {}", reservationId);
+                // PENDING 상태에서는 예약 삭제 가능
+                deleteReservation(reservation);
+                log.info("예약 삭제 완료 - 예약 ID: {}", reservationId);
             }
             case ACCEPTED -> {
                 // ACCEPTED 상태일 때 24시간 이내 여부 체크
                 checkCancellationTimeLimit(reservationDateTime);
-                // 예약 취소
-                cancelReservation(reservation);
-                log.info("예약 취소 완료 - 예약 ID: {}", reservationId);
+                // 예약 삭제
+                deleteReservation(reservation);
+                log.info("예약 삭제 완료 - 예약 ID: {}", reservationId);
             }
             case REJECTED, CANCELED -> {
                 throw new CustomException(ErrorCode.RESERVATION_CANT_ACCEPTED);
@@ -236,7 +236,7 @@ public class ReservationService {
         User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
         Reservation reservation = reservationRepository.findByIdAndCourt_Gym_User_OrThrow(reservationId, user);
 
-        // 현재 예약이 이미 취소되었는지 확인
+        // 현재 예약이 이미 삭제되었는지 확인
         checkCancellationEligibility(reservation);
 
         ReservationStatus newStatus = ReservationStatus.of(request.getStatus());
@@ -290,7 +290,7 @@ public class ReservationService {
         }
     }
 
-    // 현재 예약이 이미 수락/취소/거절됬는지 확인
+    // 현재 예약이 이미 수락/삭제/거절됬는지 확인
     private void checkStatus(Reservation reservation) {
         if (reservation.getStatus() == ReservationStatus.ACCEPTED ||
                 reservation.getStatus() == ReservationStatus.CANCELED ||
@@ -299,15 +299,15 @@ public class ReservationService {
         }
     }
 
-    // 현재 예약이 이미 취소되었는지 확인
+    // 현재 예약이 이미 삭제되었는지 확인
     private void checkCancellationEligibility(Reservation reservation) {
         if (reservation.getStatus() == ReservationStatus.CANCELED) {
             throw new CustomException(ErrorCode.RESERVATION_CANT_ACCEPTED);
         }
     }
 
-    // 예약 취소하기
-    private void cancelReservation(Reservation reservation) {
+    // 예약 삭제하기
+    private void deleteReservation(Reservation reservation) {
         reservation.updateStatus(ReservationStatus.CANCELED);
         reservation.markDeleted();
     }

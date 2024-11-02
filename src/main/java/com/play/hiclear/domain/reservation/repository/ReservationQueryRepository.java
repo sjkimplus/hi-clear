@@ -13,18 +13,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReservationQueryRepository {
-    List<Reservation> findByUserWithDetails(User user);
-
     List<Reservation> findByTimeSlotIdInAndStatusIn(List<Long> timeSlotIds, List<ReservationStatus> pending);
 
     List<Reservation> findByCourtAndDateAndTimeSlotIn(Court newCourt, LocalDate date, List<TimeSlot> newTimeSlot);
 
     Optional<Reservation> findByIdAndUser(Long reservationId, User user);
 
-    Page<Reservation> findByGymUser(User user, Long courtId, ReservationStatus status,
+    Page<Reservation> findByGymUserAndDeletedAtIsNull(User user, Long courtId, ReservationStatus status,
                                     LocalDate date, Pageable pageable);
 
-    Page<Reservation> findByUserAndCriteria(User user, Long courtId, ReservationStatus status,
+    Page<Reservation> findByUserAndCriteriaAndDeletedAtIsNull(User user, Long courtId, ReservationStatus status,
                                             LocalDate date, Pageable pageable);
 
     List<Reservation> findByTimeSlotIdInAndStatusInAndDate(List<Long> timeSlotIds, List<ReservationStatus> pending, LocalDate date);

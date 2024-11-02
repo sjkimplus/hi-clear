@@ -27,17 +27,6 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Reservation> findByUserWithDetails(User user) {
-        QReservation reservation = QReservation.reservation;
-
-        return queryFactory.selectFrom(reservation)
-                .innerJoin(reservation.court).fetchJoin()
-                .innerJoin(reservation.timeSlot).fetchJoin()
-                .where(reservation.user.eq(user))
-                .fetch();
-    }
-
-    @Override
     public List<Reservation> findByTimeSlotIdInAndStatusIn(List<Long> timeSlotIds, List<ReservationStatus> statuses) {
         QReservation reservation = QReservation.reservation;
 
@@ -73,14 +62,15 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
     }
 
     @Override
-    public Page<Reservation> findByGymUser(User user, Long courtId, ReservationStatus status,
+    public Page<Reservation> findByGymUserAndDeletedAtIsNull(User user, Long courtId, ReservationStatus status,
                                            LocalDate date,
                                            Pageable pageable) {
         QReservation reservation = QReservation.reservation;
         QCourt court = QCourt.court;
         QGym gym = QGym.gym;
 
-        BooleanExpression predicate = gym.user.eq(user);
+        BooleanExpression predicate = gym.user.eq(user)
+                .and(reservation.deletedAt.isNull());
 
         if (courtId != null) {
             predicate = predicate.and(reservation.court.id.eq(courtId));
@@ -112,13 +102,14 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
     }
 
     @Override
-    public Page<Reservation> findByUserAndCriteria(User user, Long courtId, ReservationStatus status,
+    public Page<Reservation> findByUserAndCriteriaAndDeletedAtIsNull(User user, Long courtId, ReservationStatus status,
                                                    LocalDate date,
                                                    Pageable pageable) {
         QReservation reservation = QReservation.reservation;
         QCourt court = QCourt.court;
 
-        BooleanExpression predicate = reservation.user.eq(user);
+        BooleanExpression predicate = reservation.user.eq(user)
+                .and(reservation.deletedAt.isNull());
 
         if (courtId != null) {
             predicate = predicate.and(reservation.court.id.eq(courtId));

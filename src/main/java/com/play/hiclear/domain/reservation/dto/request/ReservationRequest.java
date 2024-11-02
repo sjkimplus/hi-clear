@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.reservation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,11 +11,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ReservationRequest {
-    @NotBlank
+    @NotNull
     private List<Long> timeList;
-    @NotBlank
+    @NotNull
     private Long courtId;
-    @NotBlank
+    @NotNull
     private LocalDate date;
 
     public ReservationRequest(List<Long> timeList, Long courtId, LocalDate date) {

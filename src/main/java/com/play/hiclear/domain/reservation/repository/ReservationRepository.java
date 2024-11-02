@@ -23,8 +23,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             "WHERE r.id = :reservationId AND g.user = :user")
     Optional<Reservation> findByIdAndCourt_Gym_User(Long reservationId, User user);
 
-    default Reservation findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Reservation.class.getSimpleName()));
+    Optional<Reservation> findByIdAndDeletedAtIsNull(Long reservationId);
+
+    default Reservation findByIdAndDeletedAtIsNullOrThrow(Long id) {
+        return findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Reservation.class.getSimpleName()));
     }
 
     default Reservation findByIdAndCourt_Gym_User_OrThrow(Long reservationId, User user) {

@@ -43,6 +43,7 @@ public class ReservationController {
         return reservationService.get(reservationId, authUser);
     }
 
+    // 예약 목록 조회(다건)
     @GetMapping("/v1/reservations")
     public Page<ReservationSearchResponse> search(
             @AuthenticationPrincipal AuthUser authUser,
@@ -65,13 +66,12 @@ public class ReservationController {
         return reservationService.update(reservationId, authUser, request);
     }
 
-    // 예약 취소
+    // 예약 삭제
     @DeleteMapping("/v1/reservations/{reservationId}")
     public ResponseEntity<String> delete(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal AuthUser authUser) {
 
-        // 예약 취소 서비스 호출
         reservationService.delete(reservationId, authUser);
 
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, Reservation.class.getSimpleName()));

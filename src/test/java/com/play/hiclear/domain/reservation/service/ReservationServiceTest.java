@@ -177,7 +177,7 @@ class ReservationServiceTest {
         AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
 
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
-        when(reservationRepository.findByIdOrThrow(reservation.getId())).thenReturn(reservation);
+        when(reservationRepository.findByIdAndDeletedAtIsNullOrThrow(reservation.getId())).thenReturn(reservation);
 
         // When
         ReservationSearchDetailResponse result = reservationService.get(reservation.getId(), authUser);
@@ -207,7 +207,7 @@ class ReservationServiceTest {
 
         // 예약이 존재하지 않도록 설정
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
-        when(reservationRepository.findByIdOrThrow(reservation.getId())).thenThrow(new CustomException(ErrorCode.NOT_FOUND, Reservation.class.getSimpleName()));
+        when(reservationRepository.findByIdAndDeletedAtIsNullOrThrow(reservation.getId())).thenThrow(new CustomException(ErrorCode.NOT_FOUND, Reservation.class.getSimpleName()));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -227,7 +227,7 @@ class ReservationServiceTest {
 
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
         when(gymRepository.findByUserAndDeletedAtIsNullOrThrow(admin)).thenReturn(gym);
-        when(reservationRepository.findByGymUser(eq(gym.getUser()), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
+        when(reservationRepository.findByGymUserAndDeletedAtIsNull(eq(gym.getUser()), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
 
         // When
         Page<ReservationSearchResponse> result = reservationService.search(authUser, 1, 10, null, null, null);
@@ -247,7 +247,7 @@ class ReservationServiceTest {
         Page<Reservation> page = new PageImpl<>(reservations);
 
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
-        when(reservationRepository.findByUserAndCriteria(eq(user), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
+        when(reservationRepository.findByUserAndCriteriaAndDeletedAtIsNull(eq(user), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
 
         // When
         Page<ReservationSearchResponse> result = reservationService.search(authUser, 1, 10, null, null, null);
@@ -278,7 +278,7 @@ class ReservationServiceTest {
         Page<Reservation> page = new PageImpl<>(Collections.emptyList());
 
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
-        when(reservationRepository.findByUserAndCriteria(eq(user), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
+        when(reservationRepository.findByUserAndCriteriaAndDeletedAtIsNull(eq(user), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
 
         // When
         Page<ReservationSearchResponse> result = reservationService.search(authUser, 1, 10, null, null, null);
@@ -433,7 +433,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void deleteReservation_fail_time_is_already_passed() {
+    void delete_fail_time_is_already_passed() {
         // Given
         reservation.updateStatus(ReservationStatus.ACCEPTED);
 
@@ -451,7 +451,7 @@ class ReservationServiceTest {
 
     // 예약 상태 변경 성공 테스트 케이스
     @Test
-    void changeReservationStatus_fail_userNotFound() {
+    void change_fail_userNotFound() {
         // Given: 사용자를 찾을 수 없도록 설정
         AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
@@ -467,7 +467,7 @@ class ReservationServiceTest {
 
     // 예약 상태 변경 실패 테스트 케이스
     @Test
-    void changeReservationStatus_fail_reservationNotFound() {
+    void change_fail_reservationNotFound() {
         // Given: 사용자 정보와 함께 예약 ID를 찾을 수 없도록 설정
         AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
@@ -483,7 +483,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void changeReservationStatus_fail_notAuthorized() {
+    void change_fail_notAuthorized() {
         // Given
         User otherUser = new User("Other", "other@example.com", "인천", RANK_C, UserRole.USER);
 
@@ -501,7 +501,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void changeReservationStatus_fail_alreadyCanceled() {
+    void change_fail_alreadyCanceled() {
         // Given: 예약 상태를 CANCELED로 설정
         reservation.updateStatus(ReservationStatus.CANCELED);
         AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
