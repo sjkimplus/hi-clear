@@ -15,6 +15,8 @@ public enum SuccessMessage {
     CLUBMEMBER_CHANGE_ROLE("권한을 변경했습니다."),
 
 
+    RESERVATION_ACCEPTED("사장님이 예약을 수락했습니다."),
+    RESERVATION_REJECTED("사장님이 예약을 거절했습니다."),
 
 
     // 기본 코드

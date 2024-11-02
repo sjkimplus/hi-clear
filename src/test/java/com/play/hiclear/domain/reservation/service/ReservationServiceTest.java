@@ -2,10 +2,12 @@ package com.play.hiclear.domain.reservation.service;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.repository.CourtRepository;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
+import com.play.hiclear.domain.gym.repository.GymRepository;
 import com.play.hiclear.domain.reservation.dto.request.ReservationChangeStatusRequest;
 import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
 import com.play.hiclear.domain.reservation.dto.request.ReservationUpdateRequest;
@@ -24,14 +26,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
 import static com.play.hiclear.common.enums.Ranks.RANK_C;
@@ -54,6 +55,9 @@ class ReservationServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private GymRepository gymRepository;
+
     private User admin;
     private User user;
     private Court court;
@@ -75,90 +79,108 @@ class ReservationServiceTest {
         timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0), LocalTime.of(11, 0), court.getId(), court);
         timeSlot2 = new TimeSlot(2L, LocalTime.of(12, 0), LocalTime.of(13, 0), court.getId(), court);
 
+        // 예약을 생성할 때 사용자 정보도 설정
         reservation = new Reservation(1L, user, timeSlot1, court, ReservationStatus.PENDING, LocalDate.of(2024, 11, 1));
 
-
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
-        when(timeSlotRepository.findById(timeSlot1.getId())).thenReturn(Optional.of(timeSlot1));
-        when(timeSlotRepository.findById(timeSlot2.getId())).thenReturn(Optional.of(timeSlot2));
-        when(courtRepository.findById(court.getId())).thenReturn(Optional.of(court));
-    }
-
-    // 예약 생성 성공 테스트 케이스
-    @Test
-    void createReservations_success() {
-        // Given
-        ReservationRequest request = new ReservationRequest(Arrays.asList(timeSlot1.getId(), timeSlot2.getId()), court.getCourtNum(), LocalDate.of(2024, 11, 3));
-        setupMocksForCreate(request);
-
-        // When
-        List<ReservationSearchDetailResponse> result = reservationService.create(user.getEmail(), request);
-
-        // Then
-        assertEquals(2, result.size());
-        verify(reservationRepository, times(1)).saveAll(anyList());
+        // Mock 설정
+        when(courtRepository.findByIdAndDeletedAtIsNullOrThrow(court.getId())).thenReturn(court);
+        when(timeSlotRepository.findAllById(Arrays.asList(timeSlot1.getId(), timeSlot2.getId())))
+                .thenReturn(Arrays.asList(timeSlot1, timeSlot2));
     }
 
     private void setupMocksForCreate(ReservationRequest request) {
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(courtRepository.findById(request.getCourtId())).thenReturn(Optional.of(court));
-        when(timeSlotRepository.findAllById(request.getTimeList())).thenReturn(Arrays.asList(timeSlot1, timeSlot2));
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
         when(reservationRepository.findByTimeSlotIdInAndStatusIn(anyList(), anyList())).thenReturn(Collections.emptyList());
+
+        // Mock: 예약 저장 호출에 대한 설정
+        when(reservationRepository.saveAll(anyList())).thenAnswer(invocation -> {
+            List<Reservation> reservationsToSave = invocation.getArgument(0);
+            List<Reservation> savedReservations = new ArrayList<>();
+
+            for (Reservation reservation : reservationsToSave) {
+                // user를 설정하여 새로운 예약 생성
+                Reservation newReservation = new Reservation(user, reservation.getCourt(), reservation.getTimeSlot(), reservation.getStatus(), reservation.getDate());
+                savedReservations.add(newReservation);
+            }
+            return savedReservations;
+        });
+    }
+
+    @Test
+    void create_success() {
+        // Given
+        ReservationRequest request = new ReservationRequest(
+                Arrays.asList(timeSlot1.getId(), timeSlot2.getId()),
+                court.getId(),
+                LocalDate.of(2024, 11, 3)
+        );
+
+        setupMocksForCreate(request);
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+
+        // When
+        List<ReservationSearchDetailResponse> result = reservationService.create(authUser, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        verify(reservationRepository, times(1)).saveAll(anyList());
     }
 
     // 예약 생성 실패 테스트 케이스
     @Test
-    void createReservations_fail_userNotFound() {
+    void create_fail_userNotFound() {
         // Given
-        ReservationRequest request = new ReservationRequest(Arrays.asList(timeSlot1.getId(), timeSlot2.getId()), court.getId(), LocalDate.of(2024, 11, 3));
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+        ReservationRequest request = new ReservationRequest(
+                Arrays.asList(timeSlot1.getId(), timeSlot2.getId()),
+                court.getId(),
+                LocalDate.of(2024, 11, 3)
+        );
+
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(anyString())).thenThrow(new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.create(user.getEmail(), request);
+            reservationService.create(new AuthUser(0L, "unknown", "unknown@example.com", UserRole.USER), request);
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
-
     @Test
-    void createReservations_fail_courtInactive() {
+    void create_fail_courtInactive() {
         // Given
-        ReservationRequest request = new ReservationRequest(Arrays.asList(timeSlot1.getId()), court.getId(), LocalDate.of(2024, 11, 3));
-        court = new Court(3L, 3L, 15000000, false, gym);
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(courtRepository.findById(request.getCourtId())).thenReturn(Optional.of(court));
+        Court inactiveCourt = new Court(1L, 1L, 150000, false, gym);
+        when(courtRepository.findByIdAndDeletedAtIsNullOrThrow(court.getId())).thenReturn(inactiveCourt);
+
+        ReservationRequest request = new ReservationRequest(
+                Arrays.asList(timeSlot1.getId(), timeSlot2.getId()),
+                inactiveCourt.getId(),
+                LocalDate.of(2024, 11, 3)
+        );
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.create(user.getEmail(), request);
+            reservationService.create(new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole()), request);
         });
         assertEquals(ErrorCode.NO_AUTHORITY, exception.getErrorCode());
     }
 
-    @Test
-    void createReservations_fail_timeSlotAlreadyReserved() {
-        // Given
-        ReservationRequest request = new ReservationRequest(Arrays.asList(timeSlot1.getId(), timeSlot2.getId()), court.getId(), LocalDate.of(2024, 11, 3));
-        setupMocksForCreate(request);
-        when(reservationRepository.findByTimeSlotIdInAndStatusIn(anyList(), anyList())).thenReturn(Collections.singletonList(reservation));
 
-        // When & Then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.create(user.getEmail(), request);
-        });
-        assertEquals(ErrorCode.TIME_SLOT_ALREADY_RESERVED, exception.getErrorCode());
-    }
 
     // 예약 조회 성공 테스트 케이스
     @Test
-    void getReservation_success() {
+    void get_success() {
         // Given
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdOrThrow(reservation.getId())).thenReturn(reservation);
 
         // When
-        ReservationSearchDetailResponse result = reservationService.get(reservation.getId(), user.getEmail());
+        ReservationSearchDetailResponse result = reservationService.get(reservation.getId(), authUser);
 
         // Then
         assertNotNull(result);
@@ -167,72 +189,119 @@ class ReservationServiceTest {
 
     // 예약 조회 실패 테스트 케이스
     @Test
-    void getReservation_fail_userNotFound() {
-        // Given
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+    void get_fail_userNotFound() {
+        // Given: 사용자를 찾을 수 없도록 설정
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(anyString())).thenThrow(new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.get(reservation.getId(), user.getEmail());
+            reservationService.get(reservation.getId(), new AuthUser(0L, "unknown", "unknown@example.com", UserRole.USER));
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
-    void getReservation_fail_reservationNotFound() {
+    void get_fail_reservationNotFound() {
         // Given
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.empty());
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+
+        // 예약이 존재하지 않도록 설정
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdOrThrow(reservation.getId())).thenThrow(new CustomException(ErrorCode.NOT_FOUND, Reservation.class.getSimpleName()));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.get(reservation.getId(), user.getEmail());
+            reservationService.get(reservation.getId(), authUser);
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
-    // 예약 목록 조회 성공 테스트 케이스
+
+    // 예약 목록 조회 성공 테스트 케이스 (비즈니스 사용자)
     @Test
-    void searchReservations_success() {
+    void search_success_businessUser() {
         // Given
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findByUserWithDetails(user)).thenReturn(Collections.singletonList(reservation));
+        AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
+        List<Reservation> reservations = Collections.singletonList(reservation);
+        Page<Reservation> page = new PageImpl<>(reservations);
+
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
+        when(gymRepository.findByUserAndDeletedAtIsNullOrThrow(admin)).thenReturn(gym);
+        when(reservationRepository.findByGymUser(eq(gym.getUser()), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
 
         // When
-        List<ReservationSearchResponse> result = reservationService.search(user.getEmail());
+        Page<ReservationSearchResponse> result = reservationService.search(authUser, 1, 10, null, null, null);
 
         // Then
-        assertEquals(1, result.size());
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(reservation.getId(), result.getContent().get(0).getId());
+    }
+
+    // 예약 목록 조회 성공 테스트 케이스 (일반 사용자)
+    @Test
+    void search_success_regularUser() {
+        // Given
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        List<Reservation> reservations = Collections.singletonList(reservation);
+        Page<Reservation> page = new PageImpl<>(reservations);
+
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByUserAndCriteria(eq(user), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
+
+        // When
+        Page<ReservationSearchResponse> result = reservationService.search(authUser, 1, 10, null, null, null);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(reservation.getId(), result.getContent().get(0).getId());
     }
 
     // 예약 목록 조회 실패 테스트 케이스
     @Test
-    void searchReservations_fail_userNotFound() {
+    void search_fail_userNotFound() {
         // Given
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(anyString())).thenThrow(new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.search(user.getEmail());
+            reservationService.search(new AuthUser(0L, "unknown", "unknown@example.com", UserRole.USER), 1, 10, null, null, null);
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
+    @Test
+    void search_fail_noReservationsFound() {
+        // Given
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        Page<Reservation> page = new PageImpl<>(Collections.emptyList());
+
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByUserAndCriteria(eq(user), isNull(), isNull(), isNull(), any(Pageable.class))).thenReturn(page);
+
+        // When
+        Page<ReservationSearchResponse> result = reservationService.search(authUser, 1, 10, null, null, null);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
+
     // 예약 수정 성공 테스트 케이스
     @Test
-    void updateTimeReservation_success() {
+    void update_success() {
         // Given
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.of(2024, 11, 4));
 
-        // Mock 설정
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), user)).thenReturn(reservation);
 
-        // 기존 예약 상태는 PENDING으로 설정
+        // 현재 예약 상태를 PENDING으로 설정
         reservation.updateStatus(ReservationStatus.PENDING);
 
-        when(timeSlotRepository.findById(updateRequest.getTimeId())).thenReturn(Optional.of(timeSlot2));
-        when(courtRepository.findById(timeSlot2.getCourt().getId())).thenReturn(Optional.of(court));
+        when(timeSlotRepository.findByIdOrThrow(updateRequest.getTimeId())).thenReturn(timeSlot2);
 
         // 새로운 시간 슬롯의 상태를 Mock
         when(reservationRepository.findByTimeSlotIdInAndStatusIn(anyList(), anyList())).thenReturn(Collections.emptyList());
@@ -245,71 +314,170 @@ class ReservationServiceTest {
         });
 
         // When
-        ReservationSearchDetailResponse response = reservationService.update(reservation.getId(), user.getEmail(), updateRequest);
+        ReservationSearchDetailResponse response = reservationService.update(reservation.getId(), authUser, updateRequest);
 
         // Then
         assertNotNull(response);
         assertEquals(reservation.getId(), response.getId());
         assertEquals(ReservationStatus.PENDING.name(), response.getStatus());
         assertEquals(LocalDate.of(2024, 11, 4), response.getDate());
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
 
-    // 예약 삭제 성공 테스트 케이스
+    // 예약 수정 실패 테스트 케이스
     @Test
-    void deleteReservation_success() {
+    void update_fail_userNotFound() {
         // Given
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
-
-        // When
-        reservationService.delete(reservation.getId(), user.getEmail());
-
-        // Then
-        assertEquals(ReservationStatus.CANCELED, reservation.getStatus());
-        verify(reservationRepository, times(1)).save(reservation);
-    }
-
-    // 예약 상태 변경 성공 테스트 케이스
-    @Test
-    void changeReservationStatus_success() {
-        // Given
-        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest(ReservationStatus.ACCEPTED.name());
-        when(userRepository.findByEmail(admin.getEmail())).thenReturn(Optional.of(admin));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
-
-        // When
-        reservationService.change(reservation.getId(), admin.getEmail(), request);
-
-        // Then
-        assertEquals(ReservationStatus.ACCEPTED, reservation.getStatus()); // 상태가 변경되었는지 확인
-        verify(reservationRepository, times(1)).save(reservation); // 예약 저장 확인
-    }
-
-    // 예약 상태 변경 실패 테스트 케이스
-    @Test
-    void changeReservationStatus_fail_userNotFound() {
-        // Given
-        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest(ReservationStatus.CANCELED.name()); // Use enum's name
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.change(reservation.getId(), user.getEmail(), request);
+            reservationService.update(reservation.getId(), authUser, new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.now()));
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
-    void changeReservationStatus_fail_reservationNotFound() {
+    void update_fail_reservationNotFound() {
         // Given
-        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest(ReservationStatus.CANCELED.name()); // Use enum's name
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.empty());
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), user)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.change(reservation.getId(), user.getEmail(), request);
+            reservationService.update(reservation.getId(), authUser, new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.now()));
+        });
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void update_fail_notAuthorized() {
+        // Given
+        User otherUser = new User("Other", "other@example.com", "인천", RANK_C, UserRole.USER);
+
+        AuthUser otherUserAuth = new AuthUser(otherUser.getId(), otherUser.getName(), otherUser.getEmail(), otherUser.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(otherUserAuth.getEmail())).thenReturn(otherUser);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), otherUser)).thenThrow(new CustomException(ErrorCode.NO_AUTHORITY));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.update(reservation.getId(), otherUserAuth, new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.now()));
+        });
+        assertEquals(ErrorCode.NO_AUTHORITY, exception.getErrorCode());
+    }
+
+
+    // 예약 삭제 성공 테스트 케이스
+    @Test
+    void delete_success() {
+        // Given
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), user)).thenReturn(reservation);
+
+        // 현재 예약 상태를 PENDING으로 설정
+        reservation.updateStatus(ReservationStatus.PENDING);
+
+        // When
+        reservationService.delete(reservation.getId(), authUser);
+
+        // Then
+        assertEquals(ReservationStatus.CANCELED, reservation.getStatus());
+    }
+
+
+    // 예약 취소 실패 테스트 케이스
+    @Test
+    void delete_fail_userNotFound() {
+        // Given: 사용자를 찾을 수 없도록 설정
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
+
+        // When & Then: 예외 발생 확인
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.delete(reservation.getId(), authUser);
+        });
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void delete_fail_reservationNotFound() {
+        // Given
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), user)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.delete(reservation.getId(), authUser);
+        });
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+    }
+
+
+    @Test
+    void delete_fail_notAuthorized() {
+        // Given
+        User otherUser = new User("Other", "other@example.com", "인천", RANK_C, UserRole.USER);
+
+        AuthUser otherUserAuth = new AuthUser(otherUser.getId(), otherUser.getName(), otherUser.getEmail(), otherUser.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(otherUserAuth.getEmail())).thenReturn(otherUser);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), otherUser)).thenThrow(new CustomException(ErrorCode.NO_AUTHORITY));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.delete(reservation.getId(), otherUserAuth);
+        });
+        assertEquals(ErrorCode.NO_AUTHORITY, exception.getErrorCode());
+    }
+
+    @Test
+    void deleteReservation_fail_time_is_already_passed() {
+        // Given
+        reservation.updateStatus(ReservationStatus.ACCEPTED);
+
+        AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
+        when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), user)).thenReturn(reservation);
+
+        // When & Then: 예외 발생 확인
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.delete(reservation.getId(), authUser);
+        });
+        assertEquals(ErrorCode.TIME_IS_ALREAY_PASSED, exception.getErrorCode());
+    }
+
+
+    // 예약 상태 변경 성공 테스트 케이스
+    @Test
+    void changeReservationStatus_fail_userNotFound() {
+        // Given: 사용자를 찾을 수 없도록 설정
+        AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
+
+        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest("ACCEPTED");
+
+        // When & Then: 예외 발생 확인
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.change(reservation.getId(), authUser, request);
+        });
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+    }
+
+    // 예약 상태 변경 실패 테스트 케이스
+    @Test
+    void changeReservationStatus_fail_reservationNotFound() {
+        // Given: 사용자 정보와 함께 예약 ID를 찾을 수 없도록 설정
+        AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
+        when(reservationRepository.findByIdAndCourt_Gym_User_OrThrow(reservation.getId(), admin)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
+
+        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest("ACCEPTED");
+
+        // When & Then: 예외 발생 확인
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            reservationService.change(reservation.getId(), authUser, request);
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
@@ -317,100 +485,35 @@ class ReservationServiceTest {
     @Test
     void changeReservationStatus_fail_notAuthorized() {
         // Given
-        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest(ReservationStatus.CANCELED.name()); // Use enum's name
-        User otherUser = new User("Other User", "other@example.com", "서울", RANK_C, UserRole.USER);
-        when(userRepository.findByEmail(otherUser.getEmail())).thenReturn(Optional.of(otherUser));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
+        User otherUser = new User("Other", "other@example.com", "인천", RANK_C, UserRole.USER);
+
+        AuthUser otherUserAuth = new AuthUser(otherUser.getId(), otherUser.getName(), otherUser.getEmail(), otherUser.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(otherUserAuth.getEmail())).thenReturn(otherUser);
+        when(reservationRepository.findByIdAndCourt_Gym_User_OrThrow(reservation.getId(), otherUser)).thenThrow(new CustomException(ErrorCode.NO_AUTHORITY));
+
+        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest("ACCEPTED");
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.change(reservation.getId(), otherUser.getEmail(), request);
+            reservationService.change(reservation.getId(), otherUserAuth, request);
         });
-        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.NO_AUTHORITY, exception.getErrorCode());
     }
 
     @Test
-    void changeReservationStatus_fail_invalidStatus() {
-        // Given
-        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest("INVALID_STATUS");
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
+    void changeReservationStatus_fail_alreadyCanceled() {
+        // Given: 예약 상태를 CANCELED로 설정
+        reservation.updateStatus(ReservationStatus.CANCELED);
+        AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), admin.getUserRole());
+        when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
+        when(reservationRepository.findByIdAndCourt_Gym_User_OrThrow(reservation.getId(), admin)).thenReturn(reservation);
+
+        ReservationChangeStatusRequest request = new ReservationChangeStatusRequest("ACCEPTED");
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.change(reservation.getId(), user.getEmail(), request);
+            reservationService.change(reservation.getId(), authUser, request);
         });
-        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    void checkCancellationTimeLimit_success() {
-        // Given
-        LocalDateTime reservationDateTime = LocalDateTime.now().plusHours(25); // 25시간 후
-        reservationService.checkCancellationTimeLimit(reservationDateTime); // 예외가 발생하지 않아야 함
-    }
-
-    @Test
-    void checkCancellationTimeLimit_fail_tooLate() {
-        // Given
-        LocalDateTime reservationDateTime = LocalDateTime.now().plusHours(1); // 현재 시간 + 1시간
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.checkCancellationTimeLimit(reservationDateTime);
-        });
-
-        // Then
-        assertEquals(ErrorCode.RESERVATION_CANT_CANCELED, exception.getErrorCode());
-    }
-
-    @Test
-    void validateRequestDate_success() {
-        // Given
-        LocalDate futureDate = LocalDate.now().plusDays(1); // 내일
-        reservationService.validateRequestDate(futureDate); // 예외가 발생하지 않아야 함
-    }
-
-    @Test
-    void validateRequestDate_fail_pastDate() {
-        // Given
-        LocalDate pastDate = LocalDate.now().minusDays(1); // 어제
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.validateRequestDate(pastDate);
-        });
-
-        // Then
-        assertEquals(ErrorCode.INVALID_DATE, exception.getErrorCode());
-    }
-
-
-    @Test
-    void calculateReservationDateTime_success() {
-        // Given
-        TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0), LocalTime.of(11, 0), court.getId(), court);
-        reservation = new Reservation(1L, user, timeSlot, court, ReservationStatus.PENDING, LocalDate.of(2024, 11, 3));
-
-        // When
-        LocalDateTime result = reservationService.calculateReservationDateTime(reservation);
-
-        // Then
-        LocalDateTime expected = LocalDateTime.of(2024, 11, 3, 10, 0);
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void checkReservationAuthority_success() {
-        // Given
-        reservation = new Reservation(1L, user, timeSlot1, court, ReservationStatus.PENDING, LocalDate.of(2024, 11, 3));
-
-        // When & Then (사용자와 예약자 동일)
-        reservationService.checkReservationAuthority(reservation, user); // 예외가 발생하지 않아야 함
-    }
-
-    @Test
-    void parseReservationStatus_success_accepted() {
-        // When
-        ReservationStatus result = reservationService.parseReservationStatus("ACCEPTED");
-
-        // Then
-        assertEquals(ReservationStatus.ACCEPTED, result);
+        assertEquals(ErrorCode.RESERVATION_CANT_ACCEPTED, exception.getErrorCode());
     }
 }

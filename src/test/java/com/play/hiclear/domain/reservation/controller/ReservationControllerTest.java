@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -50,14 +53,14 @@ class ReservationControllerTest {
         // given
         ReservationRequest request = new ReservationRequest();
         List<ReservationSearchDetailResponse> expectedResponse = Collections.singletonList(new ReservationSearchDetailResponse());
-        when(reservationService.create(authUser.getEmail(), request)).thenReturn(expectedResponse);
+        when(reservationService.create(authUser, request)).thenReturn(expectedResponse);
 
         // when
         List<ReservationSearchDetailResponse> actualResponse = reservationController.create(authUser, request);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(reservationService, times(1)).create(authUser.getEmail(), request);
+        verify(reservationService, times(1)).create(authUser, request);
     }
 
     @Test
@@ -65,44 +68,50 @@ class ReservationControllerTest {
         // given
         Long reservationId = 1L;
         ReservationSearchDetailResponse expectedResponse = new ReservationSearchDetailResponse();
-        when(reservationService.get(reservationId, authUser.getEmail())).thenReturn(expectedResponse);
+        when(reservationService.get(reservationId, authUser)).thenReturn(expectedResponse);
 
         // when
         ReservationSearchDetailResponse actualResponse = reservationController.get(reservationId, authUser);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(reservationService, times(1)).get(reservationId, authUser.getEmail());
+        verify(reservationService, times(1)).get(reservationId, authUser);
     }
 
     @Test
     void search_success() {
         // given
-        List<ReservationSearchResponse> expectedResponse = Collections.singletonList(new ReservationSearchResponse());
-        when(reservationService.search(authUser.getEmail())).thenReturn(expectedResponse);
+        int page = 1;
+        int size = 10;
+        Long courtId = null;
+        ReservationSearchResponse expectedResponse = new ReservationSearchResponse(); // 여기에 실제 응답 객체를 생성하세요.
+        Page<ReservationSearchResponse> expectedPage = new PageImpl<>(Collections.singletonList(expectedResponse), PageRequest.of(page - 1, size), 1);
+
+        when(reservationService.search(authUser, page, size, courtId, null, null)).thenReturn(expectedPage);
 
         // when
-        List<ReservationSearchResponse> actualResponse = reservationController.search(authUser);
+        Page<ReservationSearchResponse> actualResponse = reservationController.search(authUser, page, size, courtId, null, null);
 
         // then
-        assertEquals(expectedResponse, actualResponse);
-        verify(reservationService, times(1)).search(authUser.getEmail());
+        assertEquals(expectedPage, actualResponse);
+        verify(reservationService, times(1)).search(authUser, page, size, courtId, null, null);
     }
 
+
     @Test
-    void update_Time_success() {
+    void update_success() {
         // given
         Long reservationId = 1L;
         ReservationUpdateRequest request = new ReservationUpdateRequest();
         ReservationSearchDetailResponse expectedResponse = new ReservationSearchDetailResponse();
-        when(reservationService.update(reservationId, authUser.getEmail(), request)).thenReturn(expectedResponse);
+        when(reservationService.update(reservationId, authUser, request)).thenReturn(expectedResponse);
 
         // when
         ReservationSearchDetailResponse actualResponse = reservationController.update(reservationId, authUser, request);
 
         // then
         assertEquals(expectedResponse, actualResponse);
-        verify(reservationService, times(1)).update(reservationId, authUser.getEmail(), request);
+        verify(reservationService, times(1)).update(reservationId, authUser, request);
     }
 
     @Test
@@ -111,32 +120,27 @@ class ReservationControllerTest {
         Long reservationId = 1L;
 
         // when
-        ResponseEntity<Map<String, Object>> actualResponse = reservationController.delete(reservationId, authUser);
+        ResponseEntity<String> actualResponse = reservationController.delete(reservationId, authUser);
 
         // then
         assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
-        assertEquals("예약이 성공적으로 취소되었습니다.", actualResponse.getBody().get("message"));
-        verify(reservationService, times(1)).delete(reservationId, authUser.getEmail());
+        assertEquals("Reservation을(를) 삭제했습니다.", actualResponse.getBody());
+        verify(reservationService, times(1)).delete(reservationId, authUser);
     }
 
-    // 예약 상태 변경 성공 테스트 케이스
     @Test
-    void changeReservation_success() {
+    void change_success() {
         // given
         Long reservationId = 1L;
         ReservationChangeStatusRequest request = new ReservationChangeStatusRequest("ACCEPTED");
-        Map<String, Object> expectedResponse = Map.of(
-                "code", HttpStatus.OK.value(),
-                "message", "예약 상태가 성공적으로 변경되었습니다.",
-                "status", HttpStatus.OK.name()
-        );
+        String expectedResponse = "사장님이 예약을 수락했습니다.";
 
         // when
-        ResponseEntity<Map<String, Object>> actualResponse = reservationController.change(reservationId, request, authUser);
+        ResponseEntity<String> actualResponse = reservationController.change(reservationId, request, authUser);
 
         // then
         assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
-        assertEquals(expectedResponse, actualResponse.getBody());
-        verify(reservationService, times(1)).change(reservationId, authUser.getEmail(), request);
+        assertEquals(expectedResponse, actualResponse.getBody()); // 수정된 응답 비교
+        verify(reservationService, times(1)).change(reservationId, authUser, request);
     }
 }
