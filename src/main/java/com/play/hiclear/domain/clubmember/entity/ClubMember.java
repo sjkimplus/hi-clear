@@ -33,4 +33,8 @@ public class ClubMember {
     @Enumerated(EnumType.STRING)
     private ClubMemberRole clubMemberRole;
 
+    public void change(ClubMemberRole newClubMemberRole) {
+        this.clubMemberRole = newClubMemberRole;
+    }
+
 }
