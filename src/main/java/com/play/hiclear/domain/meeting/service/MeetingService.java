@@ -3,6 +3,7 @@ package com.play.hiclear.domain.meeting.service;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
@@ -55,7 +56,7 @@ public class MeetingService {
 
         // participant 에 추가
         participantService.add(authUser, meeting.getId());
-        return ("번개 생성 성공"); // 이넘으로
+        return SuccessMessage.customMessage(SuccessMessage.CREATED, Meeting.class.getSimpleName());
     }
 
     /**
@@ -77,7 +78,7 @@ public class MeetingService {
         checkAuthority(authUser, meeting);
         
         meeting.update(request);
-        return "번개 수정 성공";
+        return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Meeting.class.getSimpleName());
     }
 
     /**
@@ -96,7 +97,7 @@ public class MeetingService {
         checkAuthority(authUser, meeting);
 
         meeting.markDeleted();
-        return "번개 삭제 성공";
+        return SuccessMessage.customMessage(SuccessMessage.DELETED, Meeting.class.getSimpleName());
     }
 
     /**
@@ -194,7 +195,7 @@ public class MeetingService {
         }
 
         meeting.markFinished();
-        return "번개 완료 성공";
+        return SuccessMessage.customMessage(SuccessMessage.MEETING_FINISHED);
     }
 
     private void checkAuthority(AuthUser authUser, Meeting meeting) {

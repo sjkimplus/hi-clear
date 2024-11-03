@@ -2,6 +2,7 @@ package com.play.hiclear.domain.participant.service;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
@@ -56,7 +57,7 @@ public class ParticipantService {
             // 전에 취소 했던 경우 다시 신청 가능. 단, update 메서드로 status만 바꿈
             ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.PENDING);
             update(authUser, meetingId, participant.getId(), request);
-            return "참여자 신청 성공";
+            return SuccessMessage.customMessage(SuccessMessage.PARTICIPANT_JOIN);
         }
 
         // role: HOST인지 GUEST인지 정하기
@@ -72,7 +73,7 @@ public class ParticipantService {
 
         Participant participant = new Participant(meeting, user, role, status);
         participantRepository.save(participant);
-        return "참여자 신청 성공";
+        return SuccessMessage.customMessage(SuccessMessage.PARTICIPANT_JOIN);
     }
 
     /**
@@ -130,7 +131,7 @@ public class ParticipantService {
         } else { // 기타는 불가
             throw new CustomException(ErrorCode.WRONG_STATUS);
         }
-        return "참여자 status 수정 성공";
+        return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Participant.class.getSimpleName());
     }
 
     /**
