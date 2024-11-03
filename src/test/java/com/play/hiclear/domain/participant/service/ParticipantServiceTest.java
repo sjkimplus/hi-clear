@@ -105,12 +105,11 @@ public class ParticipantServiceTest {
 
     @Test
     void getJoinedNumber_success() {
-        Long meetingId = meeting.getId();
         int expectedCount = 3;
 
-        when(participantRepository.countByMeetingId(meetingId)).thenReturn(expectedCount);
+        when(participantRepository.countByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED)).thenReturn(expectedCount);
 
-        int result = participantService.getJoinedNumber(meetingId);
+        int result = participantService.getJoinedNumber(meeting);
         assertEquals(expectedCount, result);
     }
 

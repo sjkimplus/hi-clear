@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,8 @@ public class MeetingService {
      */
     @Transactional
     public String create(AuthUser authUser, MeetingCreateEditRequest request) {
+        // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
+        checkTimeValidity(request);
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         Meeting meeting = new Meeting(request, user);
@@ -66,6 +69,9 @@ public class MeetingService {
     public String update(AuthUser authUser, MeetingCreateEditRequest request, Long meetingId) {
         // 업로드한 번개 일정 찾기
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
+
+        // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
+        checkTimeValidity(request);
 
         // 권한체크 - 작성자가 맞는지 체크
         checkAuthority(authUser, meeting);
@@ -103,7 +109,7 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         // 참여 완료한 사람수 구하기
-        int numberJoined = participantService.getJoinedNumber(meeting.getId());
+        int numberJoined = participantService.getJoinedNumber(meeting);
         return new MeetingDetailResponse(meeting, numberJoined);
     }
 
@@ -121,7 +127,7 @@ public class MeetingService {
         checkAuthority(authUser, meeting);
 
         // 번개 신청자들 중 APPROVE 된 신청자들 수
-        int numberJoined = participantService.getJoinedNumber(meeting.getId());
+        int numberJoined = participantService.getJoinedNumber(meeting);
 
         // 번개 신청자들 중 PENDING 상태인 것들 모으기
         List<ParticipantResponse> pendingParticipants = participantService.getPendingParticipants(meeting);
@@ -135,26 +141,25 @@ public class MeetingService {
      * @param role
      * @return
      */
-    // earlierst 로 정렬 추가
-    public MyMeetingResponses searchMyMeetings(AuthUser authUser, ParticipantRole role, Boolean includePassed) {
-
-        List<Participant> participantList = participantRepository.findByUserIdAndRoleWithConditionalEndTime(authUser.getUserId(), role, includePassed);
+    public MyMeetingResponses searchMyMeetings(AuthUser authUser, ParticipantRole role) {
+        // 삭제되지 않고 완료처리 되지 않은 미틴에서의 participant 정보만 반환 (빠른 날짜 순서로 정렬)
+        List<Participant> participantList = participantRepository.findByUserIdAndRoleExcludingFinished(authUser.getUserId(), role);
         List<MyMeetingResponse> responseList;
 
-        // if - return, early return 방식적용
-        if (role==ParticipantRole.HOST) { // role = HOST인 경우
+        // role = HOST인 경우
+        if (role==ParticipantRole.HOST) {
             // meetingList를 DTO로 변환
             responseList = participantList
                     .stream()
                     .map(p -> new MyMeetingResponse(p.getMeeting()))
                     .collect(Collectors.toList());
-        } else {
-            // meetingList를 DTO로 변환
-            responseList = participantList
-                    .stream()
-                    .map(p -> new MyMeetingResponse(p.getMeeting(), p.getStatus()))
-                    .collect(Collectors.toList());
+            return new MyMeetingResponses(responseList);
         }
+        // role = GUEST 인 경우
+        responseList = participantList
+                .stream()
+                .map(p -> new MyMeetingResponse(p.getMeeting(), p.getStatus()))
+                .collect(Collectors.toList());
         return new MyMeetingResponses(responseList);
     }
 
@@ -184,7 +189,9 @@ public class MeetingService {
         checkAuthority(authUser, meeting);
 
         // 현재시간이 미팅종료 시간 이후인지 확인
-
+        if (meeting.getEndTime().isAfter(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.TOO_SOON);
+        }
 
         meeting.markFinished();
         return "번개 완료 성공";
@@ -193,6 +200,12 @@ public class MeetingService {
     private void checkAuthority(AuthUser authUser, Meeting meeting) {
         if (authUser.getUserId()!=meeting.getUser().getId()){
             throw new CustomException(ErrorCode.NO_AUTHORITY);
+        }
+    }
+
+    private void checkTimeValidity(MeetingCreateEditRequest request) {
+        if (!request.getStartTime().isAfter(LocalDateTime.now()) || request.getEndTime().isBefore((request.getStartTime().plusHours(1)))) {
+            throw new CustomException(ErrorCode.INVALID_TIME);
         }
     }
 }

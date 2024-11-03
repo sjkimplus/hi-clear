@@ -27,7 +27,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
 import static org.junit.jupiter.api.Assertions.*;
@@ -150,7 +149,7 @@ class MeetingServiceTest {
 
         // when
         when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
-        when(participantService.getJoinedNumber(meeting.getId())).thenReturn(5);
+        when(participantService.getJoinedNumber(meeting)).thenReturn(5);
 
         // then
         MeetingDetailResponse response = meetingService.get(meeting.getId());
@@ -179,7 +178,7 @@ class MeetingServiceTest {
 
         // when
         when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
-        when(participantService.getJoinedNumber(meeting.getId())).thenReturn(5);
+        when(participantService.getJoinedNumber(meeting)).thenReturn(5);
         when(participantService.getPendingParticipants(meeting)).thenReturn(new ArrayList<>());
 
         // then
@@ -218,10 +217,10 @@ class MeetingServiceTest {
         responseList.add(new MyMeetingResponse(meeting));
 
         // when
-        when(participantRepository.findByUserIdAndRoleWithConditionalEndTime(authUser.getUserId(), ParticipantRole.HOST, true)).thenReturn(participants);
+        when(participantRepository.findByUserIdAndRoleExcludingFinished(authUser.getUserId(), ParticipantRole.HOST)).thenReturn(participants);
 
         // then
-        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.HOST, true);
+        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.HOST);
 
         assertEquals(1, response.getList().size());
         assertEquals(meeting.getId(), response.getList().get(0).getId());
@@ -241,10 +240,10 @@ class MeetingServiceTest {
         responseList.add(new MyMeetingResponse(meeting, participant.getStatus()));
 
         // when
-        when(participantRepository.findByUserIdAndRoleWithConditionalEndTime(authUser.getUserId(), ParticipantRole.GUEST, true)).thenReturn(participants);
+        when(participantRepository.findByUserIdAndRoleExcludingFinished(authUser.getUserId(), ParticipantRole.GUEST)).thenReturn(participants);
 
         // then
-        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.GUEST, true);
+        MyMeetingResponses response = meetingService.searchMyMeetings(authUser, ParticipantRole.GUEST);
 
         assertEquals(1, response.getList().size());
         assertEquals(meeting.getId(), response.getList().get(0).getId());

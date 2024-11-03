@@ -64,7 +64,8 @@ public enum ErrorCode {
 
 
     // Meeting
-    MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
+    TOO_SOON(HttpStatus.BAD_REQUEST, "번개일정 종료전에 번개완료를 할 수는 없습니다"),
+    INVALID_TIME(HttpStatus.BAD_REQUEST, "시작시간은 현재시간 이후, 운동시간은 총 1시간이여야 합니다."),
 
 
     // ClubMember

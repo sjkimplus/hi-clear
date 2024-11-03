@@ -4,10 +4,10 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
-import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.meeting.service.MeetingService;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,19 +19,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 public class MeetingController {
+
     private final MeetingService meetingService;
 
     // 번개글 생성
     @PostMapping("/v1/meetings")
     public ResponseEntity<String> create(@AuthenticationPrincipal AuthUser authUser,
-                                         @RequestBody MeetingCreateEditRequest request) {
+                                         @RequestBody @Valid MeetingCreateEditRequest request) {
         return ResponseEntity.ok(meetingService.create(authUser, request));
     }
 
     // 번개글 수정
     @PatchMapping("/v1/meetings/{meetingId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser,
-                                       @RequestBody MeetingCreateEditRequest request,
+                                       @RequestBody @Valid MeetingCreateEditRequest request,
                                        @PathVariable Long meetingId) {
         return ResponseEntity.ok(meetingService.update(authUser, request, meetingId));
     }
@@ -60,9 +61,8 @@ public class MeetingController {
     // 나의 번개 (신청/개최) 다건 조회 - 구분은 role 이 HOST/GUEST로 구분
     @GetMapping("/v1/my-meetings")
     public ResponseEntity<MyMeetingResponses> searchMyMeetings(@AuthenticationPrincipal AuthUser authUser,
-                                                               @RequestParam ParticipantRole role,
-                                                               @RequestParam Boolean includePassed){
-        return ResponseEntity.ok(meetingService.searchMyMeetings(authUser, role, includePassed));
+                                                               @RequestParam ParticipantRole role){
+        return ResponseEntity.ok(meetingService.searchMyMeetings(authUser, role));
     }
 
     // 개최한 번개 단건 조회
@@ -72,7 +72,7 @@ public class MeetingController {
     }
 
     // 나의 번개 활동 완료
-    @PatchMapping("v1/my-meetings/{meetingId}")
+    @PutMapping("v1/my-meetings/{meetingId}")
     public ResponseEntity<String> finishMyMeeting(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long meetingId) {
         return ResponseEntity.ok(meetingService.finishMyMeeting(authUser, meetingId));
     }

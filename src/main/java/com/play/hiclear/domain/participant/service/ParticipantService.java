@@ -32,6 +32,12 @@ public class ParticipantService {
     private final UserRepository userRepository;
     private final MeetingRepository meetingRepository;
 
+    /**
+     * 참여 신청
+     * @param authUser
+     * @param meetingId
+     * @return
+     */
     @Transactional
     public String add(AuthUser authUser, Long meetingId) {
 
@@ -69,8 +75,13 @@ public class ParticipantService {
         return "참여자 신청 성공";
     }
 
-    public int getJoinedNumber(Long meetingId) {
-        return participantRepository.countByMeetingId(meetingId); // 참여확정자만으로 수정
+    /**
+     * 확정된 참여자 수 가져오기
+     * @param meeting
+     * @return
+     */
+    public int getJoinedNumber(Meeting meeting) {
+        return participantRepository.countByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED); // 참여확정자만으로 수정
     }
 
     public List<ParticipantResponse> getPendingParticipants(Meeting meeting) {
@@ -81,6 +92,14 @@ public class ParticipantService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 번개 참여 신청 철회/거절/승락
+     * @param authUser
+     * @param meetingId
+     * @param participantId
+     * @param request
+     * @return
+     */
     @Transactional
     public String update(AuthUser authUser, Long meetingId, Long participantId, ParticipantUpdateRequest request) {
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
@@ -114,6 +133,11 @@ public class ParticipantService {
         return "참여자 status 수정 성공";
     }
 
+    /**
+     * 번개 참여자 리스트 조회
+     * @param meetingId
+     * @return
+     */
     public ParticipantListResponse search(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())

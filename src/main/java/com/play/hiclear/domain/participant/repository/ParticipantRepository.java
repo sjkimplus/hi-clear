@@ -16,22 +16,28 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Optional<Participant> findByMeetingAndUser(Meeting meeting, User user);
 
-    int countByMeetingId(Long meetingId);
-
     List<Participant> findByMeetingAndStatus(Meeting meeting, ParticipantStatus status);
 
-    List<Participant> findByUser_IdAndRoleOrderByMeeting_StartTimeAsc(Long userId, ParticipantRole role, Boolean includePassed);
+    @Query("""
+    SELECT COUNT(p) FROM Participant p 
+    WHERE p.meeting = :meeting 
+      AND p.status = :status
+    """)
+    int countByMeetingAndStatus(
+            @Param("meeting") Meeting meeting,
+            @Param("status") ParticipantStatus status);
+
 
     @Query("""
+
     SELECT p FROM Participant p 
     WHERE p.user.id = :userId 
       AND p.role = :role 
-      AND (:includePassed = true OR p.meeting.endTime > CURRENT_TIMESTAMP)
+      AND p.meeting.finished = false
+      AND p.meeting.deletedAt IS NULL
     ORDER BY p.meeting.startTime ASC
     """)
-    List<Participant> findByUserIdAndRoleWithConditionalEndTime(
+    List<Participant> findByUserIdAndRoleExcludingFinished(
             @Param("userId") Long userId,
-            @Param("role") ParticipantRole role,
-            @Param("includePassed") Boolean includePassed);
-
-}
+            @Param("role") ParticipantRole role);
+    }
