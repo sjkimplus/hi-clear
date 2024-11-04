@@ -17,4 +17,9 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
         return findByStartTimeAndCourt_CourtNum(startTime, courtNum)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, TimeSlot.class.getSimpleName()));
     }
+
+    default TimeSlot findByIdOrThrow(Long id) {
+        return findById(id).orElseThrow(
+                () ->  new CustomException(ErrorCode.NOT_FOUND, TimeSlot.class.getSimpleName()));
+    }
 }
