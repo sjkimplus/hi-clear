@@ -34,11 +34,15 @@ public class DistanceCalculator {
     }
 
     // 거리계산
-    public BigDecimal calculateDistance(BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2) {
-        BigDecimal lat1Rad = toRadians(lat1);
-        BigDecimal lon1Rad = toRadians(lon1);
-        BigDecimal lat2Rad = toRadians(lat2);
-        BigDecimal lon2Rad = toRadians(lon2);
+    public BigDecimal calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
+        BigDecimal bigLat1 = BigDecimal.valueOf(lat1);
+        BigDecimal bigLon1 = BigDecimal.valueOf(lon1);
+        BigDecimal bigLat2 = BigDecimal.valueOf(lat2);
+        BigDecimal bigLon2 = BigDecimal.valueOf(lon2);
+        BigDecimal lat1Rad = toRadians(bigLat1);
+        BigDecimal lon1Rad = toRadians(bigLon1);
+        BigDecimal lat2Rad = toRadians(bigLat2);
+        BigDecimal lon2Rad = toRadians(bigLon2);
 
         BigDecimal sinLat1 = sin(lat1Rad);
         BigDecimal sinLat2 = sin(lat2Rad);
@@ -54,15 +58,5 @@ public class DistanceCalculator {
 
         return distance;
     }
-
-
-    public BigDecimal[] convertBigDecimal(Double lat, Double lon){
-        BigDecimal[] bigDecimals = new BigDecimal[2];
-        bigDecimals[0] = new BigDecimal(lat);
-        bigDecimals[1] = new BigDecimal(lon);
-
-        return bigDecimals;
-    }
-
 }
 

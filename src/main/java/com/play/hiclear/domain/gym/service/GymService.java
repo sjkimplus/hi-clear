@@ -194,10 +194,8 @@ public class GymService {
     public String distance(DistanceRequest request) {
 
         GeoCodeAddress addressA = geoCodeService.getGeoCode(request.getAddressA());
-        BigDecimal[] bigDecimalA = distanceCalculator.convertBigDecimal(addressA.getLatitude(), addressA.getLongitude());
         GeoCodeAddress addressB = geoCodeService.getGeoCode(request.getAddressB());
-        BigDecimal[] bigDecimalB = distanceCalculator.convertBigDecimal(addressB.getLatitude(), addressB.getLongitude());
 
-        return distanceCalculator.calculateDistance(bigDecimalA[0], bigDecimalA[1], bigDecimalB[0], bigDecimalB[1]).toString();
+        return distanceCalculator.calculateDistance(addressA.getLatitude(), addressA.getLongitude(), addressB.getLatitude(), addressB.getLongitude()).toString();
     }
 }
