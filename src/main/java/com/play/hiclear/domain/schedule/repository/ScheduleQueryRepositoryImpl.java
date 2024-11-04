@@ -1,17 +1,12 @@
 package com.play.hiclear.domain.schedule.repository;
 
-import com.play.hiclear.domain.club.entity.Club;
-import com.play.hiclear.domain.schedule.entity.Schedule;
-import com.play.hiclear.domain.user.entity.User;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import static com.play.hiclear.domain.schduleparticipant.entity.QScheduleParticipant.scheduleParticipant;
 import static com.play.hiclear.domain.schedule.entity.QSchedule.schedule;
 
 @Repository
@@ -45,14 +40,5 @@ public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository{
                 .from(schedule)
                 .where(builder)
                 .fetchFirst() != null;
-    }
-
-    @Override
-    public List<Schedule> findByClubAndDeletedAtIsNull(Club club) {
-        return queryFactory.selectFrom(schedule)
-                .join(schedule.user) // Fetch associated user
-                .where(schedule.club.eq(club)
-                        .and(schedule.deletedAt.isNull()))
-                .fetch();
     }
 }
