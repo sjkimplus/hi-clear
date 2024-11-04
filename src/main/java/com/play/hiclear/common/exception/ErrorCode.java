@@ -52,11 +52,12 @@ public enum ErrorCode {
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
 
     // Reservation
-    RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
-    RESERVATION_LIST_EMPTY(HttpStatus.NOT_FOUND, "예약 목록이 비어있습니다."),
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
     RESERVATION_CANT_CANCELED(HttpStatus.CONFLICT, "예약을 취소할 수 없습니다."),
+    TIME_IS_ALREAY_PASSED(HttpStatus.CONFLICT, "현재 시간에서 예약 시작까지 24시간 이상 남아 있어야만 취소가 가능합니다."),
+    RESERVATION_CANT_ACCEPTED(HttpStatus.CONFLICT, "예약은 이미 거절/취소 되었습니다."),
     INVALID_DATE(HttpStatus.CONFLICT, "예약 날짜는 현재 시간 이후여야 합니다."),
+    INVALID_TIME_SLOT(HttpStatus.CONFLICT, "선택한 시간 슬롯이 해당 코트와 일치하지 않습니다."),
     RESERVATION_BAD_REQUEST_ROLE(HttpStatus.BAD_REQUEST,
             String.format("ReservationStatus 입력이 올바르지 않습니다. 가능한 값: %s",
                     Arrays.toString(new String[]{"ACCEPTED", "REJECTED"}))),
@@ -64,7 +65,8 @@ public enum ErrorCode {
 
 
     // Meeting
-    MEETING_CREATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "번개일정 생성 실패하였 습니다."),
+    TOO_SOON(HttpStatus.BAD_REQUEST, "번개일정 종료전에 번개완료를 할 수는 없습니다"),
+    INVALID_TIME(HttpStatus.BAD_REQUEST, "시작시간은 현재시간 이후, 운동시간은 총 1시간이여야 합니다."),
 
 
     // ClubMember

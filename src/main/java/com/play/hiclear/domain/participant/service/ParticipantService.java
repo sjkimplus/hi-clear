@@ -2,6 +2,7 @@ package com.play.hiclear.domain.participant.service;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
@@ -32,16 +33,18 @@ public class ParticipantService {
     private final UserRepository userRepository;
     private final MeetingRepository meetingRepository;
 
+    /**
+     * 참여 신청
+     * @param authUser
+     * @param meetingId
+     * @return
+     */
     @Transactional
     public String add(AuthUser authUser, Long meetingId) {
 
-        User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName())
-        );
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         // 이미 추가된 유저인 경우 중복추가 방지
         Optional<Participant> existingParticipant = participantRepository.findByMeetingAndUser(meeting, user);
@@ -54,7 +57,7 @@ public class ParticipantService {
             // 전에 취소 했던 경우 다시 신청 가능. 단, update 메서드로 status만 바꿈
             ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.PENDING);
             update(authUser, meetingId, participant.getId(), request);
-            return "참여자 신청 성공";
+            return SuccessMessage.customMessage(SuccessMessage.PARTICIPANT_JOIN);
         }
 
         // role: HOST인지 GUEST인지 정하기
@@ -70,11 +73,16 @@ public class ParticipantService {
 
         Participant participant = new Participant(meeting, user, role, status);
         participantRepository.save(participant);
-        return "참여자 신청 성공";
+        return SuccessMessage.customMessage(SuccessMessage.PARTICIPANT_JOIN);
     }
 
-    public int getJoinedNumber(Long meetingId) {
-        return participantRepository.countByMeetingId(meetingId);
+    /**
+     * 확정된 참여자 수 가져오기
+     * @param meeting
+     * @return
+     */
+    public int getJoinedNumber(Meeting meeting) {
+        return participantRepository.countByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED); // 참여확정자만으로 수정
     }
 
     public List<ParticipantResponse> getPendingParticipants(Meeting meeting) {
@@ -85,11 +93,17 @@ public class ParticipantService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 번개 참여 신청 철회/거절/승락
+     * @param authUser
+     * @param meetingId
+     * @param participantId
+     * @param request
+     * @return
+     */
     @Transactional
     public String update(AuthUser authUser, Long meetingId, Long participantId, ParticipantUpdateRequest request) {
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         Participant participant = participantRepository.findById(participantId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
@@ -117,9 +131,14 @@ public class ParticipantService {
         } else { // 기타는 불가
             throw new CustomException(ErrorCode.WRONG_STATUS);
         }
-        return "참여자 status 수정 성공";
+        return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Participant.class.getSimpleName());
     }
 
+    /**
+     * 번개 참여자 리스트 조회
+     * @param meetingId
+     * @return
+     */
     public ParticipantListResponse search(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
                 new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())

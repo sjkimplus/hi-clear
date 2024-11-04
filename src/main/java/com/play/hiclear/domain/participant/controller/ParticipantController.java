@@ -25,7 +25,7 @@ public class ParticipantController {
     }
 
     // 번개 참여 신청 철회/거절/승락
-    @PatchMapping("/v1/meetings/{meetingId}/participants/{participantId}")
+    @PutMapping("/v1/meetings/{meetingId}/participants/{participantId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable Long meetingId,
                                          @PathVariable Long participantId,
