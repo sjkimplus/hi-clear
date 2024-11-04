@@ -3,6 +3,7 @@ package com.play.hiclear.domain.meeting.service;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
@@ -24,11 +25,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true) // 데이터를
 @RequiredArgsConstructor
 public class MeetingService {
     private final MeetingRepository meetingRepository;
@@ -37,72 +39,96 @@ public class MeetingService {
     private final ParticipantRepository participantRepository;
     private final MeetingQueryDslRepository meetingQueryDslRepository;
 
+    /**
+     * 번개 생성
+     * @param authUser
+     * @param request
+     * @return
+     */
     @Transactional
     public String create(AuthUser authUser, MeetingCreateEditRequest request) {
-        User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName())
-        );
-
-        // the end time has to be greater than the start time by one hour
+        // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
+        checkTimeValidity(request);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         Meeting meeting = new Meeting(request, user);
         meetingRepository.save(meeting);
 
         // participant 에 추가
         participantService.add(authUser, meeting.getId());
-        return ("번개 생성 성공");
+        return SuccessMessage.customMessage(SuccessMessage.CREATED, Meeting.class.getSimpleName());
     }
 
+    /**
+     * 번개 수정
+     * @param authUser
+     * @param request
+     * @param meetingId
+     * @return
+     */
     @Transactional
     public String update(AuthUser authUser, MeetingCreateEditRequest request, Long meetingId) {
         // 업로드한 번개 일정 찾기
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
+
+        // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
+        checkTimeValidity(request);
+
+        // 권한체크 - 작성자가 맞는지 체크
+        checkAuthority(authUser, meeting);
         
-        // 작성자가 맞는지 체크
-        if (authUser.getUserId()!=meeting.getUser().getId()){
-            throw new CustomException(ErrorCode.NO_AUTHORITY, Meeting.class.getSimpleName());
-        }
-        
-        meeting.edit(request);
-        return "번개 수정 성공";
+        meeting.update(request);
+        return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Meeting.class.getSimpleName());
     }
 
+    /**
+     * 번개 삭제
+     * @param authUser
+     * @param meetingId
+     * @return
+     */
     @Transactional
     public String delete(AuthUser authUser, Long meetingId) {
+        // 서비스내에서 private method으로 빼기
         // 업로드한 번개 일정 찾기
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
-        // 작성자가 맞는지 체크
-        if (authUser.getUserId()!=meeting.getUser().getId()){
-            throw new CustomException(ErrorCode.NO_AUTHORITY);
-        }
+        // 권한체크 - 작성자가 맞는지 체크
+        checkAuthority(authUser, meeting);
 
         meeting.markDeleted();
-        return "번개 삭제 성공";
+        return SuccessMessage.customMessage(SuccessMessage.DELETED, Meeting.class.getSimpleName());
     }
 
+    /**
+     * 번개글 단건 조회 + 신청한 번개 단건 조회 (특별 권한 없는 일반 조회)
+     * @param meetingId
+     * @return
+     */
     public MeetingDetailResponse get(Long meetingId) {
         // 번개 일정 찾기
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
-        int numberJoined = participantService.getJoinedNumber(meeting.getId());
+        // 참여 완료한 사람수 구하기
+        int numberJoined = participantService.getJoinedNumber(meeting);
         return new MeetingDetailResponse(meeting, numberJoined);
     }
 
-    public MyMeetingDetailResponse getMyMeeting(Long meetingId) {
+    /**
+     * 개최한 번개 단건 조회
+     * @param authUser
+     * @param meetingId
+     * @return
+     */
+    public MyMeetingDetailResponse getMyMeeting(AuthUser authUser, Long meetingId) {
         // 번개 일정 찾기
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
+
+        // 권한체크
+        checkAuthority(authUser, meeting);
 
         // 번개 신청자들 중 APPROVE 된 신청자들 수
-        int numberJoined = participantService.getJoinedNumber(meeting.getId());
+        int numberJoined = participantService.getJoinedNumber(meeting);
 
         // 번개 신청자들 중 PENDING 상태인 것들 모으기
         List<ParticipantResponse> pendingParticipants = participantService.getPendingParticipants(meeting);
@@ -110,39 +136,77 @@ public class MeetingService {
         return new MyMeetingDetailResponse(meeting, numberJoined, pendingParticipants);
     }
 
+    /**
+     * 나의 번개 (신청/개최) 다건 조회
+     * @param authUser
+     * @param role
+     * @return
+     */
     public MyMeetingResponses searchMyMeetings(AuthUser authUser, ParticipantRole role) {
-        List<Participant> participantList = new ArrayList<>();
-        List<MyMeetingResponse> responseList = new ArrayList<>();
-        participantList = participantRepository.findByUserIdAndRole(authUser.getUserId(), role);
+        // 삭제되지 않고 완료처리 되지 않은 미틴에서의 participant 정보만 반환 (빠른 날짜 순서로 정렬)
+        List<Participant> participantList = participantRepository.findByUserIdAndRoleExcludingFinished(authUser.getUserId(), role);
+        List<MyMeetingResponse> responseList;
 
-        if (role==ParticipantRole.HOST) { // role = HOST인 경우
+        // role = HOST인 경우
+        if (role==ParticipantRole.HOST) {
             // meetingList를 DTO로 변환
             responseList = participantList
                     .stream()
                     .map(p -> new MyMeetingResponse(p.getMeeting()))
                     .collect(Collectors.toList());
-        } else {
-            // meetingList를 DTO로 변환
-            responseList = participantList
-                    .stream()
-                    .map(p -> new MyMeetingResponse(p.getMeeting(), p.getStatus()))
-                    .collect(Collectors.toList());
+            return new MyMeetingResponses(responseList);
         }
+        // role = GUEST 인 경우
+        responseList = participantList
+                .stream()
+                .map(p -> new MyMeetingResponse(p.getMeeting(), p.getStatus()))
+                .collect(Collectors.toList());
         return new MyMeetingResponses(responseList);
     }
 
+    /**
+     * 번개 통합검색 (급수필터, 정렬타입 적용)
+     * @param sortType
+     * @param rank
+     * @param page
+     * @param size
+     * @return
+     */
     public Page<MeetingSearchResponse> search(SortType sortType, Ranks rank, int page, int size) {
         Pageable pageable = PageRequest.of(page -1, size);
         return meetingQueryDslRepository.search(sortType, rank, pageable);
     }
 
-    public String updateMyMeeting(Long meetingId) {
+    /**
+     * 완료된 미팅은 완료 표기
+     * @param meetingId
+     * @return
+     */
+    public String finishMyMeeting(AuthUser authUser, Long meetingId) { // auth 인증
         // 번개 일정 찾기
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Meeting.class.getSimpleName())
-        );
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
+
+        // 권한체크
+        checkAuthority(authUser, meeting);
+
+        // 현재시간이 미팅종료 시간 이후인지 확인
+        if (meeting.getEndTime().isAfter(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.TOO_SOON);
+        }
 
         meeting.markFinished();
-        return "번개 완료 성공";
+        return SuccessMessage.customMessage(SuccessMessage.MEETING_FINISHED);
+    }
+
+    private void checkAuthority(AuthUser authUser, Meeting meeting) {
+        if (authUser.getUserId()!=meeting.getUser().getId()){
+            throw new CustomException(ErrorCode.NO_AUTHORITY);
+        }
+    }
+
+    private void checkTimeValidity(MeetingCreateEditRequest request) {
+        if (!request.getStartTime().isAfter(LocalDateTime.now()) || request.getEndTime().isBefore((request.getStartTime().plusHours(1)))) {
+            throw new CustomException(ErrorCode.INVALID_TIME);
+        }
     }
 }

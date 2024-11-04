@@ -6,6 +6,8 @@ import com.play.hiclear.domain.participant.enums.ParticipantRole;
 import com.play.hiclear.domain.participant.enums.ParticipantStatus;
 import com.play.hiclear.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +16,28 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Optional<Participant> findByMeetingAndUser(Meeting meeting, User user);
 
-    int countByMeetingId(Long meetingId);
-
     List<Participant> findByMeetingAndStatus(Meeting meeting, ParticipantStatus status);
 
-    List<Participant> findByUserIdAndRole(Long userId, ParticipantRole role);
+    @Query("""
+    SELECT COUNT(p) FROM Participant p 
+    WHERE p.meeting = :meeting 
+      AND p.status = :status
+    """)
+    int countByMeetingAndStatus(
+            @Param("meeting") Meeting meeting,
+            @Param("status") ParticipantStatus status);
 
-}
+
+    @Query("""
+
+    SELECT p FROM Participant p 
+    WHERE p.user.id = :userId 
+      AND p.role = :role 
+      AND p.meeting.finished = false
+      AND p.meeting.deletedAt IS NULL
+    ORDER BY p.meeting.startTime ASC
+    """)
+    List<Participant> findByUserIdAndRoleExcludingFinished(
+            @Param("userId") Long userId,
+            @Param("role") ParticipantRole role);
+    }
