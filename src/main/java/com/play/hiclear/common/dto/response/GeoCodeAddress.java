@@ -6,14 +6,18 @@ import lombok.Getter;
 @Getter
 public class GeoCodeAddress {
     @JsonProperty("y")
-    private Double latitude; // 위도
+    private final Double latitude; // 위도
 
     @JsonProperty("x")
-    private Double longitude; // 경도
-
-    @JsonProperty("road_address")
-    private String roadAddress; // 도로명 주소
+    private final Double longitude; // 경도
 
     @JsonProperty("address_name")
-    private String addressName; // 일반 주소
+    private final String addressName; // 전체 도로명 주소
+
+    // 생성자 추가
+    public GeoCodeAddress(Double latitude, Double longitude, String addressName) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.addressName = addressName;
+    }
 }
