@@ -25,7 +25,13 @@ public class Gym extends TimeStamped {
 
     private String description;
 
-    private String address;
+    private String region;
+
+    private String addressName;
+
+    private Double latitude;
+
+    private Double lontitude;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -39,10 +45,13 @@ public class Gym extends TimeStamped {
     List<Court> courts = new ArrayList<>();
 
 
-    public Gym(String name, String description, String address, GymType gymType, User user) {
+    public Gym(String name, String description, String region, String addressName, Double latitude, Double lontitude, GymType gymType, User user) {
         this.name = name;
         this.description = description;
-        this.address = address;
+        this.region = region;
+        this.addressName = addressName;
+        this.latitude = latitude;
+        this.lontitude = lontitude;
         this.gymType = gymType;
         this.user = user;
 
@@ -57,7 +66,7 @@ public class Gym extends TimeStamped {
             this.description = updateDescription;
         }
         if (updateAddress != null && !updateAddress.isEmpty()){
-            this.address = updateAddress;
+            this.region = updateAddress;
         }
     }
 }

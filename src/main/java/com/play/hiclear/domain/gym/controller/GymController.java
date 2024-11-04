@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.gym.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequiredArgsConstructor
@@ -78,9 +81,16 @@ public class GymController {
 
     // 체육관 단건 조회
     @GetMapping("/v1/gyms/{gymId}")
-    public ResponseEntity<GymDetailResponse> get(@PathVariable Long gymId) {
-        return ResponseEntity.ok(gymService.get(gymId));
+    public ResponseEntity<GymDetailResponse> get(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long gymId) {
+        return ResponseEntity.ok(gymService.get(authUser, gymId));
     }
 
 
+    // 체육관 거리 조회
+    @GetMapping("/v1/distance")
+    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
+        return ResponseEntity.ok(gymService.distance(request));
+    }
 }
