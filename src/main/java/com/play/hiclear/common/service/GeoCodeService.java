@@ -34,9 +34,10 @@ public class GeoCodeService {
 
             Double latitude = document.getAddress().getLatitude();
             Double longitude = document.getAddress().getLongitude();
-            String roadAddress = document.getRoadAddress(); // 도로명 주소를 가져옵니다.
+            String regionAddress = document.getAddress().getAddressName();
+            String roadAddress = document.getRoadAddress().getAddressName(); // 도로명 주소를 가져옵니다.
 
-            return new GeoCodeAddress(latitude, longitude, roadAddress);
+            return new GeoCodeAddress(latitude, longitude, regionAddress, roadAddress);
         }
         return null; // 결과가 없을 경우 null 반환
     }

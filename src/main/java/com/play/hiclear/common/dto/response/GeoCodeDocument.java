@@ -8,7 +8,7 @@ public class GeoCodeDocument {
     @JsonProperty("address")
     private GeoCodeAddress address; // 주소 정보
 
-    public String getRoadAddress() {
-        return address != null ? address.getAddressName() : null;
-    }
+    @JsonProperty("road_address")
+    private GeoCodeAddress roadAddress; // 주소 정보
+
 }
