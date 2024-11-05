@@ -21,7 +21,7 @@ public class GymDetailResponse {
         this.id = gym.getId();
         this.name = gym.getName();
         this.description = gym.getDescription();
-        this.address = gym.getAddress();
+        this.address = gym.getAddressName();
         this.gymType = gym.getGymType();
         this.clubNames = clubNames;
         this.todaySchedule = todaySchedule;
@@ -31,7 +31,7 @@ public class GymDetailResponse {
         this.id = gym.getId();
         this.name = gym.getName();
         this.description = gym.getDescription();
-        this.address = gym.getAddress();
+        this.address = gym.getAddressName();
         this.gymType = gym.getGymType();
     }
 }

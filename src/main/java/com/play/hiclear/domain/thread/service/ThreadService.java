@@ -30,8 +30,8 @@ public class ThreadService {
     @Transactional
     public void create(Long userId, Long commentId, ThreadCreateRequest threadCreateRequest) {
 
-        User user = findUserById(userId);
-        Comment comment = findCommentById(commentId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
 
         Thread thread = Thread.builder()
                 .content(threadCreateRequest.getContent())
@@ -45,8 +45,8 @@ public class ThreadService {
     @Transactional
     public void update(Long userId, Long threadId, ThreadUpdateRequest threadUpdateRequest) {
 
-        User user = findUserById(userId);
-        Thread thread = findThreadById(threadId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
+        Thread thread = threadRepository.findByIdAndDeletedAtIsNullOrThrow(threadId);
 
         checkThreadUser(user, thread);
         checkPassword(threadUpdateRequest.getPassword(), user.getPassword());
@@ -57,29 +57,13 @@ public class ThreadService {
     @Transactional
     public void delete(Long userId, Long threadId, ThreadDeleteRequest threadDeleteRequest) {
 
-        User user = findUserById(userId);
-        Thread thread = findThreadById(threadId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
+        Thread thread = threadRepository.findByIdAndDeletedAtIsNullOrThrow(threadId);
 
         checkThreadUser(user, thread);
         checkPassword(threadDeleteRequest.getPassword(), user.getPassword());
 
         thread.markDeleted();
-    }
-
-    // User 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
-
-    // Comment 조회
-    private Comment findCommentById(Long commentId) {
-        return commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
-
-    }
-
-    // Thread 조회
-    private Thread findThreadById(Long threadId) {
-        return threadRepository.findByIdAndDeletedAtIsNullOrThrow(threadId);
     }
 
     // 비밀번호 확인

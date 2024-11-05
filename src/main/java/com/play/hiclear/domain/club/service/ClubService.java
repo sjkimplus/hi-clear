@@ -44,7 +44,7 @@ public class ClubService {
     public void create(Long userId, ClubCreateRequest clubCreateRequest) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
         //  모임 생성
         Club club = clubRepository.save(
@@ -76,7 +76,7 @@ public class ClubService {
     public ClubGetResponse get(Long clubId) {
 
         //  모임 유효성 검사
-        Club club = findClub(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
 
         return new ClubGetResponse(club);
     }
@@ -92,11 +92,11 @@ public class ClubService {
     public ClubUpdateResponse update(Long userId, Long clubId, ClubUpdateRequest clubUpdateRequest) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  모임 조회
-        Club club = findClub(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
         //  현재 로그인된 유저의 모임멤버 조회
-        ClubMember clubMember = findClubMember(user.getId(), club.getId());
+        ClubMember clubMember = clubMemberRepository.findByUserIdAndClubIdOrThrow(user.getId(), club.getId());
 
         //  모임 권한 확인
         checkClubAdmin(clubMember);
@@ -125,11 +125,11 @@ public class ClubService {
     public void delete(Long userId, Long clubId, ClubDeleteRequest clubDeleteRequest) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  모임 조회
-        Club club = findClub(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
         //  모임 멤버 조회
-        ClubMember clubMember = findClubMember(user.getId(), club.getId());
+        ClubMember clubMember = clubMemberRepository.findByUserIdAndClubIdOrThrow(user.getId(), club.getId());
 
         //  모임 권한 확인
         checkClubAdmin(clubMember);
@@ -137,22 +137,6 @@ public class ClubService {
         checkPassword(clubDeleteRequest.getPassword(), club.getPassword());
 
         club.markDeleted();
-    }
-
-    // User 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
-
-    // 모임 조회
-    private Club findClub(Long clubId) {
-        return clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
-    }
-
-    // 모임 멤버 조회
-    private ClubMember findClubMember(Long userId, Long clubId) {
-        return clubMemberRepository.findByUserIdAndClubId(userId, clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
     }
 
     // 비밀번호 확인
