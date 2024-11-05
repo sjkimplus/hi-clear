@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class LikesController {
 
-    private LikesService likesService;
+    private final LikesService likesService;
 
     // 좋아요 토글 기능
     @PostMapping("/v1/comments/{commentId}/likes")

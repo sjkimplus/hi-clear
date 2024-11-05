@@ -3,6 +3,7 @@ package com.play.hiclear.domain.comment.entity;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
+import com.play.hiclear.domain.likes.entity.Likes;
 import com.play.hiclear.domain.thread.entity.Thread;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -33,6 +34,9 @@ public class Comment extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
+
+    @OneToMany(mappedBy = "comment")
+    private List<Likes> likes = new ArrayList<>();
     
     @OneToMany(mappedBy = "comment")
     private List<Thread> threads = new ArrayList<>();

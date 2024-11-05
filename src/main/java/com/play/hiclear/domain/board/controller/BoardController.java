@@ -25,7 +25,8 @@ public class BoardController {
     public ResponseEntity<BoardCreateResponse> create(
             @PathVariable Long clubId,
             @RequestBody BoardCreateRequest request,
-            @AuthenticationPrincipal AuthUser authUser) {
+            @AuthenticationPrincipal AuthUser authUser
+    ){
         return ResponseEntity.ok(boardService.create(clubId, request, authUser));
     }
 
