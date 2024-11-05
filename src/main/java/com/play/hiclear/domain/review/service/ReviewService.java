@@ -100,13 +100,13 @@ public class ReviewService {
         Long reviewerId = authUser.getUserId();
 
         // 리뷰 하는사람 조회
-        User reviewer = findUserById(reviewerId);
+        User reviewer = userRepository.findByIdAndDeletedAtIsNullOrThrow(reviewerId);
 
         // 리뷰 받는사람 조회
-        User reviewee = findUserById(request.getRevieweeId());
+        User reviewee = userRepository.findByIdAndDeletedAtIsNullOrThrow(request.getRevieweeId());
 
         // 미팅 조회
-        Meeting meeting = findMeetingById(meetingId);
+        Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         //미팅안에 리뷰 받는사람이 속해있는지 검증
         checkParticipant(meeting, reviewee);
@@ -129,16 +129,6 @@ public class ReviewService {
                 review.getMannerRank().name(),
                 review.getGradeRank().name()
         );
-    }
-
-    // 유저 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
-
-    // 모임 조회
-    private Meeting findMeetingById(Long meetingId) {
-        return meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
     }
 
     // 리뷰 받는사람이 모임에 속해있는지 확인

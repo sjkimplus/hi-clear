@@ -13,7 +13,6 @@ import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.board.repository.BoardRepository;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
-import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +43,10 @@ public class BoardService {
     public BoardCreateResponse create(Long clubId, BoardCreateRequest request, AuthUser authUser) {
 
         // 모임 조회
-        Club club = findClubById(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
 
         // 유저 조회
-        User user = findUserById(authUser.getUserId());
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         Board board = new Board(
                 request.getTitle(),
@@ -100,7 +99,7 @@ public class BoardService {
     public BoardSearchDetailResponse get(Long clubId, Long clubboardId) {
 
         // 게시글 조회
-        Board board = findBoardById(clubboardId);
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
 
         // Club 확인
         checkClub(clubId, board);
@@ -131,7 +130,7 @@ public class BoardService {
     public BoardUpdateResponse update(Long clubId, Long clubboardId, BoardUpdateRequest request, AuthUser authUser) {
 
         // 게시글 조회
-        Board board = findBoardById(clubboardId);
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
 
         // Club 확인
         checkClub(clubId, board);
@@ -159,7 +158,7 @@ public class BoardService {
     public void delete(Long clubId, Long clubboardId, AuthUser authUser) {
 
         // 게시글 조회
-        Board board = findBoardById(clubboardId);
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
 
         // Club 확인
         checkClub(clubId, board);
@@ -168,21 +167,6 @@ public class BoardService {
         checkUser(board, authUser);
 
         boardRepository.deleteById(clubboardId);
-    }
-
-    // User 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
-
-    // Club 조회
-    private Club findClubById(Long clubId) {
-        return clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
-    }
-
-    // Board 조회
-    private Board findBoardById(Long clubboardId) {
-        return boardRepository.findBoardIdOrThrow(clubboardId);
     }
 
     // Club 확인
