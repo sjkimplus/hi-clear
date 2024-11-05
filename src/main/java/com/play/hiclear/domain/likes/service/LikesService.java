@@ -1,7 +1,6 @@
 package com.play.hiclear.domain.likes.service;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.comment.repository.CommentRepository;
 import com.play.hiclear.domain.likes.entity.Likes;
@@ -25,12 +24,12 @@ public class LikesService {
     public void toggleLike(Long commentId, AuthUser authUser) {
 
         // Comment 조회
-        Comment comment = findCommentById(commentId);
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
 
         Long userId = authUser.getUserId();
 
         // 사용자 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
         // 기존 좋아요 상태 확인
         Likes existingLike = likesRepository.findByCommentIdAndUserId(commentId, user.getId());
@@ -49,18 +48,9 @@ public class LikesService {
     public Long get(Long commentId) {
 
         // Comment 조회
-        findCommentById(commentId);
+        commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
 
         return likesRepository.countByCommentId(commentId);
     }
 
-    // Comment 조회
-    private Comment findCommentById(Long commentId) {
-        return commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
-    }
-
-    // User 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
 }
