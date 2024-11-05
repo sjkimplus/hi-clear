@@ -18,6 +18,11 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     List<Participant> findByMeetingAndStatus(Meeting meeting, ParticipantStatus status);
 
+    @Query("SELECT p.meeting FROM Participant p WHERE p.meeting.finished = true")
+    List<Meeting> findFinishedMeetings();
+
+    List<Participant> findByMeeting(Meeting meeting);
+
     @Query("""
     SELECT COUNT(p) FROM Participant p 
     WHERE p.meeting = :meeting 
