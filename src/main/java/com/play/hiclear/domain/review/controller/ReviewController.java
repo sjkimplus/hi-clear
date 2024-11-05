@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewController {
 
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
     // 리뷰 가능한 유저 가져오기
     @GetMapping("/v1/reviewableUser")
