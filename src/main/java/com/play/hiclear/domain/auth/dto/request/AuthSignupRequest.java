@@ -22,7 +22,7 @@ public class AuthSignupRequest {
     @NotBlank(message = "이름은 필수 입력 사항 입니다.")
     private String name;
 
-    private String region;
+    private String address;
 
     @NotBlank(message = "권한 선택은 필수사항입니다.")
     private String selfRank;
@@ -30,11 +30,11 @@ public class AuthSignupRequest {
     @NotBlank(message = "권한 선택은 필수사항입니다.")
     private String userRole;
 
-    public AuthSignupRequest(String email, String password, String name, String region, String selfRank, String userRole) {
+    public AuthSignupRequest(String email, String password, String name, String address, String selfRank, String userRole) {
         this.email = email;
         this.password = password;
         this.name = name;
-        this.region = region;
+        this.address = address;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }

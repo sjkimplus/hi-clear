@@ -86,7 +86,7 @@ class UserServiceTest {
         userService.update(authUser, userUpdateRequest);
 
         // then
-        assertEquals("서울특별시 강서구", user.getRegion());
+        assertEquals("서울특별시 강서구", user.getAddress());
         assertEquals(Ranks.RANK_C, user.getSelfRank());
     }
 

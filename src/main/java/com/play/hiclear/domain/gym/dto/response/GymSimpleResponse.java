@@ -8,5 +8,5 @@ import lombok.Getter;
 public class GymSimpleResponse {
 
     private final String name;
-    private final String address;
+    private final String roadAddress;
 }

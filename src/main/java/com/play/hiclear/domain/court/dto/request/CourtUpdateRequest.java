@@ -6,9 +6,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CourtUpdateRequest {
-    private int price;
+    private Integer price;
 
-    public CourtUpdateRequest(int price) {
-        this.price = price;
+    public CourtUpdateRequest(Integer price) {
+        if (price != null) {
+            this.price = price;
+        }
     }
 }
