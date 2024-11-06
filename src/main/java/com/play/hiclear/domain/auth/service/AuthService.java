@@ -1,9 +1,9 @@
 package com.play.hiclear.domain.auth.service;
 
-import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.common.utils.JwtUtil;
 import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
@@ -29,6 +29,7 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final GeoCodeService geoCodeService;
 
     /**
      * 회원가입기능
@@ -44,6 +45,11 @@ public class AuthService {
             throw new CustomException(ErrorCode.AUTH_USER_EXISTING);
         }
 
+        // 주소 입력값 확인
+        if(geoCodeService.getGeoCode(request.getAddress()) == null){
+
+        };
+
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
 
@@ -51,7 +57,7 @@ public class AuthService {
         User user = new User(
                 request.getName(),
                 request.getEmail(),
-                request.getRegion(),
+                request.getAddress(),
                 encodePassword,
                 Ranks.of(request.getSelfRank()),
                 UserRole.of(request.getUserRole())
@@ -65,7 +71,7 @@ public class AuthService {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRegion(),
+                user.getAddress(),
                 user.getSelfRank(),
                 user.getUserRole()
         );
@@ -79,7 +85,7 @@ public class AuthService {
      */
     public AuthLoginResponse login(AuthLoginRequest request) {
 
-        // email으로 가입여부 홧인
+        // email으로 가입여부 확인
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
 

@@ -20,21 +20,19 @@ public class Court extends TimeStamped {
 
     private Long courtNum;
 
-    private int price;
-
-    private Boolean courtStatus = true; // 코트 활성화 여부(true = OPEN, false = CLOSE)
+    private Integer price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gym_id", nullable = false)
     private Gym gym;
 
-    public Court(Long courtNum, int price, Gym gym){
+    public Court(Long courtNum, Integer price, Gym gym){
         this.courtNum = courtNum;
         this.price = price;
         this.gym = gym;
     }
 
-    public void update(int price) {
+    public void update(Integer price) {
         this.price = price;
     }
 }

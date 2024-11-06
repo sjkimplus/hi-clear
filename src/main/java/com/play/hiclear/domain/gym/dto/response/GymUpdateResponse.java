@@ -9,5 +9,5 @@ public class GymUpdateResponse {
 
     private final String name;
     private final String description;
-    private final String address;
+    private final String roadAddress;
 }

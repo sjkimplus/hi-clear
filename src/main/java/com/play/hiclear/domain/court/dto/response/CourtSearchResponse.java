@@ -8,5 +8,4 @@ import lombok.Getter;
 public class CourtSearchResponse {
     private final Long courtNum;
     private final int price;
-    private final Boolean status;
 }

@@ -1,10 +1,12 @@
 package com.play.hiclear.domain.court.controller;
 
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.dto.request.CourtCreateRequest;
 import com.play.hiclear.domain.court.dto.request.CourtUpdateRequest;
 import com.play.hiclear.domain.court.dto.response.CourtCreateResponse;
 import com.play.hiclear.domain.court.dto.response.CourtSearchResponse;
+import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.service.CourtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,11 +55,12 @@ public class CourtController {
 
     // 코트 삭제
     @DeleteMapping("/v1/business/gyms/{gymId}/courts")
-    public void delete(
+    public ResponseEntity<String> delete(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
             @RequestParam Long courtNum
     ) {
         courtService.delete(authUser, gymId, courtNum);
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, Court.class.getSimpleName()));
     }
 }

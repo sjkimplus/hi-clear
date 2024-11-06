@@ -5,12 +5,10 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.gym.entity.Gym;
-import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +30,7 @@ public class User extends TimeStamped {
 
     private String password;
 
-    private String region;
+    private String address;
 
     private String imgUrl;
 
@@ -53,37 +51,34 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Participant> participants = new ArrayList<>();
-
-    public User(String name, String email, String region, Ranks selfRank, UserRole userRole){
+    public User(String name, String email, String address, Ranks selfRank, UserRole userRole){
         this.name = name;
         this.email = email;
-        this.region = region;
+        this.address = address;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }
-    public User(String name, String email, String region, String encodePassword, Ranks selfRank, UserRole role) {
+    public User(String name, String email, String address, String encodePassword, Ranks selfRank, UserRole role) {
         this.name = name;
         this.email = email;
-        this.region = region;
+        this.address = address;
         this.password = encodePassword;
         this.selfRank = selfRank;
         this.userRole = role;
     }
 
-    public User(Long id, String name, String email, String region, Ranks selfRank, UserRole userRole) {
+    public User(Long id, String name, String email, String address, Ranks selfRank, UserRole userRole) {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.region = region;
+        this.address = address;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }
 
-    public void update(String region, String selfRank) {
-        if(region != null){
-            this.region = region;
+    public void update(String address, String selfRank) {
+        if(address != null){
+            this.address = address;
         }
         if(selfRank != null){
             this.selfRank = Ranks.of(selfRank);
