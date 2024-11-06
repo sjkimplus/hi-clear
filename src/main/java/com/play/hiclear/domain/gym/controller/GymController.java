@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.gym.controller;
 
+import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
@@ -11,20 +12,18 @@ import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.service.GymService;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-
 @RestController
 @RequiredArgsConstructor
 public class GymController {
 
     private final GymService gymService;
+    private final DistanceCalculator distanceCalculator;
 
     // 체육관 등록
     @PostMapping("/v1/business/gyms")
@@ -91,6 +90,6 @@ public class GymController {
     // 체육관 거리 조회
     @GetMapping("/v1/distance")
     public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
-        return ResponseEntity.ok(gymService.distance(request));
+        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
     }
 }

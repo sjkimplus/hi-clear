@@ -50,7 +50,7 @@ class AuthServiceTest {
     void setup() {
         authSignupRequest = new AuthSignupRequest("test1@gamil.com", "Password!!", "홍길동", "서울특별시", "RANK_A", "BUSINESS");
         ;
-        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), authSignupRequest.getRegion(), "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), authSignupRequest.getAddress(), "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
         authUser = new AuthUser(1L, "홍길동", "test1@gmail.com", UserRole.BUSINESS);
     }

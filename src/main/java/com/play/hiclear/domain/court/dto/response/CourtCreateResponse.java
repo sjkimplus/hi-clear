@@ -7,5 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CourtCreateResponse {
     private final Long courtNum;
-    private final int price;
+    private final Integer price;
 }

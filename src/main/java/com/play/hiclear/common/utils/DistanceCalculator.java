@@ -1,5 +1,8 @@
 package com.play.hiclear.common.utils;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
+import com.play.hiclear.common.service.GeoCodeService;
+import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -11,6 +14,11 @@ public class DistanceCalculator {
 
     private static final BigDecimal EARTH_RADIUS = new BigDecimal("6371"); // Kilometers
     private static final MathContext MATH_CONTEXT = new MathContext(10, RoundingMode.HALF_UP);
+    private final GeoCodeService geoCodeService;
+
+    public DistanceCalculator(GeoCodeService geoCodeService) {
+        this.geoCodeService = geoCodeService;
+    }
 
     // 각도를 라디안으로 변경(BigDecimal)
     private BigDecimal toRadians(BigDecimal degrees) {
@@ -34,7 +42,7 @@ public class DistanceCalculator {
     }
 
     // 거리계산
-    public BigDecimal calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
+    private BigDecimal calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
         BigDecimal bigLat1 = BigDecimal.valueOf(lat1);
         BigDecimal bigLon1 = BigDecimal.valueOf(lon1);
         BigDecimal bigLat2 = BigDecimal.valueOf(lat2);
@@ -57,6 +65,14 @@ public class DistanceCalculator {
         BigDecimal distance = EARTH_RADIUS.multiply(acos(centralAngle), MATH_CONTEXT);
 
         return distance;
+    }
+
+    public String distance(String addressA, String addressB) {
+
+        GeoCodeDocument geoAddressA = geoCodeService.getGeoCode(addressA);
+        GeoCodeDocument geoAddressB = geoCodeService.getGeoCode(addressB);
+
+        return calculateDistance(geoAddressA.getLatitude(), geoAddressA.getLongitude(), geoAddressB.getLatitude(), geoAddressB.getLongitude()).toString();
     }
 }
 

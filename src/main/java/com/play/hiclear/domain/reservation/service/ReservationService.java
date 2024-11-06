@@ -247,7 +247,7 @@ public class ReservationService {
 
     // Court의 활성화/비활성화 , Court 삭제, 해당 Court가 있는 체육관이 삭제되었는지 확인
     private void checkCourtStatus(Court court) {
-        if (!court.getCourtStatus() || court.getDeletedAt() != null || court.getGym().getDeletedAt() != null) {
+        if (court.getDeletedAt() != null || court.getGym().getDeletedAt() != null) {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Reservation.class.getSimpleName());
         }
     }

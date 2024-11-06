@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.gym.service;
 
-import com.play.hiclear.common.dto.response.GeoCodeAddress;
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
+import com.play.hiclear.common.dto.response.GeoCodeResponse;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
@@ -25,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 @Service
@@ -51,16 +51,16 @@ public class GymService {
         // 유저 확인
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-        GeoCodeAddress geoCodeAddress = geoCodeService.getGeoCode(request.getAddress());
+        GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(request.getAddress());
 
 
         Gym gym = new Gym(
                 request.getName(),
                 request.getDescription(),
-                request.getAddress(),
-                geoCodeAddress.getAddressName(),
-                geoCodeAddress.getLatitude(),
-                geoCodeAddress.getLongitude(),
+                geoCodeDocument.getRegionAddress(),
+                geoCodeDocument.getRoadAddress(),
+                geoCodeDocument.getLatitude(),
+                geoCodeDocument.getLongitude(),
                 GymType.of(request.getGymType()),
                 user
         );
@@ -71,7 +71,8 @@ public class GymService {
                 gym.getId(),
                 gym.getName(),
                 gym.getDescription(),
-                gym.getRegion(),
+                gym.getRegionAddress(),
+                gym.getRoadAddress(),
                 gym.getGymType()
         );
     }
@@ -137,7 +138,7 @@ public class GymService {
         return new GymUpdateResponse(
                 gym.getName(),
                 gym.getDescription(),
-                gym.getRegion()
+                gym.getRegionAddress()
         );
     }
 
@@ -180,7 +181,7 @@ public class GymService {
     private GymSimpleResponse convertGymSimpleResponse(Gym gym) {
         return new GymSimpleResponse(
                 gym.getName(),
-                gym.getRegion());
+                gym.getRegionAddress());
     }
 
 
@@ -189,13 +190,5 @@ public class GymService {
             throw new CustomException(ErrorCode.NO_AUTHORITY);
         }
 
-    }
-
-    public String distance(DistanceRequest request) {
-
-        GeoCodeAddress addressA = geoCodeService.getGeoCode(request.getAddressA());
-        GeoCodeAddress addressB = geoCodeService.getGeoCode(request.getAddressB());
-
-        return distanceCalculator.calculateDistance(addressA.getLatitude(), addressA.getLongitude(), addressB.getLatitude(), addressB.getLongitude()).toString();
     }
 }

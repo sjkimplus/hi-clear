@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.auth.controller;
 
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
@@ -7,6 +8,7 @@ import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
 import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.auth.service.AuthService;
+import com.play.hiclear.domain.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,6 @@ public class AuthController {
     @DeleteMapping("/v1/auth/withdrawals")
     public ResponseEntity<String> delete(@AuthenticationPrincipal AuthUser authUser, @RequestBody AuthDeleteRequest request){
         authService.delete(authUser, request);
-        return ResponseEntity.ok("탈퇴 처리가 완료되었습니다.");
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, User.class.getSimpleName()));
     }
 }
