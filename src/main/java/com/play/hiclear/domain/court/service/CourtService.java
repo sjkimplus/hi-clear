@@ -43,6 +43,14 @@ public class CourtService {
         // 체육관 소유 사업자 확인
         checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
+        List<Court> courtList = gym.getCourts();
+        // courtList에 이미 존재하는 courtNum이 있는지 확인
+        boolean exists = courtList.stream()
+                .anyMatch(court -> court.getCourtNum() == courtCreateRequest.getCourtNum());
+        if (exists) {
+            throw new CustomException(ErrorCode.COURT_ALREADY_EXIST);
+        }
+
         Court court = new Court(
                 courtCreateRequest.getCourtNum(),
                 courtCreateRequest.getPrice(),
@@ -76,8 +84,7 @@ public class CourtService {
         return courtList.stream()
                 .map(c -> new CourtSearchResponse(
                         c.getCourtNum(),
-                        c.getPrice(),
-                        c.getCourtStatus()
+                        c.getPrice()
                 )).collect(Collectors.toList());
     }
 

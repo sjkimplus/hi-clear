@@ -25,9 +25,9 @@ public class Gym extends TimeStamped {
 
     private String description;
 
-    private String region;
+    private String regionAddress;
 
-    private String addressName;
+    private String roadAddress;
 
     private Double latitude;
 
@@ -45,11 +45,11 @@ public class Gym extends TimeStamped {
     List<Court> courts = new ArrayList<>();
 
 
-    public Gym(String name, String description, String region, String addressName, Double latitude, Double lontitude, GymType gymType, User user) {
+    public Gym(String name, String description, String regionAddress, String roadAddress, Double latitude, Double lontitude, GymType gymType, User user) {
         this.name = name;
         this.description = description;
-        this.region = region;
-        this.addressName = addressName;
+        this.regionAddress = regionAddress;
+        this.roadAddress = roadAddress;
         this.latitude = latitude;
         this.lontitude = lontitude;
         this.gymType = gymType;
@@ -66,7 +66,7 @@ public class Gym extends TimeStamped {
             this.description = updateDescription;
         }
         if (updateAddress != null && !updateAddress.isEmpty()){
-            this.region = updateAddress;
+            this.regionAddress = updateAddress;
         }
     }
 }

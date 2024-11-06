@@ -33,12 +33,12 @@ public class UserService {
 
         Pageable pageable = PageRequest.of(page - 1 , size);
 
-        Page<User> users = userRepository.findAll(pageable);
+        Page<User> users = userRepository.findAllByDeletedAtIsNull(pageable);
 
 
         // User 객체를 UserSimpleResponse로 변환
         List<UserSimpleResponse> userResponses = users.getContent().stream()
-                .map(user -> new UserSimpleResponse(user.getId(), user.getName(), user.getSelfRank().name(), user.getRegion())) // 필요한 필드로 변환
+                .map(user -> new UserSimpleResponse(user.getId(), user.getName(), user.getSelfRank().name(), user.getAddress())) // 필요한 필드로 변환
                 .collect(Collectors.toList());
 
         return new PageImpl<>(userResponses, pageable, users.getTotalElements());
@@ -60,15 +60,14 @@ public class UserService {
 
         // DTO 객체 반환
         return new UserUpdateResponse(
-                user.getRegion(),
+                user.getAddress(),
                 user.getSelfRank());
     }
 
     public UserDetailResponse get(AuthUser authUser, Long userId) {
 
         // 유저 불러오기
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
         // name(email)형태의 문자열 생성
         StringBuilder nameEmail = new StringBuilder();
@@ -77,7 +76,7 @@ public class UserService {
         // DTO 객체 생성 및 반환
         return new UserDetailResponse(
                 nameEmail.toString(),
-                user.getRegion(),
+                user.getAddress(),
                 user.getSelfRank()
         );
     }

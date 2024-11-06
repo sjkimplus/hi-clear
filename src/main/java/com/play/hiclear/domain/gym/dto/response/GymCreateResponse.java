@@ -11,6 +11,7 @@ public class GymCreateResponse {
     private final Long id;
     private final String name;
     private final String description;
-    private final String address;
+    private final String regionAddress;
+    private final String roadAddress;
     private final GymType gymType;
 }

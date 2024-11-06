@@ -12,7 +12,8 @@ public class GymDetailResponse {
     private Long id;
     private String name;
     private String description;
-    private String address;
+    private String regionAddress;
+    private String roadAddress;
     private GymType gymType;
     private List<String> clubNames = null;
     private List<ClubScheduleResponse> todaySchedule = null;
@@ -21,7 +22,7 @@ public class GymDetailResponse {
         this.id = gym.getId();
         this.name = gym.getName();
         this.description = gym.getDescription();
-        this.address = gym.getAddressName();
+        this.address = gym.getAddress();
         this.gymType = gym.getGymType();
         this.clubNames = clubNames;
         this.todaySchedule = todaySchedule;
@@ -31,7 +32,7 @@ public class GymDetailResponse {
         this.id = gym.getId();
         this.name = gym.getName();
         this.description = gym.getDescription();
-        this.address = gym.getAddressName();
+        this.address = gym.getAddress();
         this.gymType = gym.getGymType();
     }
 }
