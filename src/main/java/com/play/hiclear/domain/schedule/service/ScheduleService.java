@@ -69,7 +69,7 @@ public class ScheduleService {
         validateCreateScheduleTimes(scheduleRequest.getStartTime(), scheduleRequest.getEndTime());
 
         // 위치 정보 가져오기 (GeoCodeService 호출)
-        GeoCodeDocument geoCodeAddress = getGeoCodeInfo(scheduleRequest.getRegionAddress());
+        GeoCodeDocument geoCodeAddress = getGeoCodeInfo(scheduleRequest.getAddress());
 
         // 도로명 주소나 지번 주소가 없으면 예외 처리
         if (geoCodeAddress.getRegionAddress() == null && geoCodeAddress.getRoadAddress() == null) {
@@ -129,7 +129,6 @@ public class ScheduleService {
      * @param endDate
      * @return Page<Schedule>
      */
-    @Transactional
     public Page<Schedule> search(Long clubId, AuthUser authUser, int page, int size, String title, String description, String region, LocalDateTime startDate, LocalDateTime endDate) {
         log.info("클럽의 모임 일정 목록 조회 요청 - 사용자: {}, 클럽 ID: {}", authUser.getEmail(), clubId);
 
@@ -180,8 +179,8 @@ public class ScheduleService {
         schedule.updateSchedule(scheduleUpdateRequest);
 
         // 지역 정보(region)가 제공되면, 해당 정보를 사용하여 위치 정보를 갱신
-        if (scheduleUpdateRequest.getRegionAddress() != null && !scheduleUpdateRequest.getRegionAddress().isEmpty()) {
-            GeoCodeDocument geoCodeAddress = geoCodeService.getGeoCode(scheduleUpdateRequest.getRegionAddress());
+        if (scheduleUpdateRequest.getAddress() != null && !scheduleUpdateRequest.getAddress().isEmpty()) {
+            GeoCodeDocument geoCodeAddress = geoCodeService.getGeoCode(scheduleUpdateRequest.getAddress());
 
             // 도로명 주소 또는 지번 주소가 존재하면 위치 정보 갱신
             if (geoCodeAddress.getRegionAddress() != null || geoCodeAddress.getRoadAddress() != null) {

@@ -16,7 +16,7 @@ public class ScheduleRequest {
     @NotBlank
     private String description;
     @NotBlank
-    private String regionAddress;
+    private String address;
     @NotNull
     private LocalDateTime startTime;
     @NotNull
@@ -24,10 +24,10 @@ public class ScheduleRequest {
     @NotNull
     private List<Long> participants;
 
-    public ScheduleRequest(String title, String description, String regionAddress, LocalDateTime startTime, LocalDateTime endTime, List<Long> participants) {
+    public ScheduleRequest(String title, String description, String address, LocalDateTime startTime, LocalDateTime endTime, List<Long> participants) {
         this.title = title;
         this.description = description;
-        this.regionAddress = regionAddress;
+        this.address = address;
         this.startTime = startTime;
         this.endTime = endTime;
         this.participants = participants;
