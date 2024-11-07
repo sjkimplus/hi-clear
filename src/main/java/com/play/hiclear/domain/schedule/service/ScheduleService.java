@@ -209,7 +209,6 @@ public class ScheduleService {
         );
     }
 
-
     /**
      * 모임 일정 삭제
      * @param scheduleId

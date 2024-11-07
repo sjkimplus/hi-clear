@@ -1,7 +1,6 @@
 package com.play.hiclear.domain.schedule.dto.response;
 
-import com.play.hiclear.domain.reservation.dto.response.ReservationSearchResponse;
-import com.play.hiclear.domain.reservation.entity.Reservation;
+
 import com.play.hiclear.domain.schedule.entity.Schedule;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

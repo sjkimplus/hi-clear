@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.meeting.entity;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
@@ -28,8 +29,12 @@ public class Meeting extends TimeStamped {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String region;
+    private String regionAddress;
+
+    private String roadAddress;
+
+    private Double longitude;
+    private Double latitude;
 
     private String content;
 
@@ -43,17 +48,18 @@ public class Meeting extends TimeStamped {
     @Column(nullable = false)
     private Ranks ranks;
 
-    @Column(nullable = false)
     private int groupSize;
 
-    @Column(nullable = false)
     private boolean finished;
 
 
-    public Meeting(MeetingCreateEditRequest request, User user) {
+    public Meeting(MeetingCreateEditRequest request, User user, GeoCodeDocument address) {
         this.user = user;
         this.title = request.getTitle();
-        this.region = request.getRegion();
+        this.regionAddress = address.getRegionAddress();
+        this.roadAddress = address.getRoadAddress();
+        this.longitude = address.getLongitude();
+        this.latitude = address.getLatitude();
         this.content = request.getContent();
         this.startTime = request.getStartTime();
         this.endTime = request.getEndTime();
@@ -63,13 +69,24 @@ public class Meeting extends TimeStamped {
 
     public void update(MeetingCreateEditRequest request) {
         this.title = request.getTitle();
-        this.region = request.getRegion();
         this.content = request.getContent();
         this.startTime = request.getStartTime();
         this.endTime = request.getEndTime();
         this.ranks = request.getRanks();
         this.groupSize = request.getGroupSize();
-        this.finished = false;
+    }
+
+    public void updateWithAddress(MeetingCreateEditRequest request, GeoCodeDocument address) {
+        this.title = request.getTitle();
+        this.regionAddress = address.getRegionAddress();
+        this.roadAddress = address.getRoadAddress();
+        this.longitude = address.getLongitude();
+        this.latitude = address.getLatitude();
+        this.content = request.getContent();
+        this.startTime = request.getStartTime();
+        this.endTime = request.getEndTime();
+        this.ranks = request.getRanks();
+        this.groupSize = request.getGroupSize();
     }
 
     public void markFinished() {

@@ -1,6 +1,5 @@
 package com.play.hiclear.domain.schedule.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;

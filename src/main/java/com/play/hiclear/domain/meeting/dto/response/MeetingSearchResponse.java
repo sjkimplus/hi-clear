@@ -19,7 +19,7 @@ public class MeetingSearchResponse {
     public MeetingSearchResponse(Meeting meeting, long numberJoined) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
-        this.region = meeting.getRegion();
+        this.region = meeting.getRegionAddress();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
         this.ranks = meeting.getRanks();

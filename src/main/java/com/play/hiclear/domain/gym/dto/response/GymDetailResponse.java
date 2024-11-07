@@ -15,14 +15,14 @@ public class GymDetailResponse {
     private String regionAddress;
     private String roadAddress;
     private GymType gymType;
-    private List<String> clubNames = null;
-    private List<ClubScheduleResponse> todaySchedule = null;
+    private List<String> clubNames;
+    private List<ClubScheduleResponse> todaySchedule;
 
     public GymDetailResponse(Gym gym, List<String> clubNames, List<ClubScheduleResponse> todaySchedule) {
         this.id = gym.getId();
         this.name = gym.getName();
         this.description = gym.getDescription();
-        this.regionAddress = gym.getRegionAddress();
+//        this.address = gym.getAddress();
         this.gymType = gym.getGymType();
         this.clubNames = clubNames;
         this.todaySchedule = todaySchedule;

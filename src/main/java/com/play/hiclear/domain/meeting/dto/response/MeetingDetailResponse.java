@@ -21,7 +21,7 @@ public class MeetingDetailResponse {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
         this.content = meeting.getContent();
-        this.region = meeting.getRegion();
+        this.region = meeting.getRegionAddress();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
         this.ranks = meeting.getRanks();
