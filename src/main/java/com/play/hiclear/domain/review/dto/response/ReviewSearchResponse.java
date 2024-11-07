@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 public class ReviewSearchResponse {
     private String userName;
     private String meetingTitle;
-    private String region;
+    private String regionAddress;
     private LocalDateTime endDate;
 
     public ReviewSearchResponse(String userName, String meetingTitle, String region, LocalDateTime endDate) {
         this.userName = userName;
         this.meetingTitle = meetingTitle;
-        this.region = region;
+        this.regionAddress = region;
         this.endDate = endDate;
     }
 }
