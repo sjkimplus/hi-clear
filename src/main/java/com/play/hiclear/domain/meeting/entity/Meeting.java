@@ -33,8 +33,8 @@ public class Meeting extends TimeStamped {
 
     private String roadAddress;
 
-    private double longitude;
-    private double latitude;
+    private Double longitude;
+    private Double latitude;
 
     private String content;
 
