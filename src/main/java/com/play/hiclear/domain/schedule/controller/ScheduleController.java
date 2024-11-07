@@ -53,12 +53,12 @@ public class ScheduleController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String regionAddress,
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate
     ) {
         // 클럽의 일정 목록을 페이징하여 가져옵니다.
-        Page<Schedule> schedules = scheduleService.search(clubId, authUser, page, size, title, description, region, startDate, endDate);
+        Page<Schedule> schedules = scheduleService.search(clubId, authUser, page, size, title, description, regionAddress, startDate, endDate);
 
         // Schedule -> ScheduleSearchResponse로 변환
         List<ScheduleSearchResponse> responseList = schedules.getContent().stream()

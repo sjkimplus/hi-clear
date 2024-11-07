@@ -124,12 +124,12 @@ public class ScheduleService {
      * @param size
      * @param title
      * @param description
-     * @param region
+     * @param regionAddress
      * @param startDate
      * @param endDate
      * @return Page<Schedule>
      */
-    public Page<Schedule> search(Long clubId, AuthUser authUser, int page, int size, String title, String description, String region, LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<Schedule> search(Long clubId, AuthUser authUser, int page, int size, String title, String description, String regionAddress, LocalDateTime startDate, LocalDateTime endDate) {
         log.info("클럽의 모임 일정 목록 조회 요청 - 사용자: {}, 클럽 ID: {}", authUser.getEmail(), clubId);
 
         User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
@@ -143,7 +143,7 @@ public class ScheduleService {
 
         // 클럽의 삭제되지 않은 일정 목록을 필터링하여 조회
         Page<Schedule> schedules = scheduleRepository.findAllByClubAndDeletedAtIsNullAndFilters(
-                club, title, description, region, startDate, endDate, pageable);
+                club, title, description, regionAddress, startDate, endDate, pageable);
 
         log.info("모임 일정 목록 조회 완료 - 클럽 ID: {}, 조회된 일정 수: {}", clubId, schedules.getTotalElements());
         return schedules;  // Page<Schedule> 반환
