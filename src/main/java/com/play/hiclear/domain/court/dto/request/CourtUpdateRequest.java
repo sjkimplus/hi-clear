@@ -1,16 +1,17 @@
 package com.play.hiclear.domain.court.dto.request;
 
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 public class CourtUpdateRequest {
-    private Integer price;
 
-    public CourtUpdateRequest(Integer price) {
-        if (price != null) {
+    @Min(value = 0)
+    private int price;
+
+    public CourtUpdateRequest(int price) {
             this.price = price;
-        }
     }
 }

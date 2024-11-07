@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CourtSearchResponse {
-    private final Long courtNum;
+    private final long courtNum;
     private final int price;
 }

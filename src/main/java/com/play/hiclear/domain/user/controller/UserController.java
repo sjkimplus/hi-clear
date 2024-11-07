@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.user.controller;
 
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.dto.response.UserDetailResponse;
@@ -28,7 +29,7 @@ public class UserController {
         return ResponseEntity.ok(userService.search(page, size));
     }
 
-    // 유조 상세 조회
+    // 유저 상세 조회
     @GetMapping("/v1/users/{userId}")
     public ResponseEntity<UserDetailResponse> get(
             @AuthenticationPrincipal AuthUser authUser,
@@ -52,7 +53,8 @@ public class UserController {
     public ResponseEntity<String> updateImage(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam("image") MultipartFile image) {
-        return ResponseEntity.ok(userService.updateImage(authUser, image));
+        userService.updateImage(authUser, image);
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.POSTED, "사진"));
     }
 
     // 유저 프로필 사진 등록
@@ -60,6 +62,7 @@ public class UserController {
     public ResponseEntity<String> deleteImage(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam String fileName) {
-        return ResponseEntity.ok(userService.delete(authUser, fileName));
+        userService.deleteImage(authUser, fileName);
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, "사진"));
     }
 }

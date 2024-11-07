@@ -18,21 +18,21 @@ public class Court extends TimeStamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long courtNum;
+    private long courtNum;
 
-    private Integer price;
+    private int price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gym_id", nullable = false)
     private Gym gym;
 
-    public Court(Long courtNum, Integer price, Gym gym){
+    public Court(long courtNum, int price, Gym gym){
         this.courtNum = courtNum;
         this.price = price;
         this.gym = gym;
     }
 
-    public void update(Integer price) {
+    public void update(int price) {
         this.price = price;
     }
 }

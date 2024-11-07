@@ -48,9 +48,6 @@ public class AuthService {
 
         // 주소 입력값 확인
         GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(request.getAddress());
-        if(geoCodeDocument == null){
-            throw new CustomException(ErrorCode.ADDRESS_BAD_REQUEST);
-        }
 
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
