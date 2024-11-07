@@ -75,7 +75,7 @@ public class BoardService {
      */
     public Page<BoardSearchResponse> search(Long clubId, int page, int size) {
         Pageable pageable = PageRequest.of(page -1, size);
-        Page<Board> boards = boardRepository.findByClubId(clubId, pageable);
+        Page<Board> boards = boardRepository.findByClubIdAndDeletedAtIsNull(clubId, pageable);
 
         return boards.map(board -> new BoardSearchResponse(
                 board.getId(),
@@ -99,7 +99,7 @@ public class BoardService {
     public BoardSearchDetailResponse get(Long clubId, Long clubboardId) {
 
         // 게시글 조회
-        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
+        Board board = boardRepository.findByIdAndDeletedAtIsNullOrThrow(clubboardId);
 
         // Club 확인
         checkClub(clubId, board);
@@ -130,7 +130,7 @@ public class BoardService {
     public BoardUpdateResponse update(Long clubId, Long clubboardId, BoardUpdateRequest request, AuthUser authUser) {
 
         // 게시글 조회
-        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
+        Board board = boardRepository.findByIdAndDeletedAtIsNullOrThrow(clubboardId);
 
         // Club 확인
         checkClub(clubId, board);
@@ -158,7 +158,7 @@ public class BoardService {
     public void delete(Long clubId, Long clubboardId, AuthUser authUser) {
 
         // 게시글 조회
-        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
+        Board board = boardRepository.findByIdAndDeletedAtIsNullOrThrow(clubboardId);
 
         // Club 확인
         checkClub(clubId, board);
@@ -166,7 +166,8 @@ public class BoardService {
         // User 확인
         checkUser(board, authUser);
 
-        boardRepository.deleteById(clubboardId);
+        board.markDeleted();
+        boardRepository.save(board);
     }
 
     // Club 확인

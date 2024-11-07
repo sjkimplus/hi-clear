@@ -23,7 +23,7 @@ public class LikesController {
         return ResponseEntity.ok().build();//성공하면 200 OK를 반환
     }
 
-    // 좋아요 조회 기능
+    // 좋아요 총개수 카운트 기능
     @GetMapping("/v1/comments/{commentId}/likes/status")
     public ResponseEntity<Long> get(
             @PathVariable Long commentId
