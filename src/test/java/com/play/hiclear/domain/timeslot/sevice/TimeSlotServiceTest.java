@@ -55,9 +55,9 @@ class TimeSlotServiceTest {
     @BeforeEach
     void setup() {
         authUser = new AuthUser(1L, "사업자1", "test1@gmail.com", UserRole.BUSINESS);
-        user = new User(authUser.getName(), authUser.getEmail(), "서울특별시", "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        user = new User(authUser.getName(), authUser.getEmail(),"서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031,"encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
-        gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
+        gym = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         ReflectionTestUtils.setField(gym, "id", 1L);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
         court = new Court(1L, 10000, gym);

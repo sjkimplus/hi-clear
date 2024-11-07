@@ -1,7 +1,9 @@
 package com.play.hiclear.domain.auth.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.common.utils.JwtUtil;
 import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
@@ -39,6 +41,9 @@ class AuthServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private GeoCodeService geoCodeService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -48,9 +53,9 @@ class AuthServiceTest {
 
     @BeforeEach
     void setup() {
-        authSignupRequest = new AuthSignupRequest("test1@gamil.com", "Password!!", "홍길동", "서울특별시", "RANK_A", "BUSINESS");
+        authSignupRequest = new AuthSignupRequest("test1@gamil.com", "Password!!", "홍길동", "서울 중구 태평로1가 31", "RANK_A", "BUSINESS");
         ;
-        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), authSignupRequest.getAddress(), "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
         authUser = new AuthUser(1L, "홍길동", "test1@gmail.com", UserRole.BUSINESS);
     }
@@ -61,6 +66,8 @@ class AuthServiceTest {
         // given
         when(passwordEncoder.encode(authSignupRequest.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
+        GeoCodeDocument geoCodeDocument = new GeoCodeDocument();
+        when(geoCodeService.getGeoCode(authSignupRequest.getAddress())).thenReturn(geoCodeDocument);
 
         // when
         AuthSignupResponse result = authService.signup(authSignupRequest);
