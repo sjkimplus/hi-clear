@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.auth.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
@@ -46,9 +47,10 @@ public class AuthService {
         }
 
         // 주소 입력값 확인
-        if(geoCodeService.getGeoCode(request.getAddress()) == null){
-
-        };
+        GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(request.getAddress());
+        if(geoCodeDocument == null){
+            throw new CustomException(ErrorCode.ADDRESS_BAD_REQUEST);
+        }
 
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
@@ -57,7 +59,10 @@ public class AuthService {
         User user = new User(
                 request.getName(),
                 request.getEmail(),
-                request.getAddress(),
+                geoCodeDocument.getRegionAddress(),
+                geoCodeDocument.getRoadAddress(),
+                geoCodeDocument.getLatitude(),
+                geoCodeDocument.getLongitude(),
                 encodePassword,
                 Ranks.of(request.getSelfRank()),
                 UserRole.of(request.getUserRole())
@@ -71,7 +76,7 @@ public class AuthService {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getAddress(),
+                user.getRegionAddress(),
                 user.getSelfRank(),
                 user.getUserRole()
         );

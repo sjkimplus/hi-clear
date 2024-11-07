@@ -12,7 +12,7 @@ public class AuthSignupResponse {
     private final Long id;
     private final String name;
     private final String email;
-    private final String region;
+    private final String regionAddress;
     private final Ranks selfRank;
     private final UserRole userRole;
 

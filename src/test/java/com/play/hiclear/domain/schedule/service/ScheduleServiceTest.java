@@ -169,7 +169,7 @@ class ScheduleServiceTest {
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
         when(clubRepository.findByIdAndDeletedAtIsNullOrThrow(club.getId())).thenReturn(club);
 
-        User participantUser = new User(user.getId(), user.getName(), user.getEmail(), user.getAddress(), user.getSelfRank(), user.getUserRole());
+        User participantUser = new User(user.getId(), user.getName(), user.getEmail(), user.getRoadAddress(), user.getSelfRank(), user.getUserRole());
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(user.getId())).thenReturn(participantUser);
 
         // When & Then
