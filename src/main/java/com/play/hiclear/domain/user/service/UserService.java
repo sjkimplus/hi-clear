@@ -38,7 +38,7 @@ public class UserService {
 
         // User 객체를 UserSimpleResponse로 변환
         List<UserSimpleResponse> userResponses = users.getContent().stream()
-                .map(user -> new UserSimpleResponse(user.getId(), user.getName(), user.getSelfRank().name(), user.getAddress())) // 필요한 필드로 변환
+                .map(user -> new UserSimpleResponse(user.getId(), user.getName(), user.getSelfRank().name(), user.getRoadAddress())) // 필요한 필드로 변환
                 .collect(Collectors.toList());
 
         return new PageImpl<>(userResponses, pageable, users.getTotalElements());
@@ -60,7 +60,7 @@ public class UserService {
 
         // DTO 객체 반환
         return new UserUpdateResponse(
-                user.getAddress(),
+                user.getRoadAddress(),
                 user.getSelfRank());
     }
 
@@ -76,7 +76,7 @@ public class UserService {
         // DTO 객체 생성 및 반환
         return new UserDetailResponse(
                 nameEmail.toString(),
-                user.getAddress(),
+                user.getRoadAddress(),
                 user.getSelfRank()
         );
     }

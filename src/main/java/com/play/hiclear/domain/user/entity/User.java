@@ -30,7 +30,13 @@ public class User extends TimeStamped {
 
     private String password;
 
-    private String address;
+    private String regionAddress;
+
+    private String roadAddress;
+
+    private String longitude;
+
+    private String latitude;
 
     private String imgUrl;
 
@@ -51,34 +57,37 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
-    public User(String name, String email, String address, Ranks selfRank, UserRole userRole){
+    public User(String name, String email, String roadAddress, Ranks selfRank, UserRole userRole){
         this.name = name;
         this.email = email;
-        this.address = address;
+        this.roadAddress = roadAddress;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }
-    public User(String name, String email, String address, String encodePassword, Ranks selfRank, UserRole role) {
+    public User(String name, String email, String regionAddress, String roadAddress, String latitude, String longitude, String encodePassword, Ranks selfRank, UserRole role) {
         this.name = name;
         this.email = email;
-        this.address = address;
+        this.regionAddress = regionAddress;
+        this.roadAddress = roadAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.password = encodePassword;
         this.selfRank = selfRank;
         this.userRole = role;
     }
 
-    public User(Long id, String name, String email, String address, Ranks selfRank, UserRole userRole) {
+    public User(Long id, String name, String email, String roadAddress, Ranks selfRank, UserRole userRole) {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.address = address;
+        this.roadAddress = roadAddress;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }
 
     public void update(String address, String selfRank) {
         if(address != null){
-            this.address = address;
+            this.roadAddress = address;
         }
         if(selfRank != null){
             this.selfRank = Ranks.of(selfRank);
