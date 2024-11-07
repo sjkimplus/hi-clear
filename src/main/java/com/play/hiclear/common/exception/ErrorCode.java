@@ -49,7 +49,7 @@ public enum ErrorCode {
     SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 모임 일정입니다."),
     SCHEDULE_TIME_CONFLICT(HttpStatus.CONFLICT, "이미 다른 모임이 있는 시간입니다."),
     DUPLICATE_SCHEDULE(HttpStatus.CONFLICT, "같은 클럽에서 동일한 시작 시간과 제목을 가진 일정이 이미 존재합니다."),
-    INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "시작 시간이 종료 시간보다 늦을 수 없습니다."),
+    INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "모임 일정의 시간이 맞지 않습니다."),
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
 
     // Reservation
