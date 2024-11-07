@@ -6,6 +6,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.common.service.GeoCodeService;
+import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
@@ -58,6 +59,7 @@ public class MeetingService {
         // 주소값 가져오기
         GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
 
+        // 거리
         Meeting meeting = new Meeting(request, user, address);
         meetingRepository.save(meeting);
 
@@ -186,14 +188,15 @@ public class MeetingService {
     /**
      * 번개 통합검색 (급수필터, 정렬타입 적용)
      * @param sortType
-     * @param rank
+     * @param ranks
      * @param page
      * @param size
      * @return
      */
-    public Page<MeetingSearchResponse> search(SortType sortType, Ranks rank, int page, int size) {
+    public Page<MeetingSearchResponse> search(SortType sortType, Ranks ranks, int distance, int page, int size, AuthUser authUser) {
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
         Pageable pageable = PageRequest.of(page -1, size);
-        return meetingQueryDslRepository.search(sortType, rank, pageable);
+        return meetingQueryDslRepository.search(sortType, ranks, distance, user, pageable);
     }
 
     /**

@@ -88,8 +88,8 @@ public class GymController {
 
 
     // 체육관 거리 조회
-    @GetMapping("/v1/distance")
-    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
-        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
-    }
+//    @GetMapping("/v1/distance")
+//    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
+//        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
+//    }
 }

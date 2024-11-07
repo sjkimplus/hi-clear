@@ -1,6 +1,8 @@
 package com.play.hiclear.domain.meeting.controller;
 
 import com.play.hiclear.common.enums.Ranks;
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
@@ -46,12 +48,22 @@ public class MeetingController {
 
     // 번개글 다건 조회
     @GetMapping("/v1/meetings")
-    public ResponseEntity<Page<MeetingSearchResponse>> search(@RequestParam(defaultValue = "LATEST") SortType sortType,
-                                                              @RequestParam(required = false) Ranks ranks,
-                                                              @RequestParam(defaultValue = "1") int page,
-                                                              @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(meetingService.search(sortType, ranks, page, size));
+    public ResponseEntity<Page<MeetingSearchResponse>> search(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "LATEST") SortType sortType,
+            @RequestParam(required = false) Ranks ranks,
+            @RequestParam int distance,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // Validate distance
+        if (distance != 3 && distance != 5 && distance != 10 && distance != 20) {
+            throw new CustomException(ErrorCode.INVALID_DISTANCE);
+        }
+
+        return ResponseEntity.ok(meetingService.search(sortType, ranks, distance, page, size, authUser));
     }
+
 
     // 번개글 단건 조회 + 신청한 번개 단건 조회
     @GetMapping("/v1/meetings/{meetingId}")
