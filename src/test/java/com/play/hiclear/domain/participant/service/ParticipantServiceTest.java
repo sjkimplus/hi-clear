@@ -4,7 +4,7 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.participant.dto.ParticipantListResponse;
@@ -26,12 +26,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
-import static com.play.hiclear.domain.user.entity.QUser.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -60,7 +58,7 @@ public class ParticipantServiceTest {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime startTime = now.plusHours(25);
     LocalDateTime endTime = startTime.plusHours(2);
-    MeetingCreateEditRequest request = new MeetingCreateEditRequest("title", "region", "content", startTime, endTime, Ranks.RANK_A, 12);
+    MeetingCreateRequest request = new MeetingCreateRequest("title", "region", "content", startTime, endTime, Ranks.RANK_A, 12);
 
 
     @BeforeEach
@@ -145,7 +143,7 @@ public class ParticipantServiceTest {
         ParticipantUpdateRequest request = new ParticipantUpdateRequest(ParticipantStatus.CANCELED);
 
         // 시작까지 24시간 이하로 남은 경우
-        MeetingCreateEditRequest lateRequest = new MeetingCreateEditRequest("title", "region", "content", now, now.plusHours(1), Ranks.RANK_A, 12);
+        MeetingCreateRequest lateRequest = new MeetingCreateRequest("title", "region", "content", now, now.plusHours(1), Ranks.RANK_A, 12);
         Meeting lateMeeting = new Meeting(lateRequest, user2);
 
         when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(lateMeeting);

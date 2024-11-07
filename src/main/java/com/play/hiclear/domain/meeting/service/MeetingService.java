@@ -7,7 +7,8 @@ import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.enums.SortType;
@@ -49,9 +50,9 @@ public class MeetingService {
      * @return
      */
     @Transactional
-    public String create(AuthUser authUser, MeetingCreateEditRequest request) {
+    public String create(AuthUser authUser, MeetingCreateRequest request) {
         // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
-        checkTimeValidity(request);
+        checkTimeValidity(request.getStartTime(), request.getEndTime());
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         // 주소값 가져오기
@@ -73,23 +74,29 @@ public class MeetingService {
      * @return
      */
     @Transactional
-    public String update(AuthUser authUser, MeetingCreateEditRequest request, Long meetingId) {
+    public String update(AuthUser authUser, MeetingEditRequest request, Long meetingId) {
         // 업로드한 번개 일정 찾기
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
         // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
-        checkTimeValidity(request);
+        if (request.getStartTime()!=null || request.getEndTime()!=null) {
+            checkTimeValidity(request.getStartTime(), request.getEndTime());
+        }
 
         // 권한체크 - 작성자가 맞는지 체크
         checkAuthority(authUser, meeting);
-
-        // 주소값 가져오기 (새로운 주소인 경우에만)
-        if ((request.getAddress() != meeting.getRegionAddress()) && (request.getAddress() != meeting.getRegionAddress())) {
-            GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
-            meeting.updateWithAddress(request, address);
-        }
         
         meeting.update(request);
+
+        // 지역 정보(region)가 제공되면, 해당 정보를 사용하여 위치 정보를 갱신
+        if (request.getAddress() != null && !request.getAddress().isEmpty()) {
+            GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
+
+            // 도로명 주소 또는 지번 주소가 존재하면 위치 정보 갱신
+            if (address.getRegionAddress() != null || address.getRoadAddress() != null) {
+                meeting.updateLocation(address);
+            }
+        }
         return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Meeting.class.getSimpleName());
     }
 
@@ -194,6 +201,7 @@ public class MeetingService {
      * @param meetingId
      * @return
      */
+    @Transactional
     public String finishMyMeeting(AuthUser authUser, Long meetingId) { // auth 인증
         // 번개 일정 찾기
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
@@ -212,12 +220,12 @@ public class MeetingService {
 
     private void checkAuthority(AuthUser authUser, Meeting meeting) {
         if (authUser.getUserId()!=meeting.getUser().getId()){
-            throw new CustomException(ErrorCode.NO_AUTHORITY);
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Meeting.class.getSimpleName());
         }
     }
 
-    private void checkTimeValidity(MeetingCreateEditRequest request) {
-        if (!request.getStartTime().isAfter(LocalDateTime.now()) || request.getEndTime().isBefore((request.getStartTime().plusHours(1)))) {
+    private void checkTimeValidity(LocalDateTime startTime, LocalDateTime endTime) {
+        if (!startTime.isAfter(LocalDateTime.now()) || endTime.isBefore((startTime.plusHours(1)))) {
             throw new CustomException(ErrorCode.INVALID_TIME);
         }
     }

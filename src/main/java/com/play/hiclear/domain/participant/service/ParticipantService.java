@@ -46,6 +46,14 @@ public class ParticipantService {
 
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
+        if (meeting.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.TOO_LATE);
+        }
+
+        if (getJoinedNumber(meeting)==meeting.getGroupSize()){
+            throw new CustomException(ErrorCode.FULL);
+        }
+
         // 이미 추가된 유저인 경우 중복추가 방지
         Optional<Participant> existingParticipant = participantRepository.findByMeetingAndUser(meeting, user);
         if (existingParticipant.isPresent()){
@@ -109,6 +117,11 @@ public class ParticipantService {
                 new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
         );
 
+        // 참가자 번호가 미팅 번호에 신청된 번호가 맞는지 확인
+        if (participant.getMeeting().getId()!=meeting.getId()) {
+            throw new CustomException(ErrorCode.WRONG_MATCH);
+        }
+
         // 번개 신청 철회 - 신청자만 가능 CANCEL
         if (request.getStatus()==ParticipantStatus.CANCELED) {
             // 본인 확인
@@ -118,7 +131,7 @@ public class ParticipantService {
             // 번개 시작까지 24시간 이상 남았는지 확인
             LocalDateTime now = LocalDateTime.now();
             if (now.isAfter(meeting.getStartTime().minusHours(24))) {
-                throw new CustomException(ErrorCode.TOO_LATE);
+                throw new CustomException(ErrorCode.TOO_LATE_TO_CANCEL);
             }
             participant.updateStatus(request.getStatus());
         } else if (request.getStatus()==ParticipantStatus.ACCEPTED || request.getStatus()==ParticipantStatus.REJECTED) {
@@ -126,6 +139,10 @@ public class ParticipantService {
             // 본인 확인
             if (meeting.getUser().getId()!=authUser.getUserId()) {
                 throw new CustomException(ErrorCode.NO_AUTHORITY, Participant.class.getSimpleName());
+            }
+
+            if (request.getStatus()==ParticipantStatus.ACCEPTED && getJoinedNumber(meeting)==meeting.getGroupSize()){
+                    throw new CustomException(ErrorCode.FULL);
             }
             participant.updateStatus(request.getStatus());
         } else { // 기타는 불가

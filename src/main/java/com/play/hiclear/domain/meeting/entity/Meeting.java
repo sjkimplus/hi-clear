@@ -3,13 +3,14 @@ package com.play.hiclear.domain.meeting.entity;
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.common.enums.Ranks;
-import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.geo.Point;
 
 import java.time.LocalDateTime;
 
@@ -52,8 +53,7 @@ public class Meeting extends TimeStamped {
 
     private boolean finished;
 
-
-    public Meeting(MeetingCreateEditRequest request, User user, GeoCodeDocument address) {
+    public Meeting(MeetingCreateRequest request, User user, GeoCodeDocument address) {
         this.user = user;
         this.title = request.getTitle();
         this.regionAddress = address.getRegionAddress();
@@ -67,26 +67,34 @@ public class Meeting extends TimeStamped {
         this.groupSize = request.getGroupSize();
     }
 
-    public void update(MeetingCreateEditRequest request) {
-        this.title = request.getTitle();
-        this.content = request.getContent();
-        this.startTime = request.getStartTime();
-        this.endTime = request.getEndTime();
-        this.ranks = request.getRanks();
-        this.groupSize = request.getGroupSize();
+
+    // 모임 일정 수정
+    public void update(MeetingEditRequest request) {
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
+            this.title = request.getTitle();
+        }
+        if (request.getContent() != null && !request.getContent().isEmpty()) {
+            this.content = request.getContent();
+        }
+        if (request.getStartTime() != null) {
+            this.startTime = request.getStartTime();
+        }
+        if (request.getEndTime() != null) {
+            this.endTime = request.getEndTime();
+        }
+        if (request.getRanks() != null) {
+            this.ranks = request.getRanks();
+        }
+        if (request.getGroupSize() >= 4 && request.getGroupSize()!=this.groupSize){
+            this.groupSize = request.getGroupSize();
+        }
     }
 
-    public void updateWithAddress(MeetingCreateEditRequest request, GeoCodeDocument address) {
-        this.title = request.getTitle();
+    public void updateLocation(GeoCodeDocument address) {
         this.regionAddress = address.getRegionAddress();
         this.roadAddress = address.getRoadAddress();
         this.longitude = address.getLongitude();
         this.latitude = address.getLatitude();
-        this.content = request.getContent();
-        this.startTime = request.getStartTime();
-        this.endTime = request.getEndTime();
-        this.ranks = request.getRanks();
-        this.groupSize = request.getGroupSize();
     }
 
     public void markFinished() {

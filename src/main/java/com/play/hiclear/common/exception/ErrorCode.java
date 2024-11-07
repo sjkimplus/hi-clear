@@ -67,6 +67,8 @@ public enum ErrorCode {
 
     // Meeting
     TOO_SOON(HttpStatus.BAD_REQUEST, "번개일정 종료전에 번개완료를 할 수는 없습니다"),
+    TOO_LATE(HttpStatus.BAD_REQUEST, "번개일정 참여하기에는 너무 늦었습니다"),
+    FULL(HttpStatus.BAD_REQUEST, "번개일정 참여자가 모두 모집 되었습니다"),
     INVALID_TIME(HttpStatus.BAD_REQUEST, "시작시간은 현재시간 이후, 운동시간은 총 1시간이여야 합니다."),
 
 
@@ -81,8 +83,9 @@ public enum ErrorCode {
 
     // Participant
     DUPLICATE_PARTICIPANT(HttpStatus.CONFLICT, "이미 신청이 되어 있습니다."),
-    TOO_LATE(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
+    TOO_LATE_TO_CANCEL(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
     WRONG_STATUS(HttpStatus.BAD_REQUEST, "번개 참가자의 상태를 수정할 수 없습니다."),
+    WRONG_MATCH(HttpStatus.BAD_REQUEST, "번개 번호 또는 참가자 번호가 유효하지 않습니다."),
 
     // Review
     REVIEW_MEETING_USER(HttpStatus.FORBIDDEN, "해당 유저가 미팅에 속해있지 않습니다."),

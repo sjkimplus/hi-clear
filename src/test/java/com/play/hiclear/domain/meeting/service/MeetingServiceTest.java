@@ -4,7 +4,7 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.repository.MeetingQueryDslRepository;
@@ -51,7 +51,7 @@ class MeetingServiceTest {
     private User user;
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime futureTime = now.plusHours(2);
-    MeetingCreateEditRequest request = new MeetingCreateEditRequest("title", "region", "content", now, futureTime, Ranks.RANK_A, 12);
+    MeetingCreateRequest request = new MeetingCreateRequest("title", "region", "content", now, futureTime, Ranks.RANK_A, 12);
 
 
     @BeforeEach
