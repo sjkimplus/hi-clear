@@ -57,10 +57,10 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
-    public User(String name, String email, String roadAddress, Ranks selfRank, UserRole userRole){
+    public User(String name, String email, String regionAddress, Ranks selfRank, UserRole userRole){
         this.name = name;
         this.email = email;
-        this.roadAddress = roadAddress;
+        this.regionAddress = regionAddress;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }

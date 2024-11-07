@@ -10,5 +10,5 @@ public class UserSimpleResponse {
     private Long id;
     private String name;
     private String selfRank;
-    private String region;
+    private String regionAddress;
 }

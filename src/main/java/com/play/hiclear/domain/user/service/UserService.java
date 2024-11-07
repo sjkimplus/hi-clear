@@ -60,7 +60,7 @@ public class UserService {
 
         // DTO 객체 반환
         return new UserUpdateResponse(
-                user.getRoadAddress(),
+                user.getRegionAddress(),
                 user.getSelfRank());
     }
 
@@ -76,7 +76,7 @@ public class UserService {
         // DTO 객체 생성 및 반환
         return new UserDetailResponse(
                 nameEmail.toString(),
-                user.getRoadAddress(),
+                user.getRegionAddress(),
                 user.getSelfRank()
         );
     }

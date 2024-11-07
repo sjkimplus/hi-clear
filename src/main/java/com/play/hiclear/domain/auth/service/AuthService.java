@@ -76,7 +76,7 @@ public class AuthService {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRoadAddress(),
+                user.getRegionAddress(),
                 user.getSelfRank(),
                 user.getUserRole()
         );
