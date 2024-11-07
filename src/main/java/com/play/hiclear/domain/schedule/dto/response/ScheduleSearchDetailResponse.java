@@ -1,5 +1,6 @@
 package com.play.hiclear.domain.schedule.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schedule.entity.Schedule;
 import lombok.Getter;
@@ -12,15 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 public class ScheduleSearchDetailResponse {
     private Long id;
-    private String email; // 작성자 이메일
+    private String email;
     private String title;
     private String description;
-    private String region;
+    private String regionAddress;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Long createdBy; // 작성자 ID
-    private List<Long> participants; // 참가자 ID 목록
-    private ClubResponse club; // 클럽 정보
+    private Long createdBy;
+    private List<Long> participants;
+    private ClubResponse club;
 
     public static ScheduleSearchDetailResponse from(Schedule schedule, String email, Long createdBy, List<Long> participants) {
         ScheduleSearchDetailResponse response = new ScheduleSearchDetailResponse();
@@ -28,7 +29,7 @@ public class ScheduleSearchDetailResponse {
         response.email = email;
         response.title = schedule.getTitle();
         response.description = schedule.getDescription();
-        response.region = schedule.getRegion();
+        response.regionAddress = schedule.getRegionAddress();
         response.startTime = schedule.getStartTime();
         response.endTime = schedule.getEndTime();
         response.createdBy = createdBy;
