@@ -61,8 +61,8 @@ public class AuthService {
                 request.getEmail(),
                 geoCodeDocument.getRegionAddress(),
                 geoCodeDocument.getRoadAddress(),
-                geoCodeDocument.getLatitude().toString(),
-                geoCodeDocument.getLongitude().toString(),
+                geoCodeDocument.getLatitude(),
+                geoCodeDocument.getLongitude(),
                 encodePassword,
                 Ranks.of(request.getSelfRank()),
                 UserRole.of(request.getUserRole())
