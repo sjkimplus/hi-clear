@@ -39,7 +39,7 @@ public class CommentService {
         //  유저 조회
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  게시글 조회
-        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
+        Board board = boardRepository.findByIdAndDeletedAtIsNullOrThrow(clubboardId);
 
         Comment comment = Comment.builder()
                 .content(commentCreateRequest.getContent())

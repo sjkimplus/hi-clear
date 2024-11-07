@@ -10,11 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    Page<Board> findByClubId(Long clubId, Pageable pageable);
+    Page<Board> findByClubIdAndDeletedAtIsNull(Long clubId, Pageable pageable);
 
-    Optional<Board> findById(Long boardId);
 
-    default Board findBoardIdOrThrow(Long boardId) {
+    default Board findByIdAndDeletedAtIsNullOrThrow(Long boardId) {
         return findById(boardId).orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
     }
 }

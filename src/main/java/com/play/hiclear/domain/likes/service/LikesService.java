@@ -20,6 +20,12 @@ public class LikesService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 좋아요 토글기능
+     *
+     * @param commentId
+     * @param authUser
+     */
     @Transactional
     public void toggleLike(Long commentId, AuthUser authUser) {
 
@@ -45,6 +51,12 @@ public class LikesService {
         }
     }
 
+    /**
+     * 좋아요 총개수 카운트
+     *
+     * @param commentId
+     * @return
+     */
     public Long get(Long commentId) {
 
         // Comment 조회

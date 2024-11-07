@@ -10,6 +10,7 @@ import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.participant.repository.ParticipantRepository;
 import com.play.hiclear.domain.review.dto.request.ReviewCreateRequest;
 import com.play.hiclear.domain.review.dto.response.ReviewCreateResponse;
+import com.play.hiclear.domain.review.dto.response.ReviewSearchResponse;
 import com.play.hiclear.domain.review.entity.Review;
 import com.play.hiclear.domain.review.enums.MannerRank;
 import com.play.hiclear.domain.review.repository.ReviewRepository;
@@ -28,10 +29,10 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ReviewService {
 
-    private ParticipantRepository participantRepository;
-    private UserRepository userRepository;
-    private ReviewRepository reviewRepository;
-    private MeetingRepository meetingRepository;
+    private final ParticipantRepository participantRepository;
+    private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
+    private final MeetingRepository meetingRepository;
 
     // 점수 계산
     private void updateUserStatistics(User reviewee){
@@ -62,11 +63,12 @@ public class ReviewService {
     }
 
     /**
+     * 리뷰 가능한 유저 리스트로 불러오기
      *
      * @param authUser
      * @return
      */
-    public List<User> search(AuthUser authUser) {
+    public List<ReviewSearchResponse> search(AuthUser authUser) {
 
         Long reviewerId = authUser.getUserId();
 
@@ -74,21 +76,29 @@ public class ReviewService {
         List<Meeting> finishedMeetings = participantRepository.findFinishedMeetings();
 
         // 종료된 미팅 참가자 목록을 저장할 리스트
-        List<User> reviewableUsers = new ArrayList<>();
+        List<ReviewSearchResponse> reviewableUsers = new ArrayList<>();
 
         for(Meeting meeting : finishedMeetings){
             List<Participant> participants = participantRepository.findByMeeting(meeting);
-            reviewableUsers.addAll(participants.stream()
-                    .map(Participant::getUser)
-                    .filter(user -> !user.getId().equals(reviewerId)) //로그인된 사용자는 제외
-                    .distinct()
-                    .toList()
-            );
+
+            for(Participant participant : participants){
+                User user = participant.getUser();
+                if(!user.getId().equals(reviewerId)){
+                    ReviewSearchResponse response = new ReviewSearchResponse(
+                            user.getName(),
+                            meeting.getTitle(),
+                            meeting.getRegionAddress(),
+                            meeting.getEndTime()
+                    );
+                    reviewableUsers.add(response);
+                }
+            }
         }
         return reviewableUsers;
     }
 
     /**
+     * 리뷰 생성
      *
      * @param meetingId
      * @param request
