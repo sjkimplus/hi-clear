@@ -15,7 +15,7 @@ public class ScheduleSearchDetailResponse {
     private String email; // 작성자 이메일
     private String title;
     private String description;
-    private String region;
+//    private String region;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Long createdBy; // 작성자 ID
@@ -28,7 +28,7 @@ public class ScheduleSearchDetailResponse {
         response.email = email;
         response.title = schedule.getTitle();
         response.description = schedule.getDescription();
-        response.region = schedule.getRegion();
+//        response.region = schedule.getRegion();
         response.startTime = schedule.getStartTime();
         response.endTime = schedule.getEndTime();
         response.createdBy = createdBy;

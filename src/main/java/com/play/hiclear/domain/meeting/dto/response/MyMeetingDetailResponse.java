@@ -25,7 +25,7 @@ public class MyMeetingDetailResponse {
     public MyMeetingDetailResponse(Meeting meeting, int numberJoined, List<ParticipantResponse> pendingParticipants) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
-        this.region = meeting.getRegion();
+        this.region = meeting.getRegionAddress();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
         this.ranks = meeting.getRanks();

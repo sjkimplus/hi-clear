@@ -3,12 +3,9 @@ package com.play.hiclear.common.service;
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.dto.response.GeoCodeResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 public class GeoCodeService {
@@ -17,24 +14,31 @@ public class GeoCodeService {
     @Value("${kakao.api.key}")
     private String KAKAO_APP_KEY;
 
+    private final WebClient webClient;
+
+    public GeoCodeService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl(KAKAO_API_URL).build();
+    }
+
     public GeoCodeDocument getGeoCode(String address) {
-        RestTemplate restTemplate = new RestTemplate();
         String url = String.format(KAKAO_API_URL, address);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK " + KAKAO_APP_KEY);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
         try {
-            GeoCodeResponse response = restTemplate.exchange(url, HttpMethod.GET, entity, GeoCodeResponse.class).getBody();
+            GeoCodeResponse response = webClient.get()
+                    .uri(url)
+                    .headers(headers -> headers.set("Authorization", "KakaoAK " + KAKAO_APP_KEY))
+                    .retrieve()
+                    .bodyToMono(GeoCodeResponse.class)
+                    .block();
 
             if (response != null && response.getDocuments() != null && !response.getDocuments().isEmpty()) {
                 return response.getDocuments().get(0); // Return the first result
             }
-        } catch (HttpClientErrorException e) {
+        } catch (WebClientResponseException e) {
             System.err.println("GeoCode API call failed: " + e.getMessage());
         }
 
         return null;
     }
 }
+

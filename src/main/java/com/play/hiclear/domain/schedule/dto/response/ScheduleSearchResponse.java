@@ -14,7 +14,7 @@ public class ScheduleSearchResponse {
     private Long id;
     private String title;
     private String description;
-    private String region;
+//    private String region;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -23,7 +23,7 @@ public class ScheduleSearchResponse {
         response.id = schedule.getId();
         response.title = schedule.getTitle();
         response.description = schedule.getDescription();
-        response.region = schedule.getRegion();
+//        response.region = schedule.getRegion();
         response.startTime = schedule.getStartTime();
         response.endTime = schedule.getEndTime();
         return response;

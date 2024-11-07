@@ -53,25 +53,25 @@ public class ScheduleController {
     }
 
     // 클럽의 모임 일정 목록 조회
-    @GetMapping("/v1/clubs/{clubId}/schedules")
-    public ResponseEntity<Page<ScheduleSearchResponse>> search(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long clubId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) String region,
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate
-    ) {
-
-        Page<Schedule> schedules = scheduleService.search(clubId, authUser, page, size, title, description, region, startDate, endDate);
-
-        Page<ScheduleSearchResponse> responseList = schedules.map(ScheduleSearchResponse::from);
-
-        return ResponseEntity.ok(responseList);
-    }
+//    @GetMapping("/v1/clubs/{clubId}/schedules")
+//    public ResponseEntity<Page<ScheduleSearchResponse>> search(
+//            @AuthenticationPrincipal AuthUser authUser,
+//            @PathVariable Long clubId,
+//            @RequestParam(defaultValue = "1") int page,
+//            @RequestParam(defaultValue = "10") int size,
+//            @RequestParam(required = false) String title,
+//            @RequestParam(required = false) String description,
+//            @RequestParam(required = false) String region,
+//            @RequestParam(required = false) LocalDateTime startDate,
+//            @RequestParam(required = false) LocalDateTime endDate
+//    ) {
+//
+//        Page<Schedule> schedules = scheduleService.search(clubId, authUser, page, size, title, description, region, startDate, endDate);
+//
+//        Page<ScheduleSearchResponse> responseList = schedules.map(ScheduleSearchResponse::from);
+//
+//        return ResponseEntity.ok(responseList);
+//    }
 
     // 모임 일정 수정
     @PatchMapping("/v1/schedules/{scheduleId}")

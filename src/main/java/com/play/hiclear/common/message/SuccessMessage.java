@@ -5,9 +5,6 @@ import lombok.Getter;
 @Getter
 public enum SuccessMessage {
 
-
-
-
     // CLUB
     CLUBMEMBER_JOIN("모임 가입을 완료했습니다"),
     CLUBMEMBER_WITHDRAW("모임 탈퇴를 완료했습니다."),
@@ -15,13 +12,13 @@ public enum SuccessMessage {
     CLUBMEMBER_CHANGE_ROLE("권한을 변경했습니다."),
 
     // PARTIPCIPANT
-    PARTICIPANT_JOIN("모임 가입을 완료했습니다"),
+    PARTICIPANT_JOIN("번개 신청을 완료했습니다"),
 
     RESERVATION_ACCEPTED("사장님이 예약을 수락했습니다."),
     RESERVATION_REJECTED("사장님이 예약을 거절했습니다."),
+
     // MEETING
     MEETING_FINISHED("번개가 완료처리 되었습니다"),
-
 
     // 기본 코드
     CREATED("%s을(를) 생성했습니다."),

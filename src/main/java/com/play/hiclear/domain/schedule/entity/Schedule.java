@@ -27,11 +27,16 @@ public class Schedule extends TimeStamped {
 
     private String description;                         // 설명
 
-    private String region;                              // 장소
+    private String regionAddress;                        // 지명주소
+
+    private String roadAddress;                         // 도로명주소
 
     private LocalDateTime startTime;                    // 모임 일정 시작시간
 
     private LocalDateTime endTime;                      // 모임 일정 시작시간
+
+    private double longitude;
+    private double latitude;
 
     @ManyToOne
     @JoinColumn(name = "club_id")
@@ -44,14 +49,18 @@ public class Schedule extends TimeStamped {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Schedule(User user, Club club, String title, String description, String region, LocalDateTime startTime, LocalDateTime endTime) {
+    public Schedule(User user, Club club, String title, String description, LocalDateTime startTime, LocalDateTime endTime,
+                    String regionAddress, String roadAddress, double longitude, double latitude) {
         this.user = user;
         this.club = club;
         this.title = title;
         this.description = description;
-        this.region = region;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.regionAddress = regionAddress;
+        this.roadAddress = roadAddress;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     // 모임 일정 수정
@@ -62,9 +71,9 @@ public class Schedule extends TimeStamped {
         if (scheduleRequestDto.getDescription() != null && !scheduleRequestDto.getDescription().isEmpty()) {
             this.description = scheduleRequestDto.getDescription();
         }
-        if (scheduleRequestDto.getRegion() != null && !scheduleRequestDto.getRegion().isEmpty()) {
-            this.region = scheduleRequestDto.getRegion();
-        }
+//        if (scheduleRequestDto.getRegion() != null && !scheduleRequestDto.getRegion().isEmpty()) {
+//            this.region = scheduleRequestDto.getRegion();
+//        }
         if (scheduleRequestDto.getStartTime() != null) {
             this.startTime = scheduleRequestDto.getStartTime();
         }

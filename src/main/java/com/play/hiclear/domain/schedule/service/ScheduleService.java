@@ -1,11 +1,12 @@
 package com.play.hiclear.domain.schedule.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
-import com.play.hiclear.domain.reservation.entity.Reservation;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
 import com.play.hiclear.domain.schduleparticipant.repository.ScheduleParticipantRepository;
 import com.play.hiclear.domain.schedule.dto.request.ScheduleRequest;
@@ -38,6 +39,7 @@ public class ScheduleService {
     private final ScheduleParticipantRepository scheduleParticipantRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
+    private final GeoCodeService geoCodeService;
 
     /**
      * 모임 일정 생성
@@ -65,9 +67,12 @@ public class ScheduleService {
         // 유효성 검증: 시작 시간이 종료 시간보다 이전인지 확인
         validateScheduleTime(scheduleRequest.getStartTime(), scheduleRequest.getEndTime());
 
+        GeoCodeDocument geo = geoCodeService.getGeoCode(scheduleRequest.getAddress());
+
         // 모임 생성
         Schedule schedule = new Schedule(user, club, scheduleRequest.getTitle(), scheduleRequest.getDescription(),
-                scheduleRequest.getRegion(), scheduleRequest.getStartTime(), scheduleRequest.getEndTime());
+                scheduleRequest.getStartTime(), scheduleRequest.getEndTime(),
+                geo.getRegionAddress(), geo.getRoadAddress(), geo.getLongitude(), geo.getLatitude());
         Schedule savedSchedule = scheduleRepository.save(schedule);
 
         // 참가자 목록 추가
@@ -118,25 +123,25 @@ public class ScheduleService {
      * @param endDate
      * @return Page<Schedule>
      */
-    public Page<Schedule> search(Long clubId, AuthUser authUser, int page, int size, String title, String description, String region, LocalDateTime startDate, LocalDateTime endDate) {
-        log.info("클럽의 모임 일정 목록 조회 요청 - 사용자: {}, 클럽 ID: {}", authUser.getEmail(), clubId);
-
-        User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
-        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
-
-        // 해당 모임의 멤버인지 확인
-        validateClubMembership(user, club);
-
-        Pageable pageable = PageRequest.of(page - 1, size);
-        log.info("페이징 설정 완료 - 페이지: {}, 사이즈: {}", page, size);
-
-        // 클럽의 삭제되지 않은 일정 목록을 필터링하여 조회
-        Page<Schedule> schedules = scheduleRepository.findAllByClubAndDeletedAtIsNullAndFilters(
-                club, title, description, region, startDate, endDate, pageable);
-
-        log.info("모임 일정 목록 조회 완료 - 클럽 ID: {}, 조회된 일정 수: {}", clubId, schedules.getTotalElements());
-        return schedules;
-    }
+//    public Page<Schedule> search(Long clubId, AuthUser authUser, int page, int size, String title, String description, String region, LocalDateTime startDate, LocalDateTime endDate) {
+//        log.info("클럽의 모임 일정 목록 조회 요청 - 사용자: {}, 클럽 ID: {}", authUser.getEmail(), clubId);
+//
+//        User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
+//        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
+//
+//        // 해당 모임의 멤버인지 확인
+//        validateClubMembership(user, club);
+//
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//        log.info("페이징 설정 완료 - 페이지: {}, 사이즈: {}", page, size);
+//
+//        // 클럽의 삭제되지 않은 일정 목록을 필터링하여 조회
+//        Page<Schedule> schedules = scheduleRepository.findAllByClubAndDeletedAtIsNullAndFilters(
+//                club, title, description, region, startDate, endDate, pageable);
+//
+//        log.info("모임 일정 목록 조회 완료 - 클럽 ID: {}, 조회된 일정 수: {}", clubId, schedules.getTotalElements());
+//        return schedules;
+//    }
 
     /**
      * 모임 일정 수정

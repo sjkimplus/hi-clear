@@ -1,9 +1,11 @@
 package com.play.hiclear.domain.meeting.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.message.SuccessMessage;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
@@ -30,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true) // 데이터를
+@Transactional(readOnly = true) // 수정이 없는 데이터는 읽기만 함.
 @RequiredArgsConstructor
 public class MeetingService {
     private final MeetingRepository meetingRepository;
@@ -38,6 +40,7 @@ public class MeetingService {
     private final ParticipantService participantService;
     private final ParticipantRepository participantRepository;
     private final MeetingQueryDslRepository meetingQueryDslRepository;
+    private final GeoCodeService geoCodeService;
 
     /**
      * 번개 생성
@@ -51,7 +54,10 @@ public class MeetingService {
         checkTimeValidity(request);
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-        Meeting meeting = new Meeting(request, user);
+        // 주소값 가져오기
+        GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
+
+        Meeting meeting = new Meeting(request, user, address);
         meetingRepository.save(meeting);
 
         // participant 에 추가
@@ -76,6 +82,12 @@ public class MeetingService {
 
         // 권한체크 - 작성자가 맞는지 체크
         checkAuthority(authUser, meeting);
+
+        // 주소값 가져오기 (새로운 주소인 경우에만)
+        if ((request.getAddress() != meeting.getRegionAddress()) && (request.getAddress() != meeting.getRegionAddress())) {
+            GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
+            meeting.updateWithAddress(request, address);
+        }
         
         meeting.update(request);
         return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Meeting.class.getSimpleName());

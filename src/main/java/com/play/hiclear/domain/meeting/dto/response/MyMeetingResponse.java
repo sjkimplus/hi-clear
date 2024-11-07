@@ -19,7 +19,7 @@ public class MyMeetingResponse {
     public MyMeetingResponse(Meeting meeting) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
-        this.region = meeting.getRegion();
+        this.region = meeting.getRegionAddress();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
     }
@@ -27,7 +27,7 @@ public class MyMeetingResponse {
     public MyMeetingResponse(Meeting meeting, ParticipantStatus status) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
-        this.region = meeting.getRegion();
+        this.region = meeting.getRegionAddress();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
         this.status = status;
