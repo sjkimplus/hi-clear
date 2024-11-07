@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.gym.service;
 
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
+import com.play.hiclear.common.dto.response.GeoCodeResponse;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
@@ -49,7 +50,9 @@ public class GymService {
 
         // 유저 확인
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
         GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(request.getAddress());
+
 
         Gym gym = new Gym(
                 request.getName(),
@@ -63,6 +66,7 @@ public class GymService {
         );
 
         gymRepository.save(gym);
+
         return new GymCreateResponse(
                 gym.getId(),
                 gym.getName(),
@@ -134,7 +138,7 @@ public class GymService {
         return new GymUpdateResponse(
                 gym.getName(),
                 gym.getDescription(),
-                "gym.getRegion()"
+                gym.getRegionAddress()
         );
     }
 
@@ -177,7 +181,7 @@ public class GymService {
     private GymSimpleResponse convertGymSimpleResponse(Gym gym) {
         return new GymSimpleResponse(
                 gym.getName(),
-                "gym.getRegion()");
+                gym.getRegionAddress());
     }
 
 
@@ -186,13 +190,5 @@ public class GymService {
             throw new CustomException(ErrorCode.NO_AUTHORITY);
         }
 
-    }
-
-    public String distance(DistanceRequest request) {
-
-//        GeoCodeDocument addressA = geoCodeService.getGeoCode(request.getAddressA());
-//        GeoCodeDocument addressB = geoCodeService.getGeoCode(request.getAddressB());
-
-        return distanceCalculator.distance(request.getAddressA(), request.getAddressB());
     }
 }
