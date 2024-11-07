@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "Reviews")
 public class Review extends TimeStamped {
 
     // 리뷰의 고유 Id
@@ -22,8 +21,13 @@ public class Review extends TimeStamped {
 
     // 리뷰 작성자의 아이디
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "reviewer_id", nullable = false)
+    private User reviwer;
+
+    // 리뷰 받는사람의 아이디
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewee_id", nullable = false)
+    private User reviewee;
 
     // 미팅 아이디
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,4 +41,12 @@ public class Review extends TimeStamped {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Ranks gradeRank;
+
+    public Review(User reviewer, User reviewee, Meeting meeting, MannerRank mannerRank, Ranks gradeRank) {
+        this.reviwer = reviewer;
+        this.reviewee = reviewee;
+        this.meeting = meeting;
+        this.mannerRank = mannerRank;
+        this.gradeRank = gradeRank;
+    }
 }

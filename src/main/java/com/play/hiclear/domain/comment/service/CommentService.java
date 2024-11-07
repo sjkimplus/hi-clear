@@ -37,9 +37,9 @@ public class CommentService {
     public void create(Long userId, Long clubboardId, CommentCreateRequest commentCreateRequest) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  게시글 조회
-        Board board = findBoardById(clubboardId);
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
 
         Comment comment = Comment.builder()
                 .content(commentCreateRequest.getContent())
@@ -60,9 +60,9 @@ public class CommentService {
     public void update(Long userId, Long commentId, CommentUpdateRequest commentUpdateRequest) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  댓글 조회
-        Comment comment = findCommentById(commentId);
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
 
         //  작성자 확인
         checkCommentUser(user, comment);
@@ -82,9 +82,9 @@ public class CommentService {
     public void delete(Long userId, Long commentId, CommentDeleteRequest commentDeleteRequest) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  댓글 조회
-        Comment comment = findCommentById(commentId);
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
 
         //  작성자 확인
         checkCommentUser(user, comment);
@@ -92,22 +92,6 @@ public class CommentService {
         checkPassword(commentDeleteRequest.getPassword(), user.getPassword());
 
         comment.markDeleted();
-    }
-
-    // User 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
-
-    // Board 조회
-    private Board findBoardById(Long boardId) {
-        return boardRepository.findById(boardId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
-    }
-
-    // Comment 조회
-    private Comment findCommentById(Long commentId) {
-        return commentRepository.findByIdAndDeletedAtIsNullOrThrow(commentId);
     }
 
     // 비밀번호 확인

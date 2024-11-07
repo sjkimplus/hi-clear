@@ -84,6 +84,10 @@ public enum ErrorCode {
     TOO_LATE(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
     WRONG_STATUS(HttpStatus.BAD_REQUEST, "번개 참가자의 상태를 수정할 수 없습니다."),
 
+    // Review
+    REVIEW_MEETING_USER(HttpStatus.FORBIDDEN, "해당 유저가 미팅에 속해있지 않습니다."),
+
+
     // 기본 코드
     ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소(위,경도)값 입니다."),
     IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일입니다."),

@@ -13,7 +13,6 @@ import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.board.repository.BoardRepository;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
-import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +31,22 @@ public class BoardService {
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 게시글 생성
+     *
+     * @param clubId
+     * @param request
+     * @param authUser
+     * @return BoardCreateResponse
+     */
     @Transactional
     public BoardCreateResponse create(Long clubId, BoardCreateRequest request, AuthUser authUser) {
-        Club club = clubRepository.findById(clubId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName()));
 
-        User user = userRepository.findById(authUser.getUserId()).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
+        // 모임 조회
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
+
+        // 유저 조회
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         Board board = new Board(
                 request.getTitle(),
@@ -57,6 +65,14 @@ public class BoardService {
         );
     }
 
+    /**
+     * 게시글 다건 조회
+     *
+     * @param clubId
+     * @param page
+     * @param size
+     * @return Page<BoardSearchResponse>
+     */
     public Page<BoardSearchResponse> search(Long clubId, int page, int size) {
         Pageable pageable = PageRequest.of(page -1, size);
         Page<Board> boards = boardRepository.findByClubId(clubId, pageable);
@@ -73,13 +89,20 @@ public class BoardService {
         ));
     }
 
+    /**
+     * 게시글 단건 조회
+     *
+     * @param clubId
+     * @param clubboardId
+     * @return BoardSearchDetailResponse
+     */
     public BoardSearchDetailResponse get(Long clubId, Long clubboardId) {
-        Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
 
-        if(!board.getClub().getId().equals(clubId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName());
-        }
+        // 게시글 조회
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
+
+        // Club 확인
+        checkClub(clubId, board);
 
         User user = board.getUser();
 
@@ -94,18 +117,26 @@ public class BoardService {
         );
     }
 
+    /**
+     * 게시글 수정
+     *
+     * @param clubId
+     * @param clubboardId
+     * @param request
+     * @param authUser
+     * @return BoardUpdateResponse
+     */
     @Transactional
     public BoardUpdateResponse update(Long clubId, Long clubboardId, BoardUpdateRequest request, AuthUser authUser) {
-        Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
 
-        if(!board.getClub().getId().equals(clubId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName());
-        }
+        // 게시글 조회
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
 
-        if (!board.getUser().getId().equals(authUser.getUserId())) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, Board.class.getSimpleName());
-        }
+        // Club 확인
+        checkClub(clubId, board);
+
+        // User 확인
+        checkUser(board, authUser);
 
         board.update(
                 request.getTitle(),
@@ -116,19 +147,40 @@ public class BoardService {
         return new BoardUpdateResponse(board.getId(), board.getTitle(), board.getContext());
     }
 
+    /**
+     * 게시글 삭제(soft로 변경필요)
+     *
+     * @param clubId
+     * @param clubboardId
+     * @param authUser
+     */
     @Transactional
     public void delete(Long clubId, Long clubboardId, AuthUser authUser) {
-        Board board = boardRepository.findById(clubboardId).orElseThrow(()->
-                new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
 
-        if(!board.getClub().getId().equals(clubId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName());
-        }
+        // 게시글 조회
+        Board board = boardRepository.findBoardIdOrThrow(clubboardId);
 
-        if (!board.getUser().getId().equals(authUser.getUserId())) {  // authUser.getUserId() 사용
-            throw new CustomException(ErrorCode.NO_AUTHORITY, Board.class.getSimpleName());
-        }
+        // Club 확인
+        checkClub(clubId, board);
+
+        // User 확인
+        checkUser(board, authUser);
 
         boardRepository.deleteById(clubboardId);
     }
+
+    // Club 확인
+    private void checkClub(Long clubId, Board board) {
+        if(!board.getClub().getId().equals(clubId)) {
+            throw new CustomException(ErrorCode.NOT_FOUND, Club.class.getSimpleName());
+        }
+    }
+
+    // User 확인
+    private void checkUser(Board board, AuthUser authUser) {
+        if (!board.getUser().getId().equals(authUser.getUserId())) {
+            throw new CustomException(ErrorCode.NO_AUTHORITY, User.class.getSimpleName());
+        }
+    }
+
 }

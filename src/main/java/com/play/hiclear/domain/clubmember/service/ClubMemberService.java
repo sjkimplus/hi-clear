@@ -36,9 +36,9 @@ public class ClubMemberService {
     public void join(Long userId, Long clubId) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  모임 조회
-        Club club = findClubById(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
 
         // 모임 가입 여부 확인
         checkClubMember(userId, clubId);
@@ -67,11 +67,11 @@ public class ClubMemberService {
     public void withdraw(Long userId, Long clubId) {
 
         //  유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  모임 조회
-        Club club = findClubById(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
         //  모임 멤버 조회
-        ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
+        ClubMember member = clubMemberRepository.findByUserIdAndClubIdOrThrow(user.getId(), club.getId());
 
         //  모임장 확인
         if(member.getClubMemberRole() == ClubMemberRole.ROLE_MASTER){
@@ -91,12 +91,12 @@ public class ClubMemberService {
     public void expel(Long userId, Long clubId, ClubMemberExpelRequest clubMemberExpelRequest) {
 
         // 유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         // 모임 조회
-        Club club = findClubById(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
 
         //  모임 멤버 조회
-        ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
+        ClubMember member = clubMemberRepository.findByUserIdAndClubIdOrThrow(user.getId(), club.getId());
 
         // 추방할 권한 유무 확인
         if(member.getClubMemberRole() != ClubMemberRole.ROLE_MASTER &&
@@ -127,12 +127,12 @@ public class ClubMemberService {
     public void change(Long userId, Long clubId, ClubMemberChangeRoleRequest clubMemberChangeRoleRequest) {
 
         // 유저 조회
-        User user = findUserById(userId);
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         // 모임 조회
-        Club club = findClubById(clubId);
+        Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
 
         // 현재 로그인된 유저의 모임 멤버 권한 확인
-        ClubMember member = findClubMemberByUserIdAndClubId(user.getId(), club.getId());
+        ClubMember member = clubMemberRepository.findByUserIdAndClubIdOrThrow(user.getId(), club.getId());
         if(member.getClubMemberRole() != ClubMemberRole.ROLE_MASTER){
             throw new CustomException(ErrorCode.NO_AUTHORITY, ClubMember.class.getSimpleName());
         }
@@ -147,7 +147,7 @@ public class ClubMemberService {
 
         // 권한 변경을 할 유저
         User changeUser = userRepository.findByEmailAndDeletedAtIsNullOrThrow(clubMemberChangeRoleRequest.getEmail());
-        ClubMember changeMember = findClubMemberByUserIdAndClubId(changeUser.getId(), club.getId());
+        ClubMember changeMember = clubMemberRepository.findByUserIdAndClubIdOrThrow(changeUser.getId(), club.getId());
 
         changeMember.change(clubMemberChangeRoleRequest.getRole());
     }
@@ -155,17 +155,6 @@ public class ClubMemberService {
     // User 조회
     private User findUserById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
-    }
-
-    // 모임 조회
-    private Club findClubById(Long clubId) {
-        return clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
-    }
-
-    // 모임 멤버 조회
-    private ClubMember findClubMemberByUserIdAndClubId(Long userId, Long clubId) {
-        return clubMemberRepository.findByUserIdAndClubId(userId, clubId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, ClubMember.class.getSimpleName()));
     }
 
     // 비밀번호 확인
