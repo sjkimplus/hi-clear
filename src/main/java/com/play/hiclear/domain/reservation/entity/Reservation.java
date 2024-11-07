@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "reservations")
 public class Reservation extends TimeStamped {
     @Id

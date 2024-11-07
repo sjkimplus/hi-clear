@@ -10,6 +10,7 @@ import com.play.hiclear.domain.reservation.dto.response.ReservationSearchRespons
 import com.play.hiclear.domain.reservation.entity.Reservation;
 import com.play.hiclear.domain.reservation.enums.ReservationStatus;
 import com.play.hiclear.domain.reservation.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class ReservationController {
     @PostMapping("/v1/reservations")
     public List<ReservationSearchDetailResponse> create(
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody ReservationRequest request) {
+            @Valid @RequestBody ReservationRequest request) {
 
         return reservationService.create(authUser, request);
     }
@@ -45,7 +46,7 @@ public class ReservationController {
 
     // 예약 목록 조회(다건)
     @GetMapping("/v1/reservations")
-    public Page<ReservationSearchResponse> search(
+    public ResponseEntity<List<ReservationSearchResponse>> search(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -53,7 +54,9 @@ public class ReservationController {
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) LocalDate date) {
 
-        return reservationService.search(authUser, page, size, courtId, status, date);
+        Page<ReservationSearchResponse> result = reservationService.search(authUser, page, size, courtId, status, date);
+
+        return ResponseEntity.ok(result.getContent());
     }
 
     // 예약 수정
@@ -81,7 +84,7 @@ public class ReservationController {
     @PatchMapping("/v1/reservations/{reservationId}/status")
     public ResponseEntity<String> change(
             @PathVariable Long reservationId,
-            @RequestBody ReservationChangeStatusRequest request,
+            @Valid @RequestBody ReservationChangeStatusRequest request,
             @AuthenticationPrincipal AuthUser authUser) {
 
         // 예약 상태 변경 서비스 호출
