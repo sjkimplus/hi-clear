@@ -8,6 +8,7 @@ import com.play.hiclear.domain.court.dto.response.CourtCreateResponse;
 import com.play.hiclear.domain.court.dto.response.CourtSearchResponse;
 import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.service.CourtService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +27,7 @@ public class CourtController {
     public ResponseEntity<CourtCreateResponse> create(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
-            @RequestBody CourtCreateRequest courtCreateRequest) {
+            @Valid @RequestBody CourtCreateRequest courtCreateRequest) {
         return ResponseEntity.ok(courtService.create(authUser, gymId, courtCreateRequest));
     }
 
@@ -47,7 +48,7 @@ public class CourtController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
             @RequestParam Long courtNum,
-            @RequestBody CourtUpdateRequest courtUpdateRequest
+            @Valid @RequestBody CourtUpdateRequest courtUpdateRequest
     ) {
         return ResponseEntity.ok(courtService.update(authUser, gymId, courtNum, courtUpdateRequest));
     }

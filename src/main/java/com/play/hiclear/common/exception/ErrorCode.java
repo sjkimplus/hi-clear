@@ -92,7 +92,7 @@ public enum ErrorCode {
 
 
     // 기본 코드
-    ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소(위,경도)값 입니다."),
+    ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소 입니다."),
     IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일입니다."),
     IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 중 오류가 발생했습니다." ),
     IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패햇습니다." ),

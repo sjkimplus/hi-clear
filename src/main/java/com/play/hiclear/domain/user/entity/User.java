@@ -76,12 +76,15 @@ public class User extends TimeStamped {
         this.userRole = role;
     }
 
-    public void update(String address, String selfRank) {
-        if(address != null){
-            this.roadAddress = address;
+    public void update(String regionAddress, String roadAddress, Double latitude, Double longitude, String rank) {
+        if(regionAddress != null){
+            this.regionAddress = regionAddress;
+            this.roadAddress = roadAddress;
+            this.latitude = latitude;
+            this.longitude = longitude;
         }
         if(selfRank != null){
-            this.selfRank = Ranks.of(selfRank);
+            this.selfRank = Ranks.of(rank);
         }
     }
 

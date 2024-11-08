@@ -2,6 +2,8 @@ package com.play.hiclear.common.service;
 
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.dto.response.GeoCodeResponse;
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -37,8 +39,7 @@ public class GeoCodeService {
         } catch (WebClientResponseException e) {
             System.err.println("GeoCode API call failed: " + e.getMessage());
         }
-
-        return null;
+        throw new CustomException(ErrorCode.ADDRESS_BAD_REQUEST);
     }
 }
 

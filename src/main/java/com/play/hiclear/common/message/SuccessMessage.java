@@ -21,6 +21,7 @@ public enum SuccessMessage {
     MEETING_FINISHED("번개가 완료처리 되었습니다"),
 
     // 기본 코드
+    POSTED("%s을(를) 등록했습니다."),
     CREATED("%s을(를) 생성했습니다."),
     MODIFIED("%s을(를) 수정했습니다."),
     DELETED("%s을(를) 삭제했습니다.");

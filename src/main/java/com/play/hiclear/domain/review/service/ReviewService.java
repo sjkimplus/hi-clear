@@ -35,7 +35,7 @@ public class ReviewService {
     private final MeetingRepository meetingRepository;
 
     // 점수 계산
-    private void updateUserStatistics(User reviewee){
+    public void updateUserStatistics(User reviewee){
         List<Review> reviews = reviewRepository.findByReviewee(reviewee);
 
         if(!reviews.isEmpty()){

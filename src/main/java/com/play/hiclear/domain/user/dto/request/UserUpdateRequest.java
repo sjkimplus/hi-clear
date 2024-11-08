@@ -7,6 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserUpdateRequest {
 
-    private String region;
+    private String address;
     private String selfRank;
 }

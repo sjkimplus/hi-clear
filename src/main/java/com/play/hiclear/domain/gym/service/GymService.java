@@ -129,10 +129,16 @@ public class GymService {
         // 해당 체육관 사업주가 아닌경우 예외 발생
         checkBusinessAuth(gym.getUser(), authUser);
 
+        // 주소 불러오기
+        GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(gymUpdateRequest.getUpdateAddress());
+
         gym.update(
                 gymUpdateRequest.getUpdateName(),
                 gymUpdateRequest.getUpdateDescription(),
-                gymUpdateRequest.getUpdateAddress()
+                geoCodeDocument.getRegionAddress(),
+                geoCodeDocument.getRoadAddress(),
+                geoCodeDocument.getLatitude(),
+                geoCodeDocument.getLongitude()
         );
 
         return new GymUpdateResponse(

@@ -1,7 +1,9 @@
 package com.play.hiclear.domain.gym.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
@@ -45,6 +47,9 @@ class GymServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private GeoCodeService geoCodeService;
+
     private GymCreateRequest gymCreateRequest;
     private AuthUser authUser;
     private User user;
@@ -53,8 +58,10 @@ class GymServiceTest {
     void setup() {
         authUser = new AuthUser(1L, "사업자1", "test1@gmail.com", UserRole.BUSINESS);
         gymCreateRequest = new GymCreateRequest("공공체육관1", "서울특별시", "공공체육관1 설명", "PUBLIC");
-        user = new User(authUser.getName(), authUser.getEmail(), "서울특별시", "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        user = new User(authUser.getName(), authUser.getEmail(), "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
+        GeoCodeDocument geoCodeDocument = new GeoCodeDocument();
+        when(geoCodeService.getGeoCode(gymCreateRequest.getAddress())).thenReturn(geoCodeDocument);
     }
 
 
@@ -69,7 +76,7 @@ class GymServiceTest {
         // then
         verify(gymRepository, times(1)).save(any(Gym.class));
         assertEquals(gymCreateRequest.getName(), result.getName());
-        assertEquals(gymCreateRequest.getAddress(), result.getAddress());
+        assertEquals(gymCreateRequest.getAddress(), result.getRegionAddress());
         assertEquals(gymCreateRequest.getDescription(), result.getDescription());
         assertEquals(gymCreateRequest.getGymType(), result.getGymType().name());
     }
@@ -78,9 +85,9 @@ class GymServiceTest {
     @Test
     void search_success() {
         // given
-        Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
-        Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울특별시", GymType.PUBLIC, user);
-        Gym gym3 = new Gym("사설체육관1", "사설체육관 설명1", "서울특별시", GymType.PRIVATE, user);
+        Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        Gym gym3 = new Gym("사설체육관1", "사설체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PRIVATE, user);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Gym> gymPage = new PageImpl<>(Arrays.asList(gym1, gym2, gym3), PageRequest.of(0, 10), 3);
         when(gymRepository.searchGyms(null, null, null, pageable)).thenReturn(gymPage);
@@ -101,8 +108,8 @@ class GymServiceTest {
     @Test
     void search_name_success() {
         // given
-        Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
-        Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울특별시", GymType.PUBLIC, user);
+        Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Gym> gymPage = new PageImpl<>(Arrays.asList(gym1, gym2), PageRequest.of(0, 10), 3);
         when(gymRepository.searchGyms("공공", null, null, pageable)).thenReturn(gymPage);
@@ -121,10 +128,10 @@ class GymServiceTest {
     @Test
     void businessSearch_success() {
         // given
-        Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
-        Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울특별시", GymType.PUBLIC, user);
-        User user2 = new User("유저2", "user2@email.com", "서울특별시", "encodedPassword", Ranks.RANK_B, UserRole.BUSINESS);
-        Gym gym3 = new Gym("사설체육관1", "사설체육관 설명1", "서울특별시", GymType.PRIVATE, user2);
+        Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        User user2 = new User("유저2", "user2@email.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_B, UserRole.BUSINESS);
+        Gym gym3 = new Gym("공공체육관3", "공공체육관 설명3", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Gym> gymPage = new PageImpl<>(Arrays.asList(gym1, gym2), PageRequest.of(0, 10), 3);
         when(gymRepository.findByUserIdAndDeletedAtIsNull(authUser.getUserId(), pageable)).thenReturn(gymPage);
@@ -141,16 +148,16 @@ class GymServiceTest {
     @Test
     void update_success() {
         // given
-        Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
+        Gym gym = new Gym("공공체육관", "공공체육관 설명", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
-        GymUpdateRequest gymUpdateRequest = new GymUpdateRequest("수정체육관", "수정설명", "수정주소");
+        GymUpdateRequest gymUpdateRequest = new GymUpdateRequest("수정체육관", "수정설명", "서울특별시 종로구 세종로 1-1");
         // when
         GymUpdateResponse result = gymService.update(authUser, 1L, gymUpdateRequest);
 
         // then
         assertEquals(gymUpdateRequest.getUpdateName(), result.getName());
         assertEquals(gymUpdateRequest.getUpdateDescription(), result.getDescription());
-        assertEquals(gymUpdateRequest.getUpdateAddress(), result.getAddress());
+        assertEquals(gymUpdateRequest.getUpdateAddress(), result.getRegionAddress());
     }
 
 
@@ -158,7 +165,7 @@ class GymServiceTest {
     void update_fail_no_auth() {
         // given
         AuthUser authUser2 = new AuthUser(2L, "사업자2", "test2@gmail.com", UserRole.BUSINESS);
-        Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
+        Gym gym = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         GymUpdateRequest gymUpdateRequest = new GymUpdateRequest("수정체육관", "수정설명", "수정주소");
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
 
@@ -172,7 +179,7 @@ class GymServiceTest {
     @Test
     void delete_success() {
         // given
-        Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
+        Gym gym = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
 
         // when
@@ -188,7 +195,7 @@ class GymServiceTest {
     void delete_fail_no_auth() {
         // given
         AuthUser authUser2 = new AuthUser(2L, "사업자2", "test2@gmail.com", UserRole.BUSINESS);
-        Gym gym = new Gym("공공체육관1", "공공체육관 설명1", "서울특별시", GymType.PUBLIC, user);
+        Gym gym = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
 
         // when && then
