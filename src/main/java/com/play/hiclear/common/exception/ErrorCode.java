@@ -51,6 +51,8 @@ public enum ErrorCode {
     DUPLICATE_SCHEDULE(HttpStatus.CONFLICT, "같은 클럽에서 동일한 시작 시간과 제목을 가진 일정이 이미 존재합니다."),
     INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "모임 일정의 시간이 맞지 않습니다."),
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
+    PARTICIPANT_NOT_FOUND(HttpStatus.CONFLICT, "모임 일정에 참여한 참가자가 아닙니다."),
+    PARTICIPANT_ALREAY_EXISTED(HttpStatus.CONFLICT, "모임 일정에 이미 참가했습니다."),
 
     // Reservation
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),

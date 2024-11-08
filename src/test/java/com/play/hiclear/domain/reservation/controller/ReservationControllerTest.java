@@ -22,10 +22,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class ReservationControllerTest {
@@ -84,19 +83,20 @@ class ReservationControllerTest {
         int page = 1;
         int size = 10;
         Long courtId = null;
-        ReservationSearchResponse expectedResponse = new ReservationSearchResponse(); // 여기에 실제 응답 객체를 생성하세요.
-        Page<ReservationSearchResponse> expectedPage = new PageImpl<>(Collections.singletonList(expectedResponse), PageRequest.of(page - 1, size), 1);
+        ReservationSearchResponse expectedResponse = new ReservationSearchResponse();
+        List<ReservationSearchResponse> expectedList = Collections.singletonList(expectedResponse);
+        Page<ReservationSearchResponse> expectedPage = new PageImpl<>(expectedList, PageRequest.of(page - 1, size), expectedList.size());
 
-        when(reservationService.search(authUser, page, size, courtId, null, null)).thenReturn(expectedPage);
+        when(reservationService.search(authUser, page, size, courtId, null, null))
+                .thenReturn(expectedPage);
 
         // when
-        Page<ReservationSearchResponse> actualResponse = reservationController.search(authUser, page, size, courtId, null, null);
+        ResponseEntity<List<ReservationSearchResponse>> actualResponse = reservationController.search(authUser, page, size, courtId, null, null);
 
         // then
-        assertEquals(expectedPage, actualResponse);
+        assertEquals(ResponseEntity.ok(expectedList), actualResponse);
         verify(reservationService, times(1)).search(authUser, page, size, courtId, null, null);
     }
-
 
     @Test
     void update_success() {
