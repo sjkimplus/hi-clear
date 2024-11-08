@@ -50,6 +50,7 @@ public class MeetingQueryDslRepositoryImpl implements MeetingQueryDslRepository 
                 .from(meeting)
                 .where(
                         matchRank(ranks),
+                        meeting.deletedAt.isNull(),
                         meeting.startTime.gt(now),
                         meeting.groupSize.gt(joinedNumber)
                 )
@@ -70,6 +71,7 @@ public class MeetingQueryDslRepositoryImpl implements MeetingQueryDslRepository 
                 .from(meeting)
                 .where(
                         matchRank(ranks),
+                        meeting.deletedAt.isNull(),
                         meeting.startTime.gt(now),
                         meeting.groupSize.gt(joinedNumber)
                 )

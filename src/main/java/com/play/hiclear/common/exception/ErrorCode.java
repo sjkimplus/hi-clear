@@ -51,6 +51,8 @@ public enum ErrorCode {
     DUPLICATE_SCHEDULE(HttpStatus.CONFLICT, "같은 클럽에서 동일한 시작 시간과 제목을 가진 일정이 이미 존재합니다."),
     INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "모임 일정의 시간이 맞지 않습니다."),
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
+    PARTICIPANT_NOT_FOUND(HttpStatus.CONFLICT, "모임 일정에 참여한 참가자가 아닙니다."),
+    PARTICIPANT_ALREAY_EXISTED(HttpStatus.CONFLICT, "모임 일정에 이미 참가했습니다."),
 
     // Reservation
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
@@ -67,6 +69,8 @@ public enum ErrorCode {
 
     // Meeting
     TOO_SOON(HttpStatus.BAD_REQUEST, "번개일정 종료전에 번개완료를 할 수는 없습니다"),
+    TOO_LATE(HttpStatus.BAD_REQUEST, "번개일정 참여하기에는 너무 늦었습니다"),
+    FULL(HttpStatus.BAD_REQUEST, "번개일정 참여자가 모두 모집 되었습니다"),
     INVALID_TIME(HttpStatus.BAD_REQUEST, "시작시간은 현재시간 이후, 운동시간은 총 1시간이여야 합니다."),
 
 
@@ -81,8 +85,9 @@ public enum ErrorCode {
 
     // Participant
     DUPLICATE_PARTICIPANT(HttpStatus.CONFLICT, "이미 신청이 되어 있습니다."),
-    TOO_LATE(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
+    TOO_LATE_TO_CANCEL(HttpStatus.BAD_REQUEST, "번개를 취소하기에는 너무 늦었습니다."),
     WRONG_STATUS(HttpStatus.BAD_REQUEST, "번개 참가자의 상태를 수정할 수 없습니다."),
+    WRONG_MATCH(HttpStatus.BAD_REQUEST, "번개 번호 또는 참가자 번호가 유효하지 않습니다."),
 
     // Review
     REVIEW_MEETING_USER(HttpStatus.FORBIDDEN, "해당 유저가 미팅에 속해있지 않습니다."),

@@ -59,16 +59,13 @@ public class ReservationService {
 
         Court court = courtRepository.findByIdAndDeletedAtIsNullOrThrow(request.getCourtId());
 
-        // 해당 코트가 속한 체육관의 타입이 PUBLIC인지 확인
+        // 해당 코트가 속한 체육관의 타입이 PRIVATE인지 확인
         checkGym(court);
 
         // 체육관의 주인인지 확인
         if (court.getGym().getUser().equals(user)) {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Reservation.class.getSimpleName());
         }
-
-        //  Court 삭제, 해당 Court가 있는 체육관이 삭제되었는지 확인
-        checkCourtStatus(court);
 
         // 예약 날짜가 현재 시간 이후인지 확인
         validateRequestDate(request.getDate());
@@ -177,11 +174,8 @@ public class ReservationService {
         TimeSlot newTimeSlot = request.getTimeId() != null ? timeSlotRepository.findByIdOrThrow(request.getTimeId()) : originalTimeSlot;
         Court newCourt = newTimeSlot.getCourt();
 
-        // 해당 코트가 속한 체육관의 타입이 PUBLIC인지 확인
+        // 해당 코트가 속한 체육관의 타입이 PRIVATE인지 확인
         checkGym(newCourt);
-
-        // Court 삭제, 해당 Court가 있는 체육관이 삭제되었는지 확인
-        checkCourtStatus(newCourt);
 
         // 날짜 수정 (request에 date가 없으면 기존 날짜를 그대로 사용)
         if (!updatedDate.isEqual(originalDate)) {
@@ -238,6 +232,7 @@ public class ReservationService {
         }
     }
 
+
     /**
      * 사장님 예약 수락/거절
      * @param reservationId
@@ -260,13 +255,6 @@ public class ReservationService {
         log.info("예약 상태 변경 완료 - 예약 ID: {}, 새로운 상태: {}", reservationId, newStatus);
     }
 
-    //  Court 삭제, 해당 Court가 있는 체육관이 삭제되었는지 확인
-    private void checkCourtStatus(Court court) {
-        if (court.getDeletedAt() != null || court.getGym().getDeletedAt() != null) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, Reservation.class.getSimpleName());
-        }
-    }
-
     // 예약 날짜가 현재 시간 이후인지 확인
     private void validateRequestDate(LocalDate date) {
         if (date.isBefore(LocalDate.now())) {
@@ -276,7 +264,7 @@ public class ReservationService {
 
     // 해당 코트가 속한 체육관의 타입이 PUBLIC인지 확인
     private void checkGym(Court court) {
-        if (court.getGym().getGymType() != GymType.PUBLIC) {
+        if (court.getGym().getGymType() != GymType.PRIVATE) {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Gym.class.getSimpleName());
         }
 

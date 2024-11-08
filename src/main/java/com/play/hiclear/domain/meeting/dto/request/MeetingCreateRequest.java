@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class MeetingCreateEditRequest {
+public class MeetingCreateRequest {
     @NotBlank
     private String title;
 

@@ -45,6 +45,7 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleDetail);
     }
 
+    // 클럽의 모임 일정 목록 조회
     @GetMapping("/v1/clubs/{clubId}/schedules")
     public ResponseEntity<List<ScheduleSearchResponse>> search(
             @AuthenticationPrincipal AuthUser authUser,
@@ -88,5 +89,31 @@ public class ScheduleController {
         scheduleService.delete(scheduleId, authUser);
 
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, Schedule.class.getSimpleName()));
+    }
+
+    // 모임 일정에 참가자 추가
+    @PostMapping("/v1/schedules/{scheduleId}/participants/{participantId}")
+    public ResponseEntity<String> addParticipant(
+            @PathVariable Long scheduleId,
+            @PathVariable Long participantId,
+            @AuthenticationPrincipal AuthUser authUser) {
+
+        // 참가자 추가 로직
+        scheduleService.addParticipant(scheduleId, participantId, authUser);
+
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.SCHEDULE_ADDED));
+    }
+
+    // 모임 일정에 참가자 삭제
+    @DeleteMapping("/v1/schedules/{scheduleId}/participants/{participantId}")
+    public ResponseEntity<String> removeParticipant(
+            @PathVariable Long scheduleId,
+            @PathVariable Long participantId,
+            @AuthenticationPrincipal AuthUser authUser) {
+
+        // 참가자 삭제 로직
+        scheduleService.deleteParticipant(scheduleId, participantId, authUser);
+
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.SCHEDULE_DELETED));
     }
 }

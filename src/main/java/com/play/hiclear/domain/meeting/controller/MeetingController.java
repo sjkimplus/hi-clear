@@ -2,7 +2,8 @@ package com.play.hiclear.domain.meeting.controller;
 
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.meeting.dto.request.MeetingCreateEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.meeting.service.MeetingService;
@@ -25,14 +26,14 @@ public class MeetingController {
     // 번개글 생성
     @PostMapping("/v1/meetings")
     public ResponseEntity<String> create(@AuthenticationPrincipal AuthUser authUser,
-                                         @RequestBody @Valid MeetingCreateEditRequest request) {
+                                         @RequestBody @Valid MeetingCreateRequest request) {
         return ResponseEntity.ok(meetingService.create(authUser, request));
     }
 
     // 번개글 수정
     @PatchMapping("/v1/meetings/{meetingId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser,
-                                       @RequestBody @Valid MeetingCreateEditRequest request,
+                                       @RequestBody @Valid MeetingEditRequest request,
                                        @PathVariable Long meetingId) {
         return ResponseEntity.ok(meetingService.update(authUser, request, meetingId));
     }
