@@ -53,7 +53,7 @@ public class GymController {
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
-    ){
+    ) {
         return ResponseEntity.ok(gymService.businessSearch(authUser, page, size));
     }
 
@@ -64,8 +64,8 @@ public class GymController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
             @RequestBody GymUpdateRequest gymUpdateRequest
-    ){
-        return ResponseEntity.ok(gymService.update(authUser,gymId, gymUpdateRequest));
+    ) {
+        return ResponseEntity.ok(gymService.update(authUser, gymId, gymUpdateRequest));
     }
 
 
@@ -74,7 +74,7 @@ public class GymController {
     public ResponseEntity<String> delete(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId
-    ){
+    ) {
         gymService.delete(authUser, gymId);
         return ResponseEntity.ok("체육관이 삭제됐습니다.");
     }
@@ -94,9 +94,9 @@ public class GymController {
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam double requestDistance){
+            @RequestParam double requestDistance) {
 
-        if(requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100){
+        if (requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
             throw new CustomException(ErrorCode.INVALID_DISTANCE);
         }
         return ResponseEntity.ok(gymService.searchNearby(authUser, page, size, requestDistance));

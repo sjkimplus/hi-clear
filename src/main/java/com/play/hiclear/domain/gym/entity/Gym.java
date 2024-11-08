@@ -59,13 +59,13 @@ public class Gym extends TimeStamped {
 
     // Gym Update 메서드
     public void update(String updateName, String updateDescription, String regionAddress, String roadAddress, Double latitude, Double longitude) {
-        if (updateName != null && !updateName.isEmpty()){
+        if (updateName != null && !updateName.isEmpty()) {
             this.name = updateName;
         }
-        if (updateDescription != null && !updateDescription.isEmpty()){
+        if (updateDescription != null && !updateDescription.isEmpty()) {
             this.description = updateDescription;
         }
-        if (regionAddress != null && !regionAddress.isEmpty()){
+        if (regionAddress != null && !regionAddress.isEmpty()) {
             this.regionAddress = regionAddress;
             this.roadAddress = roadAddress;
             this.latitude = latitude;

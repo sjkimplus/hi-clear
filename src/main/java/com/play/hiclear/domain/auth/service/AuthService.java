@@ -6,9 +6,9 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.common.utils.JwtUtil;
+import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
-import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
 import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
 import com.play.hiclear.domain.auth.entity.AuthUser;
@@ -34,6 +34,7 @@ public class AuthService {
 
     /**
      * 회원가입기능
+     *
      * @param request
      * @return AuthSignupResponse
      */
@@ -82,6 +83,7 @@ public class AuthService {
 
     /**
      * 로그인(token 반환)
+     *
      * @param request
      * @return AuthLoginResponse(bearerToken)
      */
@@ -112,6 +114,7 @@ public class AuthService {
 
     /**
      * 회원 탈퇴(Soft Delete)
+     *
      * @param authUser
      * @param request
      */

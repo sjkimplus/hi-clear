@@ -33,7 +33,7 @@ public class UserService {
 
     public Page<UserSimpleResponse> search(int page, int size) {
 
-        Pageable pageable = PageRequest.of(page - 1 , size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<User> users = userRepository.findAllByDeletedAtIsNull(pageable);
 

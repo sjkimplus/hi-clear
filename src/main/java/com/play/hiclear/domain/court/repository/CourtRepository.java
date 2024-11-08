@@ -10,11 +10,12 @@ import java.util.Optional;
 
 public interface CourtRepository extends JpaRepository<Court, Long> {
     Optional<Court> findByCourtNumAndGymId(Long courtNum, Long gymId);
+
     List<Court> findAllByGymId(Long gymId);
 
     Optional<Court> findByIdAndDeletedAtIsNull(Long courtId);
 
-    default Court findByCourtNumAndGymIdOrThrow(Long courtNum, Long gymId){
+    default Court findByCourtNumAndGymIdOrThrow(Long courtNum, Long gymId) {
         return findByCourtNumAndGymId(courtNum, gymId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Court.class.getSimpleName()));
     }

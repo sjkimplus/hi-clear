@@ -47,15 +47,15 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
 
         condition = condition.and(gym.deletedAt.isNull());
 
-        if(name != null && !name.isEmpty()){
+        if (name != null && !name.isEmpty()) {
             condition = condition.and(gym.name.containsIgnoreCase(name));
         }
 
-        if(address != null && !address.isEmpty()){
+        if (address != null && !address.isEmpty()) {
             condition = condition.and(gym.name.containsIgnoreCase(address));
         }
 
-        if(gymType != null){
+        if (gymType != null) {
             condition = condition.and(gym.gymType.eq(gymType));
         }
 

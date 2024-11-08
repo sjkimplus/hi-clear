@@ -57,13 +57,14 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "user")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
-    public User(String name, String email, String regionAddress, Ranks selfRank, UserRole userRole){
+    public User(String name, String email, String regionAddress, Ranks selfRank, UserRole userRole) {
         this.name = name;
         this.email = email;
         this.regionAddress = regionAddress;
         this.selfRank = selfRank;
         this.userRole = userRole;
     }
+
     public User(String name, String email, String regionAddress, String roadAddress, Double latitude, Double longitude, String encodePassword, Ranks selfRank, UserRole role) {
         this.name = name;
         this.email = email;
@@ -77,13 +78,13 @@ public class User extends TimeStamped {
     }
 
     public void update(String regionAddress, String roadAddress, Double latitude, Double longitude, String rank) {
-        if(regionAddress != null){
+        if (regionAddress != null) {
             this.regionAddress = regionAddress;
             this.roadAddress = roadAddress;
             this.latitude = latitude;
             this.longitude = longitude;
         }
-        if(selfRank != null){
+        if (selfRank != null) {
             this.selfRank = Ranks.of(rank);
         }
     }

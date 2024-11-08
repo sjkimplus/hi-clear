@@ -25,7 +25,7 @@ public class UserController {
     public ResponseEntity<Page<UserSimpleResponse>> search(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
-    ){
+    ) {
         return ResponseEntity.ok(userService.search(page, size));
     }
 
@@ -34,7 +34,7 @@ public class UserController {
     public ResponseEntity<UserDetailResponse> get(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long userId
-    ){
+    ) {
         return ResponseEntity.ok(userService.get(authUser, userId));
     }
 
@@ -44,7 +44,7 @@ public class UserController {
     public ResponseEntity<UserUpdateResponse> update(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody UserUpdateRequest request
-    ){
+    ) {
         return ResponseEntity.ok(userService.update(authUser, request));
     }
 

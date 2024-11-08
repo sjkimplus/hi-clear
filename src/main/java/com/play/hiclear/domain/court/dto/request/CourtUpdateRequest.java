@@ -12,6 +12,6 @@ public class CourtUpdateRequest {
     private int price;
 
     public CourtUpdateRequest(int price) {
-            this.price = price;
+        this.price = price;
     }
 }

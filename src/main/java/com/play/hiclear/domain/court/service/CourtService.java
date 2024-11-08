@@ -29,6 +29,7 @@ public class CourtService {
 
     /**
      * 코트 등록
+     *
      * @param authUser
      * @param gymId
      * @param courtCreateRequest
@@ -68,6 +69,7 @@ public class CourtService {
 
     /**
      * 해당 체육관 코트 불러오기
+     *
      * @param authUser
      * @param gymId
      * @return List<CourtSearchResponse>
@@ -91,6 +93,7 @@ public class CourtService {
 
     /**
      * 코트 정보 수정(가격 변경)
+     *
      * @param authUser
      * @param gymId
      * @param courtNum
@@ -124,6 +127,7 @@ public class CourtService {
 
     /**
      * 코트 삭제(Soft)
+     *
      * @param authUser
      * @param gymId
      * @param courtNum

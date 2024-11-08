@@ -1,6 +1,5 @@
 package com.play.hiclear.domain.gym.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

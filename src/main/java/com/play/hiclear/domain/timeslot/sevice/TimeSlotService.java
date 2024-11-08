@@ -33,6 +33,7 @@ public class TimeSlotService {
 
     /**
      * 코트 시간대 생성
+     *
      * @param authUser
      * @param gymId
      * @param courtNum
@@ -53,7 +54,7 @@ public class TimeSlotService {
 
         // 이미 등록된 시간대인지 중복 확인
         Optional<TimeSlot> existTimeSlot = timeSlotRepository.findByStartTimeAndCourt_CourtNum(timeSlotRequest.getStartTime(), courtNum);
-        if(existTimeSlot.isPresent()){
+        if (existTimeSlot.isPresent()) {
             throw new CustomException(ErrorCode.TIME_SLOT_ALREADY_EXIST);
         }
 
@@ -79,6 +80,7 @@ public class TimeSlotService {
 
     /**
      * 해당 코트의 시간대 목록 조회
+     *
      * @param authUser
      * @param gymId
      * @param courtNum
@@ -108,6 +110,7 @@ public class TimeSlotService {
 
     /**
      * 코트 시간대 삭제(Hard)
+     *
      * @param authUser
      * @param gymId
      * @param courtNum
@@ -139,8 +142,8 @@ public class TimeSlotService {
     }
 
     // 해당 체육관 사업주가 아닌경우 예외 발생
-    private void checkBusinessAuth(Long authUserId, Long gymUserId){
-        if (!Objects.equals(authUserId, gymUserId)){
+    private void checkBusinessAuth(Long authUserId, Long gymUserId) {
+        if (!Objects.equals(authUserId, gymUserId)) {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Gym.class.getSimpleName());
         }
     }

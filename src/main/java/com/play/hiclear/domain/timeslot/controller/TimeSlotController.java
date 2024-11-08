@@ -25,7 +25,7 @@ public class TimeSlotController {
             @PathVariable Long gymId,
             @RequestParam Long courtNum,
             @RequestBody TimeSlotRequest timeSlotRequest
-            ){
+    ) {
         return ResponseEntity.ok(timeSlotService.create(authUser, gymId, courtNum, timeSlotRequest));
     }
 
@@ -35,7 +35,7 @@ public class TimeSlotController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
             @RequestParam Long courtNum
-    ){
+    ) {
         return ResponseEntity.ok(timeSlotService.search(authUser, gymId, courtNum));
     }
 
@@ -46,7 +46,7 @@ public class TimeSlotController {
             @PathVariable Long gymId,
             @RequestParam Long courtNum,
             @RequestBody TimeSlotRequest timeSlotRequest
-    ){
+    ) {
         return ResponseEntity.ok(timeSlotService.delete(authUser, gymId, courtNum, timeSlotRequest));
     }
 
