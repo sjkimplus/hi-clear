@@ -1,8 +1,8 @@
 package com.play.hiclear.domain.user.service;
 
-import com.play.hiclear.common.exception.CustomException;
-import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.service.AwsS3Service;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.dto.response.UserDetailResponse;
@@ -24,9 +24,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
+    private final GeoCodeService geoCodeService;
     private final AwsS3Service s3Service;
 
     public Page<UserSimpleResponse> search(int page, int size) {
@@ -35,10 +37,9 @@ public class UserService {
 
         Page<User> users = userRepository.findAllByDeletedAtIsNull(pageable);
 
-
         // User 객체를 UserSimpleResponse로 변환
         List<UserSimpleResponse> userResponses = users.getContent().stream()
-                .map(user -> new UserSimpleResponse(user.getId(), user.getName(), user.getSelfRank().name(), user.getRoadAddress())) // 필요한 필드로 변환
+                .map(user -> new UserSimpleResponse(user.getId(), user.getName(), user.getSelfRank().name(), user.getRegionAddress())) // 필요한 필드로 변환
                 .collect(Collectors.toList());
 
         return new PageImpl<>(userResponses, pageable, users.getTotalElements());
@@ -48,13 +49,17 @@ public class UserService {
     public UserUpdateResponse update(AuthUser authUser, UserUpdateRequest request) {
 
         // 유저 불러오기
-        User user = userRepository.findById(authUser.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를"));
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
+        // 지역 정보 불러오기
+        GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(request.getAddress());
 
         // 정보 업데이트
         user.update(
-                request.getRegion(),
+                geoCodeDocument.getRegionAddress(),
+                geoCodeDocument.getRoadAddress(),
+                geoCodeDocument.getLatitude(),
+                geoCodeDocument.getLongitude(),
                 request.getSelfRank()
         );
 
@@ -73,6 +78,8 @@ public class UserService {
         StringBuilder nameEmail = new StringBuilder();
         nameEmail.append(user.getName()).append("(").append(user.getEmail()).append(")");
 
+//        reviewService.updateUserStatistics();
+
         // DTO 객체 생성 및 반환
         return new UserDetailResponse(
                 nameEmail.toString(),
@@ -82,25 +89,21 @@ public class UserService {
     }
 
     @Transactional
-    public String updateImage(AuthUser authUser, MultipartFile image) {
+    public void updateImage(AuthUser authUser, MultipartFile image) {
 
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         user.updateImage(s3Service.uploadFile(image));
-
-        return "프로필 사진 변경 완료";
     }
 
 
     @Transactional
-    public String delete(AuthUser authUser, String fileName) {
+    public void deleteImage(AuthUser authUser, String fileName) {
 
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         s3Service.deleteFile(fileName);
 
         user.updateImage(null);
-
-        return "프로필 사진 삭제 완료";
     }
 }

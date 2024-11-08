@@ -51,6 +51,8 @@ public enum ErrorCode {
     DUPLICATE_SCHEDULE(HttpStatus.CONFLICT, "같은 클럽에서 동일한 시작 시간과 제목을 가진 일정이 이미 존재합니다."),
     INVALID_SCHEDULE_TIME(HttpStatus.CONFLICT, "모임 일정의 시간이 맞지 않습니다."),
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 모임일정입니다."),
+    PARTICIPANT_NOT_FOUND(HttpStatus.CONFLICT, "모임 일정에 참여한 참가자가 아닙니다."),
+    PARTICIPANT_ALREAY_EXISTED(HttpStatus.CONFLICT, "모임 일정에 이미 참가했습니다."),
 
     // Reservation
     TIME_SLOT_ALREADY_RESERVED(HttpStatus.CONFLICT, "해당 시간 슬롯은 이미 예약되었습니다."),
@@ -93,7 +95,7 @@ public enum ErrorCode {
 
 
     // 기본 코드
-    ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소(위,경도)값 입니다."),
+    ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소 입니다."),
     IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일입니다."),
     IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 중 오류가 발생했습니다." ),
     IMAGE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패햇습니다." ),

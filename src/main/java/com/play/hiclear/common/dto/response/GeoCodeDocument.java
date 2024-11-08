@@ -1,6 +1,5 @@
 package com.play.hiclear.common.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GeoCodeDocument {

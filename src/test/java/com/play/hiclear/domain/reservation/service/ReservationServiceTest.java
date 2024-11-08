@@ -29,6 +29,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -72,16 +73,19 @@ class ReservationServiceTest {
 
         admin = new User("John Doe", "john@example.com", "서울", RANK_A, UserRole.BUSINESS);
         user = new User("Jame", "jame@example.com", "인천", RANK_C, UserRole.USER);
-        gym = new Gym("My Gym", "운동하기 좋은 체육관", "123 Main St", GymType.PUBLIC, admin);
+        gym = new Gym("My Gym", "운동하기 좋은 체육관", "region", "roadAdress", 32.6938482, 45.2938482, GymType.PRIVATE, admin);
 
-        court = new Court(1L, 1L, 150000, true, gym);
+        court = new Court(25L, 150000, gym);
+        ReflectionTestUtils.setField(court, "id", 1L);
 
-        timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0), LocalTime.of(11, 0), court.getId(), court);
-        timeSlot2 = new TimeSlot(2L, LocalTime.of(12, 0), LocalTime.of(13, 0), court.getId(), court);
+        timeSlot1 = new TimeSlot(LocalTime.of(10, 0) , court.getId(), court);
+        ReflectionTestUtils.setField(timeSlot1, "id", 1L);
+        timeSlot2 = new TimeSlot(LocalTime.of(12, 0), court.getId(), court);
+        ReflectionTestUtils.setField(timeSlot2, "id", 2L);
 
         // 예약을 생성할 때 사용자 정보도 설정
-        reservation = new Reservation(1L, user, timeSlot1, court, ReservationStatus.PENDING, LocalDate.of(2024, 11, 1));
-
+        reservation = new Reservation(user, court, timeSlot1, ReservationStatus.PENDING, LocalDate.of(2024, 11, 1));
+        ReflectionTestUtils.setField(reservation, "id", 1L);
         // Mock 설정
         when(courtRepository.findByIdAndDeletedAtIsNullOrThrow(court.getId())).thenReturn(court);
         when(timeSlotRepository.findAllById(Arrays.asList(timeSlot1.getId(), timeSlot2.getId())))
@@ -114,7 +118,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest(
                 Arrays.asList(timeSlot1.getId(), timeSlot2.getId()),
                 court.getId(),
-                LocalDate.of(2024, 11, 3)
+                LocalDate.of(2024, 11, 28)
         );
 
         setupMocksForCreate(request);
@@ -148,27 +152,6 @@ class ReservationServiceTest {
         });
         assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
     }
-
-    @Test
-    void create_fail_courtInactive() {
-        // Given
-        Court inactiveCourt = new Court(1L, 1L, 150000, false, gym);
-        when(courtRepository.findByIdAndDeletedAtIsNullOrThrow(court.getId())).thenReturn(inactiveCourt);
-
-        ReservationRequest request = new ReservationRequest(
-                Arrays.asList(timeSlot1.getId(), timeSlot2.getId()),
-                inactiveCourt.getId(),
-                LocalDate.of(2024, 11, 3)
-        );
-
-        // When & Then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            reservationService.create(new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole()), request);
-        });
-        assertEquals(ErrorCode.NO_AUTHORITY, exception.getErrorCode());
-    }
-
-
 
     // 예약 조회 성공 테스트 케이스
     @Test
@@ -293,7 +276,7 @@ class ReservationServiceTest {
     void update_success() {
         // Given
         AuthUser authUser = new AuthUser(user.getId(), user.getName(), user.getEmail(), user.getUserRole());
-        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.of(2024, 11, 4));
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(timeSlot2.getId(), LocalDate.of(2024, 11, 28));
 
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(user);
         when(reservationRepository.findByIdAndUserOrThrow(reservation.getId(), user)).thenReturn(reservation);
@@ -320,7 +303,7 @@ class ReservationServiceTest {
         assertNotNull(response);
         assertEquals(reservation.getId(), response.getId());
         assertEquals(ReservationStatus.PENDING.name(), response.getStatus());
-        assertEquals(LocalDate.of(2024, 11, 4), response.getDate());
+        assertEquals(LocalDate.of(2024, 11, 28), response.getDate());
     }
 
     // 예약 수정 실패 테스트 케이스

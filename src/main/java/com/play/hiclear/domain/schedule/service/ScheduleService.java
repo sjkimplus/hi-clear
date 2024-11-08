@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -138,15 +137,14 @@ public class ScheduleService {
         // 해당 모임의 멤버인지 확인
         validateClubMembership(user, club);
 
-        Pageable pageable = PageRequest.of(page - 1, size); // 페이지 번호는 0부터 시작하기 때문에 -1
-        log.info("페이징 설정 완료 - 페이지: {}, 사이즈: {}", page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         // 클럽의 삭제되지 않은 일정 목록을 필터링하여 조회
         Page<Schedule> schedules = scheduleRepository.findAllByClubAndDeletedAtIsNullAndFilters(
                 club, title, description, regionAddress, startDate, endDate, pageable);
 
         log.info("모임 일정 목록 조회 완료 - 클럽 ID: {}, 조회된 일정 수: {}", clubId, schedules.getTotalElements());
-        return schedules;  // Page<Schedule> 반환
+        return schedules;
     }
 
     /**
@@ -188,11 +186,6 @@ public class ScheduleService {
             }
         }
 
-        // 참가자 수정 (participants가 null이 아니면 수정)
-        if (scheduleUpdateRequest.getParticipants() != null && !scheduleUpdateRequest.getParticipants().isEmpty()) {
-            updateParticipants(schedule, scheduleUpdateRequest.getParticipants());
-        }
-
         // 수정된 일정 저장
         Schedule updatedSchedule = scheduleRepository.save(schedule);
 
@@ -228,12 +221,74 @@ public class ScheduleService {
         // 참가자 삭제
         List<ScheduleParticipant> participants = scheduleParticipantRepository.findBySchedule(schedule);
         for (ScheduleParticipant participant : participants) {
-            participant.markDeleted();
+            scheduleParticipantRepository.delete(participant);
         }
 
         log.info("모임 일정 삭제 완료 - 일정 ID: {}", scheduleId);
         // 일정 삭제
         schedule.markDeleted();
+    }
+
+
+    /**
+     * 모임 일정에 참가자 추가
+     * @param scheduleId
+     * @param participantId
+     * @param authUser
+     */
+    @Transactional
+    public void addParticipant(Long scheduleId, Long participantId, AuthUser authUser) {
+        log.info("모임 일정 참가자 추가 요청 - 사용자: {}, 일정 ID: {}, 참가자 ID: {}", authUser.getEmail(), scheduleId, participantId);
+        User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
+        Schedule schedule = scheduleRepository.findByIdAndDeletedAtIsNullOrThrow(scheduleId);
+
+        // 사용자가 일정의 생성자인지 확인
+        checkScheduleAuthority(schedule, user);
+
+        // 4. 참가자 조회 (참가할 사용자를 찾음)
+        User participantUser = userRepository.findByIdAndDeletedAtIsNullOrThrow(participantId);
+
+        // 5. 해당 모임의 멤버인지 확인
+        validateClubMembership(participantUser, schedule.getClub());
+
+        // 6. 이미 해당 모임 일정에 참가한 사용자라면 예외 발생
+        scheduleParticipantRepository.checkIfAlreadyParticipating(schedule, participantUser);
+
+        // 7. 참가자 추가
+        ScheduleParticipant additionalParticipant = new ScheduleParticipant(schedule, participantUser, schedule.getClub());
+        scheduleParticipantRepository.save(additionalParticipant);
+
+        log.info("모임 일정 참가자 추가 완료 - 일정 ID: {}, 참가자 ID: {}", scheduleId, participantId);
+    }
+
+
+    /**
+     * 모임 일정에 참가자 삭제
+     * @param scheduleId
+     * @param participantId
+     * @param authUser
+     */
+    @Transactional
+    public void deleteParticipant(Long scheduleId, Long participantId, AuthUser authUser) {
+        log.info("모임 일정 참가자 삭제 요청 - 사용자: {}, 일정 ID: {}, 참가자 ID: {}", authUser.getEmail(), scheduleId, participantId);
+        User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
+
+        Schedule schedule = scheduleRepository.findByIdAndDeletedAtIsNullOrThrow(scheduleId);
+
+        // 사용자가 일정의 생성자인지 확인
+        checkScheduleAuthority(schedule, user);
+
+        // 삭제할 참가자 조회
+        User participantUser = userRepository.findByIdAndDeletedAtIsNullOrThrow(participantId);
+
+        // 해당 모임의 멤버인지 확인
+        validateClubMembership(participantUser, schedule.getClub());
+
+        // 이미 참가자인지 확인
+        ScheduleParticipant participant = scheduleParticipantRepository.findByScheduleAndUserOrThrow(schedule, participantUser);
+        scheduleParticipantRepository.delete(participant);
+
+        log.info("모임 일정 참가자 삭제 완료 - 일정 ID: {}, 참가자 ID: {}", scheduleId, participantId);
     }
 
     // Schedule의 권한 확인
@@ -263,6 +318,7 @@ public class ScheduleService {
         }
     }
 
+    // 예약 생성(시간 확인)
     private void validateCreateScheduleTimes(LocalDateTime startTime, LocalDateTime endTime) {
         // 시작 시간 검증
         if (startTime != null && startTime.isBefore(LocalDateTime.now())) {
@@ -281,6 +337,7 @@ public class ScheduleService {
         }
     }
 
+    // 예약 수정(시간 확인)
     private void validateUpdateScheduleTimes(LocalDateTime originalStartTime, LocalDateTime originalEndTime, LocalDateTime updatedStartTime, LocalDateTime updatedEndTime) {
         // 1. startTime만 들어올 때
         if (updatedStartTime != null && updatedEndTime == null) {
@@ -362,41 +419,6 @@ public class ScheduleService {
 
             ScheduleParticipant additionalParticipant = new ScheduleParticipant(schedule, participantUser, club);
             scheduleParticipantRepository.save(additionalParticipant);
-        }
-    }
-
-    // 모임 일정에 참가자 수정
-    private void updateParticipants(Schedule schedule, List<Long> participantIds) {
-        // 기존 참가자 목록 가져오기
-        List<ScheduleParticipant> existingParticipants = scheduleParticipantRepository.findBySchedule(schedule);
-
-        // 기존 참가자 ID 리스트 생성
-        Set<Long> existingParticipantIds = existingParticipants.stream()
-                .map(participant -> participant.getUser().getId())
-                .collect(Collectors.toSet());
-
-        // 새로운 참가자 ID 집합, 현재 사용자 ID도 추가
-        Set<Long> newParticipantIds = new HashSet<>(participantIds);
-        newParticipantIds.add(schedule.getUser().getId());
-
-        // 1. 기존 참가자 제거
-        for (ScheduleParticipant participant : existingParticipants) {
-            if (!newParticipantIds.contains(participant.getUser().getId())) {
-                scheduleParticipantRepository.delete(participant);
-            }
-        }
-
-        // 2. 새로운 참가자 추가
-        for (Long participantId : newParticipantIds) {
-            if (!existingParticipantIds.contains(participantId)) {
-                User participantUser = userRepository.findByIdAndDeletedAtIsNullOrThrow(participantId);
-
-                // 클럽의 회원인지 확인
-                validateParticipant(participantId, schedule.getClub());
-
-                ScheduleParticipant newParticipant = new ScheduleParticipant(schedule, participantUser, schedule.getClub());
-                scheduleParticipantRepository.save(newParticipant);
-            }
         }
     }
 }
