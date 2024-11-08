@@ -1,13 +1,11 @@
 package com.play.hiclear.domain.gym.service;
 
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
-import com.play.hiclear.common.dto.response.GeoCodeResponse;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
@@ -21,11 +19,15 @@ import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -35,12 +37,12 @@ public class GymService {
 
     private final UserRepository userRepository;
     private final GymRepository gymRepository;
-    private final DistanceCalculator calculator;
     private final GeoCodeService geoCodeService;
     private final DistanceCalculator distanceCalculator;
 
     /**
      * 체육관 생성
+     *
      * @param authUser
      * @param request
      * @return GymCreateResponse
@@ -99,7 +101,52 @@ public class GymService {
 
 
     /**
+     * 가까운 체육관 조회
+     *
+     * @param authUser
+     * @param page
+     * @param size
+     * @param requestDistance
+     * @return Page<GymSimpleResponse>
+     */
+    public Page<GymSimpleResponse> searchNearby(AuthUser authUser, int page, int size, double requestDistance) {
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
+        List<Gym> gyms = gymRepository.findAll();
+
+        List<GymSimpleResponse> aroundGymsList = gyms.stream()
+                .filter(gym -> Objects.isNull(gym.getDeletedAt()))
+                .map(gym -> {
+                    // 거리 계산
+                    double distance = distanceCalculator.calculateDistance(
+                            user.getLatitude(), user.getLongitude(),
+                            gym.getLatitude(), gym.getLongitude()
+                    ).setScale(1, RoundingMode.HALF_UP).doubleValue();
+
+                    // 거리 조건 필터링
+                    if (distance <= requestDistance) {
+                        return new GymSimpleResponse(gym.getName(), gym.getRegionAddress(), distance);
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingDouble(GymSimpleResponse::getDistance))
+                .toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), aroundGymsList.size());
+        List<GymSimpleResponse> subList = aroundGymsList.subList(start, end);
+
+        return new PageImpl<>(subList, pageable, aroundGymsList.size());
+    }
+
+    /**
      * 사업자 본인소유 체육관 조회
+     *
      * @param authUser
      * @param page
      * @param size
@@ -116,6 +163,7 @@ public class GymService {
 
     /**
      * 체육관 정보 수정
+     *
      * @param authUser
      * @param gymId
      * @param gymUpdateRequest
@@ -151,6 +199,7 @@ public class GymService {
 
     /**
      * 체육관 삭제(Soft)
+     *
      * @param authUser
      * @param gymId
      */
@@ -197,4 +246,6 @@ public class GymService {
         }
 
     }
+
+
 }

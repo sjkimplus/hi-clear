@@ -1,8 +1,9 @@
 package com.play.hiclear.domain.gym.controller;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
@@ -87,9 +88,17 @@ public class GymController {
     }
 
 
-    // 체육관 거리 조회
-    @GetMapping("/v1/distance")
-    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
-        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
+    // 주변 체육관 조회
+    @GetMapping("/v1/gyms/nearby")
+    public ResponseEntity<Page<GymSimpleResponse>> searchNearby(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam double requestDistance){
+
+        if(requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100){
+            throw new CustomException(ErrorCode.INVALID_DISTANCE);
+        }
+        return ResponseEntity.ok(gymService.searchNearby(authUser, page, size, requestDistance));
     }
 }

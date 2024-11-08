@@ -4,9 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class GymSimpleResponse {
 
     private final String name;
-    private final String roadAddress;
+    private final String regionAddress;
+    private double distance;
+
+    public GymSimpleResponse(String name, String regionAddress, double distance) {
+        this.name = name;
+        this.regionAddress = regionAddress;
+        this.distance = distance;
+    }
+
+    public GymSimpleResponse(String name, String regionAddress) {
+        this.name = name;
+        this.regionAddress = regionAddress;
+    }
 }
