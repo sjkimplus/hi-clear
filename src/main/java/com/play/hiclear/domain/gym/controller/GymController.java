@@ -33,17 +33,21 @@ public class GymController {
     }
 
 
-    // 체육관 조회(체육관 이름, 주소, 타입으로 검색가능)
-    @GetMapping("/v1/gyms")
-    public ResponseEntity<Page<GymSimpleResponse>> search(
+    // 체육관 조회
+    @GetMapping("/v2/gyms/search")
+    public ResponseEntity<Page<GymSimpleResponse>> searchv2(
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String address,
-            @RequestParam(required = false) GymType gymType
-    ) {
-        return ResponseEntity.ok(gymService.search(page, size, name, address, gymType));
+            @RequestParam(required = false) GymType gymType,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Double requestDistance) {
+
+        if (requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
+            throw new CustomException(ErrorCode.INVALID_DISTANCE);
+        }
+        return ResponseEntity.ok(gymService.search(authUser, name, address, gymType, page, size, requestDistance));
     }
 
 
@@ -87,18 +91,4 @@ public class GymController {
         return ResponseEntity.ok(gymService.get(authUser, gymId));
     }
 
-
-    // 주변 체육관 조회
-    @GetMapping("/v1/gyms/nearby")
-    public ResponseEntity<Page<GymSimpleResponse>> searchNearby(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam double requestDistance) {
-
-        if (requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
-            throw new CustomException(ErrorCode.INVALID_DISTANCE);
-        }
-        return ResponseEntity.ok(gymService.searchNearby(authUser, page, size, requestDistance));
-    }
 }

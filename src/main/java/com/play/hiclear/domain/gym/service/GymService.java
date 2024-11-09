@@ -29,6 +29,7 @@ import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,69 +80,41 @@ public class GymService {
         );
     }
 
-
     /**
-     * 체육관 검색 기능(체육관명, 주소, 타입으로 조건가능)
+     * 체육관 조회 v2
      *
-     * @param page
-     * @param size
+     * @param authUser
      * @param name
      * @param address
      * @param gymType
-     * @return
-     */
-    public Page<GymSimpleResponse> search(int page, int size, String name, String address, GymType gymType) {
-
-        Pageable pageable = PageRequest.of(page - 1, size);
-
-        Page<Gym> gyms = gymRepository.searchGyms(name, address, gymType, pageable);
-
-        return gyms.map(this::convertGymSimpleResponse);
-    }
-
-
-    /**
-     * 가까운 체육관 조회
-     *
-     * @param authUser
      * @param page
      * @param size
      * @param requestDistance
-     * @return Page<GymSimpleResponse>
+     * @return
      */
-    public Page<GymSimpleResponse> searchNearby(AuthUser authUser, int page, int size, double requestDistance) {
-
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public Page<GymSimpleResponse> search(
+            AuthUser authUser, String name, String address,
+            GymType gymType, int page, int size, Double requestDistance) {
 
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-        List<Gym> gyms = gymRepository.findAll();
+        Double userLatitude = user.getLatitude();
 
-        List<GymSimpleResponse> aroundGymsList = gyms.stream()
-                .filter(gym -> Objects.isNull(gym.getDeletedAt()))
-                .map(gym -> {
-                    // 거리 계산
-                    double distance = distanceCalculator.calculateDistance(
-                            user.getLatitude(), user.getLongitude(),
-                            gym.getLatitude(), gym.getLongitude()
-                    ).setScale(1, RoundingMode.HALF_UP).doubleValue();
+        Double userLongitude = user.getLongitude();
 
-                    // 거리 조건 필터링
-                    if (distance <= requestDistance) {
-                        return new GymSimpleResponse(gym.getName(), gym.getRegionAddress(), distance);
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        List<Gym> gyms = gymRepository.search(name, address, gymType, userLatitude, userLongitude, requestDistance);
+
+        List<GymSimpleResponse> result = gyms.stream()
+                .map(this::convertGymSimple)
                 .sorted(Comparator.comparingDouble(GymSimpleResponse::getDistance))
-                .toList();
+                .collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), aroundGymsList.size());
-        List<GymSimpleResponse> subList = aroundGymsList.subList(start, end);
+        int end = Math.min((start + pageable.getPageSize()), result.size());
 
-        return new PageImpl<>(subList, pageable, aroundGymsList.size());
+        return new PageImpl<>(result.subList(start, end), pageable, result.size());
     }
 
     /**
@@ -247,5 +220,13 @@ public class GymService {
 
     }
 
+    private GymSimpleResponse convertGymSimple(Gym gym) {
+        return new GymSimpleResponse(
+                gym.getName(),
+                gym.getRegionAddress(),
+                distanceCalculator.calculateDistance(gym.getUser().getLatitude(), gym.getUser().getLongitude(), gym.getLatitude(), gym.getLongitude())
+                        .setScale(1, RoundingMode.HALF_UP).doubleValue()
+        );
+    }
 
 }

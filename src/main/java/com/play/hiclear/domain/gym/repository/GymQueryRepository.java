@@ -2,15 +2,17 @@ package com.play.hiclear.domain.gym.repository;
 
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface GymQueryRepository {
 
-    Page<Gym> searchGyms(
+    List<Gym> search(
             String name,
             String address,
             GymType gymType,
-            Pageable pageable);
-
+            Double userLatitude,
+            Double userLongitude,
+            Double requestDistance);
 }
