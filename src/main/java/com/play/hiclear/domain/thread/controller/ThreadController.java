@@ -25,7 +25,7 @@ public class ThreadController {
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.CREATED, Thread.class.getSimpleName()));
     }
 
-    @PatchMapping("/v1/comments/{commentId}/threads/{threadId}")
+    @PutMapping("/v1/comments/{commentId}/threads/{threadId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long threadId, @RequestBody ThreadUpdateRequest threadUpdateRequest) throws Exception {
         threadService.update(authUser.getUserId(), threadId, threadUpdateRequest);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.MODIFIED, Thread.class.getSimpleName()));

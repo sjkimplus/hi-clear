@@ -9,12 +9,17 @@ import com.play.hiclear.domain.clubmember.dto.request.ClubMemberExpelRequest;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
 import com.play.hiclear.domain.clubmember.repository.ClubMemberRepository;
+import com.play.hiclear.domain.notification.enums.NotiType;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class ClubMemberService {
     private final ClubMemberRepository clubMemberRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final NotiService notiService;
 
     /**
      * 
@@ -56,6 +62,14 @@ public class ClubMemberService {
                         .clubMemberRole(ClubMemberRole.ROLE_MEMBER)
                         .build()
         );
+
+//        List<ClubMember> members = clubMemberRepository.findAllByClubId(clubId);
+//
+//        for(User clubUser : members.stream().map(ClubMember::getUser).toList()) {
+//            if (clubUser != user)
+//                notiService.send(clubUser, NotiType.JOIN, "가입", "Join");
+//        }
+        //List<User> users = members.stream().map(ClubMember::getUser).toList();
     }
 
     /**
