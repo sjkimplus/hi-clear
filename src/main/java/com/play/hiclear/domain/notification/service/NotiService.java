@@ -35,20 +35,26 @@ public class NotiService {
 
         // 유저의 고유 식별자를 이용한 SseEmitter 고유 아이디 생성
         String emitterId = makeTimeIncludeId(username);
+
         // SseEmitter를 생성하고 emitterId를 키로 사용해 emitterRepository에 저장한다
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
+
         // onCompletion(), onTimeout() -> SseEmitter가 완료되거나 타임아웃될 때 해당 SseEmitter를 emitterRepository에서 삭제
         emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
         emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
+
         // sendNotification을 호출하여 클라이언트에게 연결이 생성되었음을 알리는 더미 메시지 전송하고 이를 통하여 클라이언트-서버 간의 연결이 유지되도록 한다.
         String eventId = makeTimeIncludeId(username);
         sendNotification(emitter, eventId, emitterId, "연결되었습니다. [userEmail = " + username + "]");
 
-        // (1-6) 클라이언트가 미수신한 Event 목록이 존재할 경우 전송하여 Event 유실을 예방
+        // 클라이언트가 미수신한 Event 목록이 존재할 경우 전송하여 Event 유실을 예방
         if (!lastEventId.isEmpty()) {
             sendLostData(lastEventId, username, emitterId, emitter);
         }
-        return emitter; // (1-7)
+
+        // 생성된 SseEmitter 객체를 반환하여 클라이언트에게 전달
+        // 클라이언트는 이를 통해 서버로부터 알림 이벤트를 수신 / 처리 가능
+        return emitter;
     }
 
     /**
@@ -78,9 +84,14 @@ public class NotiService {
                 .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
                 .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
-    
-    // [2] send()
-    //@Override
+
+    /**
+     *
+     * @param receiver 수신자 정보
+     * @param notiType  알림 타입
+     * @param content   알림 내용
+     * @param url   호출한 URL
+     */
     public void send(User receiver, NotiType notiType, String content, String url) {
 
         // 알림 객체 생성 및 저장
@@ -94,13 +105,24 @@ public class NotiService {
                         .build()
                 );
 
-        String receiverEmail = receiver.getEmail(); // (2-2)
-        String eventId = receiverEmail + "_" + System.currentTimeMillis(); // (2-3)
-        Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByUserEmail(receiverEmail); // (2-4)
-        emitters.forEach( // (2-5)
+        // 수신자의 이메일을 receiverEmail 변수에 저장
+        String receiverEmail = receiver.getEmail();
+
+        // SsseEmitter로 전송되는 이벤트의 고유 식별자로 사용 된다.
+        String eventId = receiverEmail + "_" + System.currentTimeMillis();
+
+        // 수신자에게 연결된 모든 SseEmitter 객체를 emitters 변수에 가져온다(다중 연결을 위한 작업)
+        Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByUserEmail(receiverEmail);
+
+        // emitter를 순환하며 각 SseEmitter 객체에 알림을 전송한다
+        emitters.forEach(
                 (key, emitter) -> {
+                    // 각 SseEmitter 객체에 이벤트 캐시를 저장한다.
                     emitterRepository.saveEventCache(key, noti);
-                    sendNotification(emitter, eventId, key, NotiDto.Response.createResponse(noti));
+
+                    // 알림을 SseEmitter 객체로 전송한다
+                    // 생성된 알림 객체를 기반으로 Noti를 Dto로 변환하여 클라이언트에게 알림 전송
+                    sendNotification(emitter, eventId, key, NotiDto.createResponse(noti));
                 }
         );
     }
