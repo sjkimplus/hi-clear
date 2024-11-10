@@ -64,4 +64,5 @@ public class CourtController {
         courtService.delete(authUser, gymId, courtNum);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, Court.class.getSimpleName()));
     }
+
 }

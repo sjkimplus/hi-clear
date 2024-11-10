@@ -44,9 +44,9 @@ public class GymService {
     /**
      * 체육관 생성
      *
-     * @param authUser
-     * @param request
-     * @return GymCreateResponse
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param request  체육관 생성 정보를 포함한 객체
+     * @return 생성된 체육관의 ID를 제외한 모든 정보를 표시
      */
     @Transactional
     public GymCreateResponse create(AuthUser authUser, GymCreateRequest request) {
@@ -81,16 +81,16 @@ public class GymService {
     }
 
     /**
-     * 체육관 조회 v2
+     * 체육관 검색 v2
      *
-     * @param authUser
-     * @param name
-     * @param address
-     * @param gymType
-     * @param page
-     * @param size
-     * @param requestDistance
-     * @return
+     * @param authUser        인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param name            이름(조건검색)
+     * @param address         주소(조건검색)
+     * @param gymType         타입(조건검색)
+     * @param page            페이징의 페이지
+     * @param size            페이지당 표시 개수
+     * @param requestDistance 거리(조건검색)
+     * @return 조건에 부합하는 체육관(이름, 주소, 거리)들 반환
      */
     public Page<GymSimpleResponse> search(
             AuthUser authUser, String name, String address,
@@ -107,7 +107,7 @@ public class GymService {
         List<Gym> gyms = gymRepository.search(name, address, gymType, userLatitude, userLongitude, requestDistance);
 
         List<GymSimpleResponse> result = gyms.stream()
-                .map(this::convertGymSimple)
+                .map(this::convertGymSimpleContainDistance)
                 .sorted(Comparator.comparingDouble(GymSimpleResponse::getDistance))
                 .collect(Collectors.toList());
 
@@ -118,12 +118,12 @@ public class GymService {
     }
 
     /**
-     * 사업자 본인소유 체육관 조회
+     * 사업자 소유 체육관 조회
      *
-     * @param authUser
-     * @param page
-     * @param size
-     * @return Page<GymSimpleResponse>
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param page     페이징의 페이지
+     * @param size     페이지당 표시 개수
+     * @return 체육관의 이름과 주소를 반환
      */
     public Page<GymSimpleResponse> businessSearch(AuthUser authUser, int page, int size) {
 
@@ -137,10 +137,10 @@ public class GymService {
     /**
      * 체육관 정보 수정
      *
-     * @param authUser
-     * @param gymId
-     * @param gymUpdateRequest
-     * @return GymUpdateResponse
+     * @param authUser         인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId            수정할 체육관의 ID
+     * @param gymUpdateRequest 체육관의 수정 할 정보를 포함한 객체
+     * @return 수정된 체육관의 정보(이름, 설명, 주소) 반환
      */
     @Transactional
     public GymUpdateResponse update(AuthUser authUser, Long gymId, GymUpdateRequest gymUpdateRequest) {
@@ -173,8 +173,8 @@ public class GymService {
     /**
      * 체육관 삭제(Soft)
      *
-     * @param authUser
-     * @param gymId
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId    삭제할 체육관의 ID
      */
     @Transactional
     public void delete(AuthUser authUser, Long gymId) {
@@ -189,6 +189,9 @@ public class GymService {
 
 
     public GymDetailResponse get(AuthUser authUser, Long gymId) {
+
+        userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
 
@@ -205,7 +208,7 @@ public class GymService {
     }
 
 
-    // GymSimpleResponse 객체 변환 메서드
+    // GymSimpleResponse(거리X) 객체 변환 메서드
     private GymSimpleResponse convertGymSimpleResponse(Gym gym) {
         return new GymSimpleResponse(
                 gym.getName(),
@@ -213,6 +216,7 @@ public class GymService {
     }
 
 
+    // 사업자 권한 확인
     private void checkBusinessAuth(User ownUser, AuthUser requestUser) {
         if (!Objects.equals(ownUser.getId(), requestUser.getUserId())) {
             throw new CustomException(ErrorCode.NO_AUTHORITY);
@@ -220,7 +224,9 @@ public class GymService {
 
     }
 
-    private GymSimpleResponse convertGymSimple(Gym gym) {
+
+    // GymSimpleResponse(거리O) 객체 변환 메서드
+    private GymSimpleResponse convertGymSimpleContainDistance(Gym gym) {
         return new GymSimpleResponse(
                 gym.getName(),
                 gym.getRegionAddress(),

@@ -34,11 +34,11 @@ public class TimeSlotService {
     /**
      * 코트 시간대 생성
      *
-     * @param authUser
-     * @param gymId
-     * @param courtNum
-     * @param timeSlotRequest
-     * @return TimeSlotResponse
+     * @param authUser        인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId           코트가 등록된 체육관의 ID
+     * @param courtNum        시간대를 생성할 코트번호
+     * @param timeSlotRequest 생성할 시간대 정보를 포함한 객체
+     * @return 생성된 시간대와 체육관, 코트번호를 반환
      */
     @Transactional
     public TimeSlotResponse create(AuthUser authUser, Long gymId, Long courtNum, TimeSlotRequest timeSlotRequest) {
@@ -81,10 +81,10 @@ public class TimeSlotService {
     /**
      * 해당 코트의 시간대 목록 조회
      *
-     * @param authUser
-     * @param gymId
-     * @param courtNum
-     * @return List<TimeSlotSimpleResponse>
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId    코트가 등록된 체육관의 ID
+     * @param courtNum 시간대를 조회할 코트번호
+     * @return 해당 코트의 시간대 목록을 표시
      */
     public List<TimeSlotSimpleResponse> search(AuthUser authUser, Long gymId, Long courtNum) {
 
@@ -94,8 +94,8 @@ public class TimeSlotService {
         // 해당 체육관 사업주가 아닌경우 예외 발생
         checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
-        // 코트 불러오기
-        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
+        // 코트 확인
+        courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
 
         // 해당 코트 모든 TimeSlot 불러오기
         List<TimeSlot> timeSlotList = timeSlotRepository.findAllByCourt_CourtNum(courtNum);
@@ -111,14 +111,13 @@ public class TimeSlotService {
     /**
      * 코트 시간대 삭제(Hard)
      *
-     * @param authUser
-     * @param gymId
-     * @param courtNum
-     * @param timeSlotRequest
-     * @return 삭제 메세지
+     * @param authUser        인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId           코트가 등록된 체육관의 ID
+     * @param courtNum        시간대를 삭제할 코트번호
+     * @param timeSlotRequest 삭제할 시간대 정보를 포함한 객체
      */
     @Transactional
-    public String delete(AuthUser authUser, Long gymId, Long courtNum, TimeSlotRequest timeSlotRequest) {
+    public void delete(AuthUser authUser, Long gymId, Long courtNum, TimeSlotRequest timeSlotRequest) {
 
         // 체육관 정보 불러오기
         Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
@@ -126,20 +125,15 @@ public class TimeSlotService {
         // 해당 체육관 사업주가 아닌경우 예외 발생
         checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
-        // 코트 불러오기
-        Court court = courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
+        // 코트 확인
+        courtRepository.findByCourtNumAndGymIdOrThrow(courtNum, gymId);
 
         // TimeSlot 불러오기
         TimeSlot timeSlot = timeSlotRepository.findByStartTimeAndCourt_CourtNumOrThrow(timeSlotRequest.getStartTime(), courtNum);
 
         timeSlotRepository.delete(timeSlot);
-
-        return "코트번호 " + courtNum + "의 "
-                + timeSlotRequest.getStartTime().toString()
-                + " ~ " + timeSlotRequest.getStartTime().plusHours(1).toString()
-                + "타임이 삭제됐습니다.";
-
     }
+
 
     // 해당 체육관 사업주가 아닌경우 예외 발생
     private void checkBusinessAuth(Long authUserId, Long gymUserId) {

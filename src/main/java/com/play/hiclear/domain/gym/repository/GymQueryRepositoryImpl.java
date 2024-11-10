@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -30,6 +29,7 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
                 .selectFrom(gym)
                 .where(condition)
                 .fetch();
+
     }
 
 
@@ -53,8 +53,8 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
             condition = condition.and(gym.gymType.eq(gymType));
         }
 
-        if (requestDistance != null){
-            // 두 지점 간의 거리를 계산하는 표현식 생성
+        if (requestDistance != null) {
+            // 하버사인 공식으로 거리 계산
             NumberExpression<Double> distanceExpression = Expressions.numberTemplate(
                     Double.class,
                     "6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({0})) * sin(radians({1})))",
@@ -66,4 +66,6 @@ public class GymQueryRepositoryImpl implements GymQueryRepository {
 
         return condition;
     }
+
+
 }

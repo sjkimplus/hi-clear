@@ -11,6 +11,7 @@ import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.repository.CourtRepository;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.repository.GymRepository;
+import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,15 +26,16 @@ public class CourtService {
 
     private final GymRepository gymRepository;
     private final CourtRepository courtRepository;
+    private final UserRepository userRepository;
 
 
     /**
      * 코트 등록
      *
-     * @param authUser
-     * @param gymId
-     * @param courtCreateRequest
-     * @return CourtCreateResponse
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId 코트를 등록할 체육관의 ID
+     * @param courtCreateRequest 등록할 코트의 정보(번호, 가격)를 포함한 객체
+     * @return 생성된 코트의 정보(번호, 가격)을 반환
      */
     @Transactional
     public CourtCreateResponse create(AuthUser authUser, Long gymId, CourtCreateRequest courtCreateRequest) {
@@ -45,6 +47,7 @@ public class CourtService {
         checkBusinessAuth(authUser.getUserId(), gym.getUser().getId());
 
         List<Court> courtList = gym.getCourts();
+
         // courtList에 이미 존재하는 courtNum이 있는지 확인
         boolean exists = courtList.stream()
                 .anyMatch(court -> court.getCourtNum() == courtCreateRequest.getCourtNum());
@@ -68,13 +71,16 @@ public class CourtService {
 
 
     /**
-     * 해당 체육관 코트 불러오기
+     * 해당 체육관 의 모든 코트 불러오기
      *
-     * @param authUser
-     * @param gymId
-     * @return List<CourtSearchResponse>
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId 코트를 조회할 체육관의 ID
+     * @return 코트 목록을 반환
      */
     public List<CourtSearchResponse> search(AuthUser authUser, Long gymId) {
+
+        // 유저 권한 확인
+        userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         // 체육관 정보 불러오기
         Gym gym = gymRepository.findByIdAndDeletedAtIsNullOrThrow(gymId);
@@ -94,11 +100,11 @@ public class CourtService {
     /**
      * 코트 정보 수정(가격 변경)
      *
-     * @param authUser
-     * @param gymId
-     * @param courtNum
-     * @param courtUpdateRequest
-     * @return CourtCreateResponse
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId 코트를 포함한 체육관의 ID
+     * @param courtNum 수정할 코트 번호
+     * @param courtUpdateRequest 수정할 내용(가격)을 포함한 객체
+     * @return 변경된 코트 정보를 반환
      */
     @Transactional
     public CourtCreateResponse update(AuthUser authUser, Long gymId, Long courtNum, CourtUpdateRequest courtUpdateRequest) {
@@ -128,9 +134,9 @@ public class CourtService {
     /**
      * 코트 삭제(Soft)
      *
-     * @param authUser
-     * @param gymId
-     * @param courtNum
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param gymId 코트가 등록된 체육관의 ID
+     * @param courtNum 삭제할 코트 번호
      */
     @Transactional
     public void delete(AuthUser authUser, Long gymId, Long courtNum) {

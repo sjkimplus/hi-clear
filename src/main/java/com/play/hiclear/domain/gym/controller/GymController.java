@@ -2,7 +2,6 @@ package com.play.hiclear.domain.gym.controller;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
-import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class GymController {
 
     private final GymService gymService;
-    private final DistanceCalculator distanceCalculator;
 
     // 체육관 등록
     @PostMapping("/v1/business/gyms")
@@ -35,7 +33,7 @@ public class GymController {
 
     // 체육관 조회
     @GetMapping("/v2/gyms/search")
-    public ResponseEntity<Page<GymSimpleResponse>> searchv2(
+    public ResponseEntity<Page<GymSimpleResponse>> search(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String address,
@@ -44,10 +42,11 @@ public class GymController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Double requestDistance) {
 
-        if (requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
+        if (requestDistance != null && requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
             throw new CustomException(ErrorCode.INVALID_DISTANCE);
         }
         return ResponseEntity.ok(gymService.search(authUser, name, address, gymType, page, size, requestDistance));
+
     }
 
 
@@ -82,6 +81,7 @@ public class GymController {
         gymService.delete(authUser, gymId);
         return ResponseEntity.ok("체육관이 삭제됐습니다.");
     }
+
 
     // 체육관 단건 조회
     @GetMapping("/v1/gyms/{gymId}")

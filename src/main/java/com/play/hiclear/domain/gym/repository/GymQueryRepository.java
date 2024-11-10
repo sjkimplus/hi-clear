@@ -2,7 +2,6 @@ package com.play.hiclear.domain.gym.repository;
 
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 

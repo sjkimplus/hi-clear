@@ -30,11 +30,13 @@ public class AuthController {
         return ResponseEntity.ok(authService.signup(request));
     }
 
+
     // 로그인
     @PostMapping("/v1/auth/login")
     public ResponseEntity<AuthLoginResponse> login(@Valid @RequestBody AuthLoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
 
     // 회원탈퇴
     @DeleteMapping("/v1/auth/withdrawals")

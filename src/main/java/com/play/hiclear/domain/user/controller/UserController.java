@@ -23,12 +23,14 @@ public class UserController {
     // 유저 전체 조회
     @GetMapping("/v1/users")
     public ResponseEntity<Page<UserSimpleResponse>> search(
+            @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(userService.search(page, size));
+        return ResponseEntity.ok(userService.search(authUser, page, size));
     }
 
+    
     // 유저 상세 조회
     @GetMapping("/v1/users/{userId}")
     public ResponseEntity<UserDetailResponse> get(
@@ -47,6 +49,7 @@ public class UserController {
     ) {
         return ResponseEntity.ok(userService.update(authUser, request));
     }
+
 
     // 유저 프로필 사진 등록
     @PostMapping("/v1/users/images")

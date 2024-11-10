@@ -48,7 +48,7 @@ public class GymDummyService {
         User user = new User("이름", "adminuser1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, encodePassword, Ranks.RANK_A, UserRole.BUSINESS);
         userRepository.save(user);
 
-        for (int i = 0; i < 25000; i++) {
+        for (int i = 0; i < 500; i++) {
             int regionNum = random.nextInt(region.length);
             String regionAddress = region[regionNum];
             String name = regionAddress + " 공공체육관";
@@ -64,7 +64,7 @@ public class GymDummyService {
             }
         }
 
-        for (int i = 0; i < 25000; i++) {
+        for (int i = 0; i < 500; i++) {
             int regionNum = random.nextInt(region.length);
             String regionAddress = region[regionNum];
             String name = regionAddress + " 사설체육관";

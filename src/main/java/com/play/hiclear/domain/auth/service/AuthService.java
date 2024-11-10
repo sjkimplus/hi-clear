@@ -35,8 +35,8 @@ public class AuthService {
     /**
      * 회원가입기능
      *
-     * @param request
-     * @return AuthSignupResponse
+     * @param request 회원가입할 유저의 정보를 포함한 객체
+     * @return 회원가입된 유저의 모든 정보를 반환
      */
     @Transactional
     public AuthSignupResponse signup(AuthSignupRequest request) {
@@ -84,8 +84,8 @@ public class AuthService {
     /**
      * 로그인(token 반환)
      *
-     * @param request
-     * @return AuthLoginResponse(bearerToken)
+     * @param request 로그인할 유저의 이메일과 비밀번호를 포함한 객체
+     * @return bearerToken 반환
      */
     public AuthLoginResponse login(AuthLoginRequest request) {
 
@@ -115,8 +115,8 @@ public class AuthService {
     /**
      * 회원 탈퇴(Soft Delete)
      *
-     * @param authUser
-     * @param request
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param request 탈퇴할(접속중인) 유저의 비밀번호를 확인
      */
     @Transactional
     public void delete(AuthUser authUser, AuthDeleteRequest request) {
