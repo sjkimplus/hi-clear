@@ -93,6 +93,9 @@ public enum ErrorCode {
     REVIEW_MEETING_USER(HttpStatus.FORBIDDEN, "해당 유저가 미팅에 속해있지 않습니다."),
 
 
+    // Notification
+
+
     // 기본 코드
     ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소 입니다."),
     IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일입니다."),

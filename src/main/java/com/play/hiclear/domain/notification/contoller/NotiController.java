@@ -1,14 +1,17 @@
 package com.play.hiclear.domain.notification.contoller;
 
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.notification.dto.NotiDto;
 import com.play.hiclear.domain.notification.service.NotiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +30,16 @@ public class NotiController {
     public SseEmitter subscribe(@AuthenticationPrincipal AuthUser authUser,
                                 @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
         return notifyService.subscribe(authUser.getEmail(), lastEventId);
+    }
+
+    @GetMapping("/notifications")
+    public List<NotiDto> search(@AuthenticationPrincipal AuthUser authUser) {
+        return notifyService.search(authUser.getEmail());
+    }
+
+    @PatchMapping("/notifications/{notificationId}")
+    public ResponseEntity<String> read(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long notificationId) {
+        notifyService.read(authUser.getEmail(), notificationId);
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.NOTIFICATION_READ));
     }
 }

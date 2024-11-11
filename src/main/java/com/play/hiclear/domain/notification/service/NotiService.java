@@ -1,17 +1,21 @@
 package com.play.hiclear.domain.notification.service;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.notification.dto.NotiDto;
 import com.play.hiclear.domain.notification.entity.Noti;
 import com.play.hiclear.domain.notification.enums.NotiType;
 import com.play.hiclear.domain.notification.repository.EmitterRepository;
 import com.play.hiclear.domain.notification.repository.NotiRepository;
 import com.play.hiclear.domain.user.entity.User;
+import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,18 +27,20 @@ public class NotiService {
     
     private final EmitterRepository emitterRepository;
     private final NotiRepository notiRepository;
+    private final UserRepository userRepository;
 
 
     /**
      *
-     * @param username  알림을 받을 수신자의 식별 정보
+     * @param userEmail  알림을 받을 수신자의 식별 정보
      * @param lastEventId   수신자가 마지막으로 받은 이벤트의 식별자
      * @return  SseEmitter를 생성하여 반환
      */
-    public SseEmitter subscribe(String username, String lastEventId) { // 수신자의 고유 식별 정보와 수신자의 마지막 이벤트 번호를 받는다
+    @Transactional
+    public SseEmitter subscribe(String userEmail, String lastEventId) { // 수신자의 고유 식별 정보와 수신자의 마지막 이벤트 번호를 받는다
 
         // 유저의 고유 식별자를 이용한 SseEmitter 고유 아이디 생성
-        String emitterId = makeTimeIncludeId(username);
+        String emitterId = makeTimeIncludeId(userEmail);
 
         // SseEmitter를 생성하고 emitterId를 키로 사용해 emitterRepository에 저장한다
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
@@ -44,12 +50,12 @@ public class NotiService {
         emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
 
         // sendNotification을 호출하여 클라이언트에게 연결이 생성되었음을 알리는 더미 메시지 전송하고 이를 통하여 클라이언트-서버 간의 연결이 유지되도록 한다.
-        String eventId = makeTimeIncludeId(username);
-        sendNotification(emitter, eventId, emitterId, "연결되었습니다. [userEmail = " + username + "]");
+        String eventId = makeTimeIncludeId(userEmail);
+        sendNotification(emitter, eventId, emitterId, "연결되었습니다. [userEmail = " + userEmail + "]");
 
         // 클라이언트가 미수신한 Event 목록이 존재할 경우 전송하여 Event 유실을 예방
         if (!lastEventId.isEmpty()) {
-            sendLostData(lastEventId, username, emitterId, emitter);
+            sendLostData(lastEventId, userEmail, emitterId, emitter);
         }
 
         // 생성된 SseEmitter 객체를 반환하여 클라이언트에게 전달
@@ -65,7 +71,7 @@ public class NotiService {
     private String makeTimeIncludeId(String email) { // (3)
         return email + "_" + System.currentTimeMillis();
     }
-    
+
     private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) { // (4)
         try {
             emitter.send(SseEmitter.event()
@@ -81,7 +87,7 @@ public class NotiService {
     private void sendLostData(String lastEventId, String userEmail, String emitterId, SseEmitter emitter) { // (6)
         Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithByUserEmail(userEmail);
         eventCaches.entrySet().stream()
-                .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
+                .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0) // 가나다.compareTo("안녕하세요")
                 .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
 
@@ -92,6 +98,7 @@ public class NotiService {
      * @param content   알림 내용
      * @param url   호출한 URL
      */
+    @Transactional
     public void send(User receiver, NotiType notiType, String content, String url) {
 
         // 알림 객체 생성 및 저장
@@ -125,5 +132,28 @@ public class NotiService {
                     sendNotification(emitter, eventId, key, NotiDto.createResponse(noti));
                 }
         );
+    }
+
+    public List<NotiDto> search(String email) {
+
+        //수신자 조회
+        User receiver = userRepository.findByEmailAndDeletedAtIsNullOrThrow(email);
+        List<Noti> noties = notiRepository.findAllByReceiverIdAndIsReadFalseOrderByIdDesc(receiver.getId());
+
+        return noties.stream().map(NotiDto::createResponse).toList();
+    }
+
+    @Transactional
+    public void read(String email, Long notificationId) {
+
+        // 알림 조회
+        Noti noti = notiRepository.findById(notificationId).orElseThrow(() -> new NullPointerException("존재하지 않는 알림입니다"));
+
+        // 해당 알림 수신자 확인
+        if (noti.getReceiver().getEmail().equals(email)) {
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Noti.class.getSimpleName());
+        }
+
+        noti.read();
     }
 }
