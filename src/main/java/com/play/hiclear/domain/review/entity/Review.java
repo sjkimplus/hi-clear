@@ -22,7 +22,7 @@ public class Review extends TimeStamped {
     // 리뷰 작성자의 아이디
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_id", nullable = false)
-    private User reviwer;
+    private User reviewer;
 
     // 리뷰 받는사람의 아이디
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,7 +43,7 @@ public class Review extends TimeStamped {
     private Ranks gradeRank;
 
     public Review(User reviewer, User reviewee, Meeting meeting, MannerRank mannerRank, Ranks gradeRank) {
-        this.reviwer = reviewer;
+        this.reviewer = reviewer;
         this.reviewee = reviewee;
         this.meeting = meeting;
         this.mannerRank = mannerRank;
