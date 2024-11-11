@@ -34,31 +34,46 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MeetingRepository meetingRepository;
 
-    // 점수 계산
-    public void updateUserStatistics(User reviewee){
+    // 매너 점수 평균을 계산
+    public double updateUserMannerScore(User reviewee){
         List<Review> reviews = reviewRepository.findByReviewee(reviewee);
-
-        if(!reviews.isEmpty()){
-            double averageMannerScore = reviews.stream()
-                    .mapToInt(review -> getMannerScore(review.getMannerRank()))
-                    .average()
-                    .orElse(0);
-
-            double averageGradeRank = reviews.stream()
-                    .mapToInt(review -> getGradeRank(review.getGradeRank()))
-                    .average()
-                    .orElse(0);
-
-            System.out.println("Average Manner Score for user " + reviewee.getId() + ": " + averageMannerScore);
-            System.out.println("Average Grade Rank for user " + reviewee.getId() + ": " + averageGradeRank);
+        if(reviews.isEmpty()){
+            return 0;
         }
+        return reviews.stream()
+                .mapToInt(review -> getMannerScore(review.getMannerRank()))
+                .average()
+                .orElse(0);
     }
 
-    private int getMannerScore(MannerRank mannerRank){
+    // 평가 급수 평균을 계산
+    public double updateUserGradeRank(User reviewee){
+        List<Review> reviews = reviewRepository.findByReviewee(reviewee);
+        if(reviews.isEmpty()){
+            return 0;
+        }
+        return reviews.stream()
+                .mapToInt(review -> getGradeRank(review.getGradeRank()))
+                .average()
+                .orElse(0);
+    }
+
+    // 결과값 출력만을 위한 메서드 -> 필요없어지면 버려도 됨
+    private void updateUserStatistics(User reviewee) {
+        // 매너 점수와 평가 급수 평균 계산
+        double averageMannerScore = updateUserMannerScore(reviewee);
+        double averageGradeRank = updateUserGradeRank(reviewee);
+
+        // 출력
+        System.out.println("Average Manner Score for user " + reviewee.getId() + ": " + averageMannerScore);
+        System.out.println("Average Grade Rank for user " + reviewee.getId() + ": " + averageGradeRank);
+    }
+
+    private int getMannerScore(MannerRank mannerRank) {
         return mannerRank.getMannerScore();
     }
 
-    private int getGradeRank(Ranks ranks){
+    private int getGradeRank(Ranks ranks) {
         return ranks.getRankValue();
     }
 
@@ -73,17 +88,18 @@ public class ReviewService {
         Long reviewerId = authUser.getUserId();
 
         // 이미 종료된 미팅 필터
-        List<Meeting> finishedMeetings = participantRepository.findFinishedMeetings();
+        List<Participant> finishedParticipants = participantRepository.findFinishedMeetingsUserJoined(reviewerId); // 미팅이 끝난 것만 찾는다
 
         // 종료된 미팅 참가자 목록을 저장할 리스트
         List<ReviewSearchResponse> reviewableUsers = new ArrayList<>();
 
-        for(Meeting meeting : finishedMeetings){
-            List<Participant> participants = participantRepository.findByMeeting(meeting);
-
-            for(Participant participant : participants){
-                User user = participant.getUser();
-                if(!user.getId().equals(reviewerId)){
+        for (Participant participant : finishedParticipants) {
+            User user = participant.getUser();
+            Meeting meeting = participant.getMeeting();
+            if (!user.getId().equals(reviewerId)) {
+                // 이미 리뷰를 작성한 건은 필터링
+                boolean reviewed = reviewRepository.existsByMeetingAndRevieweeAndReviewer(meeting, user, userRepository.findByIdAndDeletedAtIsNullOrThrow(reviewerId));
+                if (!reviewed) {
                     ReviewSearchResponse response = new ReviewSearchResponse(
                             user.getName(),
                             meeting.getTitle(),
@@ -144,7 +160,7 @@ public class ReviewService {
     // 리뷰 받는사람이 모임에 속해있는지 확인
     private void checkParticipant(Meeting meeting, User reviewee) {
         Optional<Participant> participant = participantRepository.findByMeetingAndUser(meeting, reviewee);
-        if(!participant.isPresent()){
+        if (!participant.isPresent()) {
             throw new CustomException(ErrorCode.REVIEW_MEETING_USER);
             // 해당 유저가 미팅에 속해있지않습니다.
         }

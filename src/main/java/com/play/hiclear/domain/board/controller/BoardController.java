@@ -8,6 +8,7 @@ import com.play.hiclear.domain.board.dto.response.BoardSearchDetailResponse;
 import com.play.hiclear.domain.board.dto.response.BoardSearchResponse;
 import com.play.hiclear.domain.board.dto.response.BoardUpdateResponse;
 import com.play.hiclear.domain.board.service.BoardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class BoardController {
     @PostMapping("/v1/clubs/{clubId}/clubboards")
     public ResponseEntity<BoardCreateResponse> create(
             @PathVariable Long clubId,
+            @Valid
             @RequestBody BoardCreateRequest request,
             @AuthenticationPrincipal AuthUser authUser
     ){

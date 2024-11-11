@@ -12,8 +12,9 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, Long> {
     Page<Board> findByClubIdAndDeletedAtIsNull(Long clubId, Pageable pageable);
 
+    Optional<Board> findByIdAndDeletedAtIsNull(Long boardId);
 
     default Board findByIdAndDeletedAtIsNullOrThrow(Long boardId) {
-        return findById(boardId).orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
+        return findByIdAndDeletedAtIsNull(boardId).orElseThrow(()-> new CustomException(ErrorCode.NOT_FOUND, Board.class.getSimpleName()));
     }
 }
