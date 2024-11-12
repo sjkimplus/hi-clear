@@ -6,57 +6,67 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_REGION: ap-northeast-2
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: hi-clear-ECR-Log
-        env:
-          AWS_REGION: ap-northeast-2
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region $AWS_REGION
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 565393063528.dkr.ecr.$AWS_REGION.amazonaws.com
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Set up JDK 17
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Grant execute permission to gradlew
-      - name: Grant execute permission for gradlew
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper/
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant Execute Permission for Gradle Wrapper
         run: chmod +x gradlew
 
-      # Build project using Gradle Wrapper
-      - name: Build with Gradle Wrapper
+      - name: Build with Gradle
         run: ./gradlew build -x test
 
-      - name: hi-clear-ECR
+      - name: Build and Push Docker Image
         env:
-          ECR_REGISTRY: 565393063528.dkr.ecr.ap-northeast-2.amazonaws.com
+          ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           ECR_REPOSITORY: hi-clear
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # Render ECS Task Definition
       - name: Render ECS Task Definition
-        id: render_task
         uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-task-definition
         with:
-          task-definition: ${{ secrets.ECS_TASK_DEFINITION }}
+          task-definition: task-definition.json
           container-name: hi-clear
-          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          image: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
 
-      # Deploy to ECS using rendered Task Definition
-      - name: hi-clear-ECS Deploy
+      - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
+          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
           service: hi-clear-service
           cluster: hiclear_cluster
           wait-for-service-stability: true
-          task-definition: ${{ steps.render_task.outputs.task-definition }}
