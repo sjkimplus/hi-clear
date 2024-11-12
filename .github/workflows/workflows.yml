@@ -1,10 +1,8 @@
 name: CI/CD Pipeline
-
 on:
   push:
     branches:
       - dev
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -22,18 +20,16 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 565393063528.dkr.ecr.$AWS_REGION.amazonaws.com
 
       # Set up JDK 17
-      # temurin = JDK provided by Adoptium
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-        
+
       # Grant execute permission to gradlew
-      # Gradle wrapper allows developers to run Gradle builds without installing a specific version of Gradle
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      
+
       # Build project using Gradle Wrapper
       - name: Build with Gradle Wrapper
         run: ./gradlew build -x test
@@ -47,10 +43,20 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: hi-clear-ECS
+      # Render ECS Task Definition
+      - name: Render ECS Task Definition
+        id: render_task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ secrets.ECS_TASK_DEFINITION }}
+          container-name: hi-clear
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+      # Deploy to ECS using rendered Task Definition
+      - name: hi-clear-ECS Deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           service: hi-clear-service
           cluster: hiclear_cluster
           wait-for-service-stability: true
-          task-definition: ${{ secrets.ECS_TASK_DEFINITION }}
+          task-definition: ${{ steps.render_task.outputs.task-definition }}
