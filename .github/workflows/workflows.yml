@@ -21,6 +21,15 @@ jobs:
           aws configure set region $AWS_REGION
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 565393063528.dkr.ecr.$AWS_REGION.amazonaws.com
 
+      # gradle wrapper 파일에 실행 권한을 부여
+      # gradle wrapper = 개발자가 특정 버전의 Gradle을 미리 설치하지 않고도 Gradle 빌드를 실행할 수 있게 해주는 편리한 도구        
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      
+      # Gradle 빌드 엑션을 이용해서 프로젝트 빌드
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build -x test
+
       - name: hi-clear-ECR
         env:
           ECR_REGISTRY: 565393063528.dkr.ecr.ap-northeast-2.amazonaws.com
