@@ -65,7 +65,7 @@ jobs:
         id: render-task-definition
         with:
           task-definition: task-definition.json
-          container-name: hi-clear
+          container-name: hi-clear-container
           image: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
 
       - name: Deploy to ECS
