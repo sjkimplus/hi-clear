@@ -1,0 +1,39 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: hi-clear-ECR-Log
+        env:
+          AWS_REGION: ap-northeast-2
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region $AWS_REGION
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 565393063528.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: hi-clear-ECR
+        env:
+          ECR_REGISTRY: 565393063528.dkr.ecr.ap-northeast-2.amazonaws.com
+          ECR_REPOSITORY: hi-clear
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: hi-clear-ECS
+        uses: aws-actions/hi-clear-task-definition@v1
+        with:
+          task-definition: hi-clear-task-definition
+          service: hi-clear-service
+          cluster: hiclear_cluster
+          wait-for-service-stability: true
