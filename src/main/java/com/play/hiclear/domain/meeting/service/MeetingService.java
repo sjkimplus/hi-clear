@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true) // 수정이 없는 데이터는 읽기만 함.
@@ -174,14 +173,14 @@ public class MeetingService {
             responseList = participantList
                     .stream()
                     .map(p -> new MyMeetingResponse(p.getMeeting()))
-                    .collect(Collectors.toList());
+                    .toList();
             return new MyMeetingResponses(responseList);
         }
         // role = GUEST 인 경우
         responseList = participantList
                 .stream()
                 .map(p -> new MyMeetingResponse(p.getMeeting(), p.getStatus()))
-                .collect(Collectors.toList());
+                .toList();
         return new MyMeetingResponses(responseList);
     }
 
