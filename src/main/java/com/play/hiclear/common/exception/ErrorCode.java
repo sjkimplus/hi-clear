@@ -72,7 +72,7 @@ public enum ErrorCode {
     TOO_LATE(HttpStatus.BAD_REQUEST, "번개일정 참여하기에는 너무 늦었습니다"),
     FULL(HttpStatus.BAD_REQUEST, "번개일정 참여자가 모두 모집 되었습니다"),
     INVALID_TIME(HttpStatus.BAD_REQUEST, "시작시간은 현재시간 이후, 운동시간은 총 1시간이여야 합니다."),
-    INVALID_DISTANCE(HttpStatus.BAD_REQUEST, "허용된 값은 [3, 5, 10, 20]km입니다."),
+    INVALID_DISTANCE(HttpStatus.BAD_REQUEST, "허용된 값은 [5, 10, 50, 100]km 입니다."),
 
 
     // ClubMember

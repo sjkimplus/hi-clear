@@ -57,7 +57,7 @@ public class MeetingController {
             @RequestParam(defaultValue = "10") int size) {
 
         // Validate distance
-        if (distance != 3 && distance != 5 && distance != 10 && distance != 20) {
+        if (distance != 5 && distance != 10 && distance != 50 && distance != 100) {
             throw new CustomException(ErrorCode.INVALID_DISTANCE);
         }
 
