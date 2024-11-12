@@ -66,14 +66,5 @@ public class DistanceCalculator {
 
         return distance;
     }
-
-//    public String distance(String addressA, String addressB) {
-//
-//        GeoCodeDocument geoAddressA = geoCodeService.getGeoCode(addressA);
-//        GeoCodeDocument geoAddressB = geoCodeService.getGeoCode(addressB);
-//
-//        return calculateDistance(geoAddressA.getLatitude(), geoAddressA.getLongitude(), geoAddressB.getLatitude(), geoAddressB.getLongitude()).toString();
-//    }
-
 }
 
