@@ -2,7 +2,7 @@ package com.play.hiclear.common.utils;
 
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.service.GeoCodeService;
-import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
+import com.querydsl.core.types.OrderSpecifier;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -42,7 +42,7 @@ public class DistanceCalculator {
     }
 
     // 거리계산
-    private BigDecimal calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
+    public BigDecimal calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
         BigDecimal bigLat1 = BigDecimal.valueOf(lat1);
         BigDecimal bigLon1 = BigDecimal.valueOf(lon1);
         BigDecimal bigLat2 = BigDecimal.valueOf(lat2);
@@ -65,14 +65,6 @@ public class DistanceCalculator {
         BigDecimal distance = EARTH_RADIUS.multiply(acos(centralAngle), MATH_CONTEXT);
 
         return distance;
-    }
-
-    public String distance(String addressA, String addressB) {
-
-        GeoCodeDocument geoAddressA = geoCodeService.getGeoCode(addressA);
-        GeoCodeDocument geoAddressB = geoCodeService.getGeoCode(addressB);
-
-        return calculateDistance(geoAddressA.getLatitude(), geoAddressA.getLongitude(), geoAddressB.getLatitude(), geoAddressB.getLongitude()).toString();
     }
 }
 

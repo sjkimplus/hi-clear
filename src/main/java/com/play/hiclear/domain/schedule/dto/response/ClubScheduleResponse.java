@@ -11,12 +11,12 @@ public class ClubScheduleResponse {
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Club club;
+    private String clubname;
 
     public ClubScheduleResponse(Schedule schedule) {
         this.id = schedule.getId();
         this.startTime = schedule.getStartTime();
         this.endTime = schedule.getEndTime();
-        this.club = schedule.getClub();
+        this.clubname = schedule.getClub().getClubname();
     }
 }

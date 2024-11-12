@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +97,7 @@ public class ParticipantService {
         List<Participant> pendingUsers = participantRepository.findByMeetingAndStatus(meeting, ParticipantStatus.PENDING);
         return pendingUsers.stream()
                 .map(ParticipantResponse::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
