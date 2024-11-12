@@ -184,7 +184,7 @@ public class GymService {
             List<Club> clubs = scheduleRepository.findAllClubsByScheduleAtGym(now.minusDays(30), now, gym.getRegionAddress());
             List<String> clubNames = clubs.stream()
                     .map(Club::getClubname)
-                    .collect(Collectors.toList());
+                    .toList();
             // 당날 스케줄 정보가져오기
             LocalDateTime dayStart = LocalDate.now().atStartOfDay();
             LocalDateTime dayEnd = dayStart.plusDays(1);
@@ -194,7 +194,7 @@ public class GymService {
 
             List<ClubScheduleResponse> todaySchedule = schedules.stream()
                     .map(ClubScheduleResponse::new)
-                    .collect(Collectors.toList());
+                    .toList();
 
             return new GymDetailResponse(gym, clubNames, todaySchedule);
         }
