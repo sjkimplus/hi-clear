@@ -16,6 +16,7 @@ import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,14 +54,16 @@ public class AuthService {
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
 
+        // 좌표 객체 생성
+        Point location = geoCodeService.createPoint(geoCodeDocument);
+
         // 유저 객체 생성
         User user = new User(
                 request.getName(),
                 request.getEmail(),
                 geoCodeDocument.getRegionAddress(),
                 geoCodeDocument.getRoadAddress(),
-                geoCodeDocument.getLatitude(),
-                geoCodeDocument.getLongitude(),
+                location,
                 encodePassword,
                 Ranks.of(request.getSelfRank()),
                 UserRole.of(request.getUserRole())
@@ -116,7 +119,7 @@ public class AuthService {
      * 회원 탈퇴(Soft Delete)
      *
      * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
-     * @param request 탈퇴할(접속중인) 유저의 비밀번호를 확인
+     * @param request  탈퇴할(접속중인) 유저의 비밀번호를 확인
      */
     @Transactional
     public void delete(AuthUser authUser, AuthDeleteRequest request) {
@@ -137,4 +140,5 @@ public class AuthService {
             throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
         }
     }
+
 }

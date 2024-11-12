@@ -1,17 +1,31 @@
 package com.play.hiclear.domain.gym.repository;
 
+import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
-
-import java.util.List;
+import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface GymQueryRepository {
 
-    List<Gym> search(
+    Page<GymSimpleResponse> search(
             String name,
             String address,
             GymType gymType,
-            Double userLatitude,
-            Double userLongitude,
-            Double requestDistance);
+            Point userLocation,
+            Double requestDistance,
+            Pageable pageable);
+
+    Page<Gym> searchv3(
+            String name,
+            String address,
+            GymType gymType,
+            Point userLocation,
+            Double minLat,
+            Double maxLat,
+            Double minLon,
+            Double maxLon,
+            Double requestDistance,
+            Pageable pageable);
 }

@@ -32,7 +32,7 @@ public class GymController {
 
 
     // 체육관 조회
-    @GetMapping("/v2/gyms/search")
+    @GetMapping("/v3/gyms/search")
     public ResponseEntity<Page<GymSimpleResponse>> search(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) String name,
@@ -45,8 +45,36 @@ public class GymController {
         if (requestDistance != null && requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
             throw new CustomException(ErrorCode.INVALID_DISTANCE);
         }
-        return ResponseEntity.ok(gymService.search(authUser, name, address, gymType, page, size, requestDistance));
 
+        if (requestDistance == null) {
+            requestDistance = 1000d;
+        }
+
+        return ResponseEntity.ok(gymService.search(authUser, name, address, gymType, page, size, requestDistance * 1000));
+
+    }
+
+
+    // 체육관 조회 인덱싱
+    @GetMapping("/v4/gyms/search")
+    public ResponseEntity<Page<GymSimpleResponse>> searchv3(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) GymType gymType,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Double requestDistance) {
+
+        if (requestDistance != null && requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
+            throw new CustomException(ErrorCode.INVALID_DISTANCE);
+        }
+
+        if (requestDistance == null) {
+            requestDistance = 1000d;
+        }
+
+        return ResponseEntity.ok(gymService.searchv3(authUser, name, address, gymType, page, size, requestDistance));
     }
 
 

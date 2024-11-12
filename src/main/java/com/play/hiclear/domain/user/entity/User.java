@@ -9,6 +9,7 @@ import com.play.hiclear.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +35,8 @@ public class User extends TimeStamped {
 
     private String roadAddress;
 
-    private Double longitude;
-
-    private Double latitude;
+    @Column(columnDefinition = "geometry")
+    private Point location;
 
     private String imgUrl;
 
@@ -65,24 +65,22 @@ public class User extends TimeStamped {
         this.userRole = userRole;
     }
 
-    public User(String name, String email, String regionAddress, String roadAddress, Double latitude, Double longitude, String encodePassword, Ranks selfRank, UserRole role) {
+    public User(String name, String email, String regionAddress, String roadAddress, Point location, String encodePassword, Ranks selfRank, UserRole role) {
         this.name = name;
         this.email = email;
         this.regionAddress = regionAddress;
         this.roadAddress = roadAddress;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
         this.password = encodePassword;
         this.selfRank = selfRank;
         this.userRole = role;
     }
 
-    public void update(String regionAddress, String roadAddress, Double latitude, Double longitude, String rank) {
+    public void update(String regionAddress, String roadAddress, Point location, String rank) {
         if (regionAddress != null) {
             this.regionAddress = regionAddress;
             this.roadAddress = roadAddress;
-            this.latitude = latitude;
-            this.longitude = longitude;
+            this.location = location;
         }
         if (selfRank != null) {
             this.selfRank = Ranks.of(rank);

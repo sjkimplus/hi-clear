@@ -7,6 +7,7 @@ import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +30,9 @@ public class Gym extends TimeStamped {
 
     private String roadAddress;
 
-    private Double latitude;
+    @Column(columnDefinition = "geometry")
+    private Point location;
 
-    private Double longitude;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,20 +46,19 @@ public class Gym extends TimeStamped {
     List<Court> courts = new ArrayList<>();
 
 
-    public Gym(String name, String description, String regionAddress, String roadAddress, Double latitude, Double longitude, GymType gymType, User user) {
+    public Gym(String name, String description, String regionAddress, String roadAddress, Point location, GymType gymType, User user) {
         this.name = name;
         this.description = description;
         this.regionAddress = regionAddress;
         this.roadAddress = roadAddress;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
         this.gymType = gymType;
         this.user = user;
 
     }
 
     // Gym Update 메서드
-    public void update(String updateName, String updateDescription, String regionAddress, String roadAddress, Double latitude, Double longitude) {
+    public void update(String updateName, String updateDescription, String regionAddress, String roadAddress, Point location) {
         if (updateName != null && !updateName.isEmpty()) {
             this.name = updateName;
         }
@@ -68,8 +68,7 @@ public class Gym extends TimeStamped {
         if (regionAddress != null && !regionAddress.isEmpty()) {
             this.regionAddress = regionAddress;
             this.roadAddress = roadAddress;
-            this.latitude = latitude;
-            this.longitude = longitude;
+            this.location= location;
         }
     }
 }

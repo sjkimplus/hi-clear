@@ -7,9 +7,9 @@ public class GymSimpleResponse {
 
     private final String name;
     private final String regionAddress;
-    private double distance;
+    private Double distance;
 
-    public GymSimpleResponse(String name, String regionAddress, double distance) {
+    public GymSimpleResponse(String name, String regionAddress, Double distance) {
         this.name = name;
         this.regionAddress = regionAddress;
         this.distance = distance;
