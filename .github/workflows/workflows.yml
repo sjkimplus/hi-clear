@@ -31,7 +31,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: hi-clear-ECS
-        uses: aws-actions/hi-clear-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: hi-clear-task-definition
           service: hi-clear-service
