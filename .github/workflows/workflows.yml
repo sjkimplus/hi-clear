@@ -61,17 +61,31 @@ jobs:
         run: echo "${ECS_TASK_DEFINITION}" > task-definition.json
 
       - name: Render ECS Task Definition
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        id: render-task-definition
-        with:
-          task-definition: task-definition.json
-          container-name: hi-clear-container
-          image: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
+        env:
+          ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          IMAGE: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
+          CONTAINER_NAME: hi-clear-container
+        run: |
+          jq --arg IMAGE "$IMAGE" --arg CONTAINER_NAME "$CONTAINER_NAME" \
+            '(.containerDefinitions[] | select(.name == $CONTAINER_NAME) | .image) |= $IMAGE' \
+            task-definition.json > rendered-task-definition.json
 
       - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
-          service: hi-clear-service
-          cluster: hiclear_cluster
-          wait-for-service-stability: true
+        run: |
+          # Register the rendered task definition and fetch its ARN
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://rendered-task-definition.json \
+            | jq -r '.taskDefinition.taskDefinitionArn')
+
+          # Update the ECS service with the new task definition
+          aws ecs update-service \
+            --cluster hiclear_cluster \
+            --service hi-clear-service \
+            --task-definition "$NEW_TASK_DEF_ARN" \
+            --wait
+
+          # Wait for the ECS service to stabilize after the update
+          aws ecs wait services-stable \
+            --cluster hiclear_cluster \
+            --services hi-clear-service
+
+          echo "Deployment complete and service is stable."
