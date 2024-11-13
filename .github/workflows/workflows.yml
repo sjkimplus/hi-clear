@@ -87,7 +87,7 @@ jobs:
           # Update the ECS service with the new task definition
           aws ecs update-service \
             --cluster hiclear_cluster \
-            --service hi-clear-service \
+            --service ecs-hi-clear-service-fargate \
             --task-definition "$NEW_TASK_DEF_ARN" \
             --network-configuration "awsvpcConfiguration={subnets=[${SUBNET_ID}],securityGroups=[${SECURITY_GROUP_ID}],assignPublicIp=ENABLED}"
 
@@ -95,7 +95,7 @@ jobs:
           # Wait for the ECS service to stabilize after the update
           aws ecs wait services-stable \
             --cluster hiclear_cluster \
-            --services hi-clear-service
+            --services ecs-hi-clear-service-fargate
       
           echo "Deployment complete and service is stable."
 
