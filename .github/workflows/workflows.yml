@@ -65,7 +65,8 @@ jobs:
         with:
           task-definition: ${{ secrets.ECS_TASK_DEFINITION }}
           container-name: hi-clear-container
-          image: ${{ steps.build-image.outputs.image }}
+          image: ${{ env.ECR_REGISTRY }}/hi-clear:latest
+          # image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
