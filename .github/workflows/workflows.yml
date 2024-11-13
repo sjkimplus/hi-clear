@@ -93,3 +93,4 @@ jobs:
             --services hi-clear-service
       
           echo "Deployment complete and service is stable."
+
