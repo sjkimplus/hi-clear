@@ -72,8 +72,8 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
-          service: hi-clear-fargate
-          cluster: hiclear_cluster
+          service: hi-clear-service-fargate
+          cluster: hi-clear-cluster
           wait-for-service-stability: true
 
       
