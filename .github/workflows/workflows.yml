@@ -76,6 +76,9 @@ jobs:
             rendered-task-definition.json > final-task-definition.json
 
       - name: Deploy to ECS
+        env:
+         SUBNET_ID: ${{ secrets.SUBNET_ID }}
+         SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
         run: |
           # Register the cleaned task definition and fetch its ARN
           NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://final-task-definition.json \
@@ -85,7 +88,9 @@ jobs:
           aws ecs update-service \
             --cluster hiclear_cluster \
             --service hi-clear-service \
-            --task-definition "$NEW_TASK_DEF_ARN"
+            --task-definition "$NEW_TASK_DEF_ARN" \
+            --network-configuration "awsvpcConfiguration={subnets=[${SUBNET_ID}],securityGroups=[${SECURITY_GROUP_ID}],assignPublicIp=ENABLED}"
+
       
           # Wait for the ECS service to stabilize after the update
           aws ecs wait services-stable \
