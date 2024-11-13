@@ -57,7 +57,7 @@ public class GymController {
 
     // 체육관 조회 인덱싱
     @GetMapping("/v4/gyms/search")
-    public ResponseEntity<Page<GymSimpleResponse>> searchv3(
+    public ResponseEntity<Page<GymSimpleResponse>> searchv4(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String address,
@@ -74,7 +74,7 @@ public class GymController {
             requestDistance = 1000d;
         }
 
-        return ResponseEntity.ok(gymService.searchv3(authUser, name, address, gymType, page, size, requestDistance));
+        return ResponseEntity.ok(gymService.searchv4(authUser, name, address, gymType, page, size, requestDistance));
     }
 
 
@@ -111,12 +111,17 @@ public class GymController {
     }
 
 
-    // 체육관 단건 조회
-    @GetMapping("/v1/gyms/{gymId}")
-    public ResponseEntity<GymDetailResponse> get(
-            @AuthenticationPrincipal AuthUser authUser,
-            @PathVariable Long gymId) {
-        return ResponseEntity.ok(gymService.get(authUser, gymId));
-    }
+//    // 체육관 단건 조회
+//    @GetMapping("/v1/gyms/{gymId}")
+//    public ResponseEntity<GymDetailResponse> get(
+//            @PathVariable Long gymId) {
+//        return ResponseEntity.ok(gymService.get(gymId));
+//    }
 
+
+    // 체육관 거리 조회
+//    @GetMapping("/v1/distance")
+//    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
+//        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
+//    }
 }

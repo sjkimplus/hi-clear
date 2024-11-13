@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 public class MeetingSearchResponse {
     private Long id;
     private String title;
-    private String region;
+    private String regionAddress;
+    private double longitude;
+    private double latitude;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Ranks ranks;
@@ -19,7 +21,9 @@ public class MeetingSearchResponse {
     public MeetingSearchResponse(Meeting meeting, long numberJoined) {
         this.id = meeting.getId();
         this.title = meeting.getTitle();
-        this.region = meeting.getRegionAddress();
+        this.regionAddress = meeting.getRegionAddress();
+        this.longitude = meeting.getLongitude();
+        this.latitude = meeting.getLatitude();
         this.startTime = meeting.getStartTime();
         this.endTime = meeting.getEndTime();
         this.ranks = meeting.getRanks();

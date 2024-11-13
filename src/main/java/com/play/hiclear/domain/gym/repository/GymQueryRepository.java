@@ -17,15 +17,11 @@ public interface GymQueryRepository {
             Double requestDistance,
             Pageable pageable);
 
-    Page<Gym> searchv3(
+    Page<GymSimpleResponse> searchv4(
             String name,
             String address,
             GymType gymType,
             Point userLocation,
-            Double minLat,
-            Double maxLat,
-            Double minLon,
-            Double maxLon,
             Double requestDistance,
             Pageable pageable);
 }

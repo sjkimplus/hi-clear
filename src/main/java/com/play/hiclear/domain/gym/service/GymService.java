@@ -5,6 +5,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
@@ -14,6 +15,9 @@ import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.repository.GymRepository;
+import com.play.hiclear.domain.schedule.dto.response.ClubScheduleResponse;
+import com.play.hiclear.domain.schedule.entity.Schedule;
+import com.play.hiclear.domain.schedule.repository.ScheduleRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +44,7 @@ public class GymService {
     private final UserRepository userRepository;
     private final GymRepository gymRepository;
     private final GeoCodeService geoCodeService;
+    private final ScheduleRepository scheduleRepository;
 
     /**
      * 체육관 생성
@@ -102,29 +111,27 @@ public class GymService {
     }
 
 
-    public Page<GymSimpleResponse> searchv3(
+    public Page<GymSimpleResponse> searchv4(
             AuthUser authUser, String name, String address, GymType gymType,
             int page, int size, Double requestDistance) {
 
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-        Double userLatitude = user.getLocation().getY();
-        Double userLongitude = user.getLocation().getX();
-
-        // 위도 1도는 약 113.32km, 경도 1도는 약 113.32 * cos(위도)
-        Double minLat = new BigDecimal(userLatitude - requestDistance / 111.32).setScale(6, RoundingMode.DOWN).doubleValue();
-        Double maxLat = new BigDecimal(userLatitude + requestDistance / 111.32).setScale(6, RoundingMode.UP).doubleValue();
-        Double minLon = new BigDecimal(userLongitude - requestDistance / (111.32 * Math.cos(Math.toRadians(userLatitude)))).setScale(6, RoundingMode.DOWN).doubleValue();
-        Double maxLon = new BigDecimal(userLongitude + requestDistance / (111.32 * Math.cos(Math.toRadians(userLatitude)))).setScale(6, RoundingMode.UP).doubleValue();
-
-        System.out.printf("%s, %s, %s, %s%n", minLat, maxLat, minLon, maxLon);
+//        Double userLatitude = user.getLocation().getY();
+//        Double userLongitude = user.getLocation().getX();
+//
+//        // 위도 1도는 약 113.32km, 경도 1도는 약 113.32 * cos(위도)
+//        Double minLat = new BigDecimal(userLatitude - requestDistance / 111.32).setScale(6, RoundingMode.DOWN).doubleValue();
+//        Double maxLat = new BigDecimal(userLatitude + requestDistance / 111.32).setScale(6, RoundingMode.UP).doubleValue();
+//        Double minLon = new BigDecimal(userLongitude - requestDistance / (111.32 * Math.cos(Math.toRadians(userLatitude)))).setScale(6, RoundingMode.DOWN).doubleValue();
+//        Double maxLon = new BigDecimal(userLongitude + requestDistance / (111.32 * Math.cos(Math.toRadians(userLatitude)))).setScale(6, RoundingMode.UP).doubleValue();
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Gym> gyms = gymRepository.searchv3(name, address, gymType,
-                user.getLocation(), minLat, maxLat, minLon, maxLon, requestDistance, pageable);
 
-        return null;
+
+        return gymRepository.searchv4(name, address, gymType,
+                user.getLocation(), requestDistance, pageable);
     }
 
 
@@ -200,24 +207,33 @@ public class GymService {
     }
 
 
-    public GymDetailResponse get(AuthUser authUser, Long gymId) {
-
-        userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
-
-        Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
-
-        if (gym.getGymType() == GymType.PRIVATE) {
-            return new GymDetailResponse(gym);
-        } else { // public 인 경우 모임 리스트와 당날 스케줄 정보 가져오기
-            // 공립 체육관의 모임 리스트 가져오기
-
-
-            // 당날 스케줄 정보가져오기
-
-            return new GymDetailResponse(gym);
-        }
-    }
+//    public GymDetailResponse get(Long gymId) {
+//        Gym gym = gymRepository.findById(gymId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
+//
+//        if (gym.getGymType() == GymType.PRIVATE) {
+//            return new GymDetailResponse(gym);
+//        } else { // public 인 경우 모임 리스트와 당날 스케줄 정보 가져오기
+//            // 공립 체육관의 모임 리스트 가져오기 (최근 한달간 4회 이상 모임일정을 개설한)
+//            LocalDateTime now = LocalDateTime.now();
+//            List<Club> clubs = scheduleRepository.findAllClubsByScheduleAtGym(now.minusDays(30), now, gym.getRegionAddress());
+//            List<String> clubNames = clubs.stream()
+//                    .map(Club::getClubname)
+//                    .toList();
+//            // 당날 스케줄 정보가져오기
+//            LocalDateTime dayStart = LocalDate.now().atStartOfDay();
+//            LocalDateTime dayEnd = dayStart.plusDays(1);
+//
+//            List<Schedule> schedules = scheduleRepository.findSchedulesByDayAndLocation(dayStart, dayEnd, gym.getRegionAddress());
+//
+//
+//            List<ClubScheduleResponse> todaySchedule = schedules.stream()
+//                    .map(ClubScheduleResponse::new)
+//                    .toList();
+//
+//            return new GymDetailResponse(gym, clubNames, todaySchedule);
+//        }
+//    }
 
 
     // GymSimpleResponse(거리X) 객체 변환 메서드

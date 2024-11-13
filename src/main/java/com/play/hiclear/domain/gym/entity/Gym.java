@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "gyms")
+@Table(name = "gyms", indexes = {@Index(name = "point_idx", columnList = "location")})
 public class Gym extends TimeStamped {
 
     @Id
@@ -30,9 +30,8 @@ public class Gym extends TimeStamped {
 
     private String roadAddress;
 
-    @Column(columnDefinition = "geometry")
+    @Column(columnDefinition = "POINT", nullable = false)
     private Point location;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

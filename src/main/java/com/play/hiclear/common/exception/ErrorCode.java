@@ -72,6 +72,7 @@ public enum ErrorCode {
     TOO_LATE(HttpStatus.BAD_REQUEST, "번개일정 참여하기에는 너무 늦었습니다"),
     FULL(HttpStatus.BAD_REQUEST, "번개일정 참여자가 모두 모집 되었습니다"),
     INVALID_TIME(HttpStatus.BAD_REQUEST, "시작시간은 현재시간 이후, 운동시간은 총 1시간이여야 합니다."),
+    INVALID_DISTANCE(HttpStatus.BAD_REQUEST, "허용된 값은 [5, 10, 50, 100]km 입니다."),
 
 
     // ClubMember
@@ -94,7 +95,6 @@ public enum ErrorCode {
 
 
     // 기본 코드
-    INVALID_DISTANCE(HttpStatus.BAD_REQUEST, "허용된 값은 [5, 10, 50, 100]km 입니다."),
     ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소 입니다."),
     IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일입니다."),
     IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 중 오류가 발생했습니다." ),

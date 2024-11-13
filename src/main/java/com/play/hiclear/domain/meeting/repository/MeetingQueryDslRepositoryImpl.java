@@ -1,9 +1,11 @@
 package com.play.hiclear.domain.meeting.repository;
 
 import com.play.hiclear.common.enums.Ranks;
+import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.meeting.dto.response.MeetingSearchResponse;
 import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.participant.enums.ParticipantStatus;
+import com.play.hiclear.domain.user.entity.User;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
@@ -27,9 +29,10 @@ import static com.play.hiclear.domain.participant.entity.QParticipant.participan
 @RequiredArgsConstructor
 public class MeetingQueryDslRepositoryImpl implements MeetingQueryDslRepository {
     private final JPAQueryFactory queryFactory;
+    private final DistanceCalculator distanceCalculator;
 
     @Override
-    public Page<MeetingSearchResponse> search(SortType sortType, Ranks ranks, Pageable pageable) {
+    public Page<MeetingSearchResponse> search(SortType sortType, Ranks ranks, int distance, User user, Pageable pageable) {
         LocalDateTime now = LocalDateTime.now();
         // Subquery to count ACCEPTED participants for each meeting
         var joinedNumber = JPAExpressions
@@ -66,18 +69,18 @@ public class MeetingQueryDslRepositoryImpl implements MeetingQueryDslRepository 
 
         List<MeetingSearchResponse> results = query.fetch();
 
-        Long totalCount = queryFactory
-                .select(Wildcard.count)
-                .from(meeting)
-                .where(
-                        matchRank(ranks),
-                        meeting.deletedAt.isNull(),
-                        meeting.startTime.gt(now),
-                        meeting.groupSize.gt(joinedNumber)
+        // Use DistanceCalculator to filter results based on distance
+        List<MeetingSearchResponse> filteredResults = results.stream()
+                .filter(meetingResponse ->
+                         distanceCalculator.calculateDistance(user.getLocation().getY(), user.getLocation().getX(),
+                                meetingResponse.getLatitude(), meetingResponse.getLongitude()).intValue() <= distance
                 )
-                .fetchOne();
+                .toList();
 
-        return new PageImpl<>(results, pageable, totalCount);
+        // Total count for pagination (after filtering)
+        long totalCount = filteredResults.size();
+
+        return new PageImpl<>(filteredResults, pageable, totalCount);
     }
 
     private BooleanExpression matchRank(Ranks ranks) {

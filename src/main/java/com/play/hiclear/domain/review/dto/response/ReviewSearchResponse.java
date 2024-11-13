@@ -1,10 +1,12 @@
 package com.play.hiclear.domain.review.dto.response;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
 public class ReviewSearchResponse {
     private String userName;
     private String meetingTitle;

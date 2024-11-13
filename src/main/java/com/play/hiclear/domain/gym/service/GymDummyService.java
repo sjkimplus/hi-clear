@@ -53,7 +53,7 @@ public class GymDummyService {
         userRepository.save(user);
 
         // 일정 간격으로 위도와 경도 생성
-        int gridSize = 100;  // 위경도 분포의 세밀도 조절
+        int gridSize = 300;  // 위경도 분포의 세밀도 조절
         BigDecimal latitudeStep = latMax.subtract(liatMin).divide(BigDecimal.valueOf(gridSize), scale, RoundingMode.HALF_UP);
         BigDecimal longitudeStep = longMax.subtract(longMin).divide(BigDecimal.valueOf(gridSize), scale, RoundingMode.HALF_UP);
 
