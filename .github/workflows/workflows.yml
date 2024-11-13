@@ -47,35 +47,31 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Build and Push Docker Image
+        id: build-image
         env:
           ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           ECR_REPOSITORY: hi-clear
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Build the image with a tag format IMAGE_TAG:latest
+          # Build the image with a tag format 'latest'
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-          # Push the image with the tag IMAGE_TAG:latest to ECR
+          # Push the image with the tag 'latest' to ECR
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "${ECR_REGISTRY}/${ECR_REPOSITORY}:latest" >> $GITHUB_OUTPUT
 
-
-      - name: Create task definition file from secret
-        env:
-          ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
-        run: echo "${ECS_TASK_DEFINITION}" > task-definition.json
-
-      - name: Render ECS Task Definition
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
-        id: render-task-definition
         with:
-          task-definition: task-definition.json
+          task-definition: ${{ secrets.ECS_TASK_DEFINITION }}
           container-name: hi-clear-container
-          image: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
+          image: ${{ steps.build-image.outputs.image }}
 
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
-          service: hi-clear-service-fargate
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: hi-clear-service
           cluster: hi-clear-cluster
           wait-for-service-stability: true
 
