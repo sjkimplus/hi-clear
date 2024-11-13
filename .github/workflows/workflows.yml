@@ -66,26 +66,32 @@ jobs:
           IMAGE: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
           CONTAINER_NAME: hi-clear-container
         run: |
+          # Update the task definition file with the new image
           jq --arg IMAGE "$IMAGE" --arg CONTAINER_NAME "$CONTAINER_NAME" \
             '(.containerDefinitions[] | select(.name == $CONTAINER_NAME) | .image) |= $IMAGE' \
             task-definition.json > rendered-task-definition.json
+      
+          # Strip unwanted fields from the task definition JSON
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
+            rendered-task-definition.json > final-task-definition.json
 
       - name: Deploy to ECS
         run: |
-          # Register the rendered task definition and fetch its ARN
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://rendered-task-definition.json \
+          # Register the cleaned task definition and fetch its ARN
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://final-task-definition.json \
             | jq -r '.taskDefinition.taskDefinitionArn')
-
+      
           # Update the ECS service with the new task definition
           aws ecs update-service \
             --cluster hiclear_cluster \
             --service hi-clear-service \
             --task-definition "$NEW_TASK_DEF_ARN" \
             --wait
-
+      
           # Wait for the ECS service to stabilize after the update
           aws ecs wait services-stable \
             --cluster hiclear_cluster \
             --services hi-clear-service
-
+      
           echo "Deployment complete and service is stable."
+
