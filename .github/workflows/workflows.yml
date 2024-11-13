@@ -61,41 +61,20 @@ jobs:
         run: echo "${ECS_TASK_DEFINITION}" > task-definition.json
 
       - name: Render ECS Task Definition
-        env:
-          ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-          IMAGE: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
-          CONTAINER_NAME: hi-clear-container
-        run: |
-          # Update the task definition file with the new image
-          jq --arg IMAGE "$IMAGE" --arg CONTAINER_NAME "$CONTAINER_NAME" \
-            '(.containerDefinitions[] | select(.name == $CONTAINER_NAME) | .image) |= $IMAGE' \
-            task-definition.json > rendered-task-definition.json
-      
-          # Strip unwanted fields from the task definition JSON
-          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .tags)' \
-            rendered-task-definition.json > final-task-definition.json
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: render-task-definition
+        with:
+          task-definition: task-definition.json
+          container-name: hi-clear-container
+          image: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
 
       - name: Deploy to ECS
-        env:
-         SUBNET_ID: ${{ secrets.SUBNET_ID }}
-         SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-        run: |
-          # Register the cleaned task definition and fetch its ARN
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://final-task-definition.json \
-            | jq -r '.taskDefinition.taskDefinitionArn')
-      
-          # Update the ECS service with the new task definition
-          aws ecs update-service \
-            --cluster hiclear_cluster \
-            --service hi-clear-fargate \
-            --task-definition "$NEW_TASK_DEF_ARN" \
-            --network-configuration "awsvpcConfiguration={subnets=[${SUBNET_ID}],securityGroups=[${SECURITY_GROUP_ID}],assignPublicIp=ENABLED}"
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
+          service: hi-clear-fargate
+          cluster: hiclear_cluster
+          wait-for-service-stability: true
 
       
-          # Wait for the ECS service to stabilize after the update
-          aws ecs wait services-stable \
-            --cluster hiclear_cluster \
-            --services hi-clear-fargate
-      
-          echo "Deployment complete and service is stable."
 
