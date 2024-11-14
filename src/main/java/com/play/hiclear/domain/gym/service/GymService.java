@@ -5,14 +5,18 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
+import com.play.hiclear.domain.gym.dto.response.GymDetailResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.repository.GymRepository;
+import com.play.hiclear.domain.schedule.dto.response.ClubScheduleResponse;
+import com.play.hiclear.domain.schedule.entity.Schedule;
 import com.play.hiclear.domain.schedule.repository.ScheduleRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
@@ -24,6 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -173,33 +180,34 @@ public class GymService {
     }
 
 
-//    public GymDetailResponse get(Long gymId) {
-//        Gym gym = gymRepository.findById(gymId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
-//
-//        if (gym.getGymType() == GymType.PRIVATE) {
-//            return new GymDetailResponse(gym);
-//        } else { // public 인 경우 모임 리스트와 당날 스케줄 정보 가져오기
-//            // 공립 체육관의 모임 리스트 가져오기 (최근 한달간 4회 이상 모임일정을 개설한)
-//            LocalDateTime now = LocalDateTime.now();
-//            List<Club> clubs = scheduleRepository.findAllClubsByScheduleAtGym(now.minusDays(30), now, gym.getRegionAddress());
-//            List<String> clubNames = clubs.stream()
-//                    .map(Club::getClubname)
-//                    .toList();
-//            // 당날 스케줄 정보가져오기
-//            LocalDateTime dayStart = LocalDate.now().atStartOfDay();
-//            LocalDateTime dayEnd = dayStart.plusDays(1);
-//
-//            List<Schedule> schedules = scheduleRepository.findSchedulesByDayAndLocation(dayStart, dayEnd, gym.getRegionAddress());
-//
-//
-//            List<ClubScheduleResponse> todaySchedule = schedules.stream()
-//                    .map(ClubScheduleResponse::new)
-//                    .toList();
-//
-//            return new GymDetailResponse(gym, clubNames, todaySchedule);
-//        }
-//    }
+    public GymDetailResponse get(Long gymId) {
+        Gym gym = gymRepository.findById(gymId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, Gym.class.getSimpleName()));
+
+        if (gym.getGymType() == GymType.PRIVATE) {
+            return new GymDetailResponse(gym);
+        } else { // public 인 경우 모임 리스트와 당날 스케줄 정보 가져오기
+            // 공립 체육관의 모임 리스트 가져오기 (최근 한달간 4회 이상 모임일정을 개설한)
+            LocalDateTime now = LocalDateTime.now();
+            List<Club> clubs = scheduleRepository.findAllClubsByScheduleAtGym(now.minusDays(30), now, gym.getRegionAddress());
+            List<String> clubNames = clubs.stream()
+                    .map(Club::getClubname)
+                    .toList();
+
+            // 당날 스케줄 정보가져오기 올때 필요한 당날 00:00~24:00 변수
+            LocalDateTime dayStart = LocalDate.now().atStartOfDay();
+            LocalDateTime dayEnd = dayStart.plusDays(1);
+
+            List<Schedule> schedules = scheduleRepository.findSchedulesByDayAndLocation(dayStart, dayEnd, gym.getRegionAddress());
+
+
+            List<ClubScheduleResponse> todaySchedule = schedules.stream()
+                    .map(ClubScheduleResponse::new)
+                    .toList();
+
+            return new GymDetailResponse(gym, clubNames, todaySchedule);
+        }
+    }
 
 
     // GymSimpleResponse(거리X) 객체 변환 메서드
