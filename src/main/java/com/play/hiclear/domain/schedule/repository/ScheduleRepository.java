@@ -41,13 +41,13 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
     List<Club> findAllClubsByScheduleAtGym(@Param("dayStart") LocalDateTime dayStart,
                                            @Param("dayEnd") LocalDateTime dayEnd,
                                            @Param("regionAddress") String regionAddress);
-
-    @Query("SELECT s FROM Schedule s WHERE s.deletedAt IS NULL " +
-            "AND s.startTime BETWEEN :dayStart AND :dayEnd " +
-            "AND s.latitude = :latitude " +
-            "AND s.longitude = :longitude")
-    List<Schedule> findSchedulesByDayAndLocation(@Param("dayStart") LocalDateTime dayStart,
-                                                 @Param("dayEnd") LocalDateTime dayEnd,
-                                                 @Param("regionAddress") String regionAddress);
+//
+//    @Query("SELECT s FROM Schedule s WHERE s.deletedAt IS NULL " +
+//            "AND s.startTime BETWEEN :dayStart AND :dayEnd " +
+//            "AND s.latitude = :latitude " +
+//            "AND s.longitude = :longitude")
+//    List<Schedule> findSchedulesByDayAndLocation(@Param("dayStart") LocalDateTime dayStart,
+//                                                 @Param("dayEnd") LocalDateTime dayEnd,
+//                                                 @Param("regionAddress") String regionAddress);
 
 }

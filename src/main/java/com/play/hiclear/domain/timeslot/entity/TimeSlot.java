@@ -24,7 +24,7 @@ public class TimeSlot {
     private LocalTime startTime;
 
     @Column(nullable = false)
-    private LocalTime  endTime;
+    private LocalTime endTime;
 
     private Long gymId;
 
@@ -32,7 +32,7 @@ public class TimeSlot {
     @JoinColumn(name = "court_id")
     private Court court;
 
-    public TimeSlot(LocalTime  startTime, Long gymId, Court court) {
+    public TimeSlot(LocalTime startTime, Long gymId, Court court) {
         this.startTime = startTime;
         this.endTime = startTime.plusHours(1);
         this.gymId = gymId;

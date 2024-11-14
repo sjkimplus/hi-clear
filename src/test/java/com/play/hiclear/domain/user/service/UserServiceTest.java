@@ -26,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,7 +73,7 @@ class UserServiceTest {
 
 
         // when
-        Page<UserSimpleResponse> result = userService.search(page, size);
+        Page<UserSimpleResponse> result = userService.search(authUser, page, size);
 
         // then
         assertNotNull(result);

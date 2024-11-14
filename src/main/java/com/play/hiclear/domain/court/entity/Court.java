@@ -26,7 +26,7 @@ public class Court extends TimeStamped {
     @JoinColumn(name = "gym_id", nullable = false)
     private Gym gym;
 
-    public Court(long courtNum, int price, Gym gym){
+    public Court(long courtNum, int price, Gym gym) {
         this.courtNum = courtNum;
         this.price = price;
         this.gym = gym;
