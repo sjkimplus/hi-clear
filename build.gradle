@@ -65,9 +65,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'io.netty:netty-resolver-dns-native-macos:4.1.114.Final:osx-aarch_64'
 
+    implementation 'org.hibernate:hibernate-spatial:6.5.3.Final'
+    implementation 'org.locationtech.jts:jts-core:1.18.2'         // JTS (Java Topology Suite) 추가
 
     // SSE
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {

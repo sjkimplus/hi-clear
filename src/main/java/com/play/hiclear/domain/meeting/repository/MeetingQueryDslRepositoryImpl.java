@@ -72,7 +72,7 @@ public class MeetingQueryDslRepositoryImpl implements MeetingQueryDslRepository 
         // Use DistanceCalculator to filter results based on distance
         List<MeetingSearchResponse> filteredResults = results.stream()
                 .filter(meetingResponse ->
-                         distanceCalculator.calculateDistance(user.getLatitude(), user.getLongitude(),
+                         distanceCalculator.calculateDistance(user.getLocation().getY(), user.getLocation().getX(),
                                 meetingResponse.getLatitude(), meetingResponse.getLongitude()).intValue() <= distance
                 )
                 .toList();

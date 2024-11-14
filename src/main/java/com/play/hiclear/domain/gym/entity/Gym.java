@@ -7,6 +7,8 @@ import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "gyms")
+@Table(name = "gyms", indexes = {
+        @Index(name = "idx_location", columnList = "location")})
 public class Gym extends TimeStamped {
 
     @Id
@@ -29,9 +32,8 @@ public class Gym extends TimeStamped {
 
     private String roadAddress;
 
-    private Double latitude;
-
-    private Double longitude;
+    @Column(columnDefinition = "POINT NOT NULL SRID 4326")
+    private Point location;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,31 +47,29 @@ public class Gym extends TimeStamped {
     List<Court> courts = new ArrayList<>();
 
 
-    public Gym(String name, String description, String regionAddress, String roadAddress, Double latitude, Double longitude, GymType gymType, User user) {
+    public Gym(String name, String description, String regionAddress, String roadAddress, Point location, GymType gymType, User user) {
         this.name = name;
         this.description = description;
         this.regionAddress = regionAddress;
         this.roadAddress = roadAddress;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
         this.gymType = gymType;
         this.user = user;
 
     }
 
     // Gym Update 메서드
-    public void update(String updateName, String updateDescription, String regionAddress, String roadAddress, Double latitude, Double longitude) {
-        if (updateName != null && !updateName.isEmpty()){
+    public void update(String updateName, String updateDescription, String regionAddress, String roadAddress, Point location) {
+        if (updateName != null && !updateName.isEmpty()) {
             this.name = updateName;
         }
-        if (updateDescription != null && !updateDescription.isEmpty()){
+        if (updateDescription != null && !updateDescription.isEmpty()) {
             this.description = updateDescription;
         }
-        if (regionAddress != null && !regionAddress.isEmpty()){
+        if (regionAddress != null && !regionAddress.isEmpty()) {
             this.regionAddress = regionAddress;
             this.roadAddress = roadAddress;
-            this.latitude = latitude;
-            this.longitude = longitude;
+            this.location= location;
         }
     }
 }

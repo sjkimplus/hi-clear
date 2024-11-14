@@ -1,9 +1,11 @@
 package com.play.hiclear.domain.timeslot.controller;
 
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.timeslot.dto.request.TimeSlotRequest;
 import com.play.hiclear.domain.timeslot.dto.response.TimeSlotResponse;
 import com.play.hiclear.domain.timeslot.dto.response.TimeSlotSimpleResponse;
+import com.play.hiclear.domain.timeslot.entity.TimeSlot;
 import com.play.hiclear.domain.timeslot.sevice.TimeSlotService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class TimeSlotController {
             @PathVariable Long gymId,
             @RequestParam Long courtNum,
             @RequestBody TimeSlotRequest timeSlotRequest
-            ){
+    ) {
         return ResponseEntity.ok(timeSlotService.create(authUser, gymId, courtNum, timeSlotRequest));
     }
 
@@ -35,7 +37,7 @@ public class TimeSlotController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
             @RequestParam Long courtNum
-    ){
+    ) {
         return ResponseEntity.ok(timeSlotService.search(authUser, gymId, courtNum));
     }
 
@@ -46,8 +48,9 @@ public class TimeSlotController {
             @PathVariable Long gymId,
             @RequestParam Long courtNum,
             @RequestBody TimeSlotRequest timeSlotRequest
-    ){
-        return ResponseEntity.ok(timeSlotService.delete(authUser, gymId, courtNum, timeSlotRequest));
+    ) {
+        timeSlotService.delete(authUser, gymId, courtNum, timeSlotRequest);
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, TimeSlot.class.getSimpleName()));
     }
 
 }

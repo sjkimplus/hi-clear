@@ -4,6 +4,7 @@ import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.service.GeoCodeService;
+import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
@@ -28,7 +29,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,6 +53,12 @@ class GymServiceTest {
     @Mock
     private GeoCodeService geoCodeService;
 
+    @Mock
+    private GeoCodeDocument geoCodeDocument;
+
+    @Mock
+    private DistanceCalculator distanceCalculator;
+
     private GymCreateRequest gymCreateRequest;
     private AuthUser authUser;
     private User user;
@@ -57,18 +66,22 @@ class GymServiceTest {
     @BeforeEach
     void setup() {
         authUser = new AuthUser(1L, "사업자1", "test1@gmail.com", UserRole.BUSINESS);
-        gymCreateRequest = new GymCreateRequest("공공체육관1", "서울특별시", "공공체육관1 설명", "PUBLIC");
+        gymCreateRequest = new GymCreateRequest("공공체육관1", "서울 중구 태평로1가 31", "공공체육관1 설명", "PUBLIC");
         user = new User(authUser.getName(), authUser.getEmail(), "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
-        GeoCodeDocument geoCodeDocument = new GeoCodeDocument();
-        when(geoCodeService.getGeoCode(gymCreateRequest.getAddress())).thenReturn(geoCodeDocument);
+
     }
 
 
     @Test
     void create_success() {
         // given
+        geoCodeDocument = new GeoCodeDocument();
+        GeoCodeDocument.NestedAddress1 address = new GeoCodeDocument.NestedAddress1();
+        ReflectionTestUtils.setField(address, "addressName", "서울 중구 태평로1가 31");
+        ReflectionTestUtils.setField(geoCodeDocument, "regionAddress", address);
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        when(geoCodeService.getGeoCode(gymCreateRequest.getAddress())).thenReturn(geoCodeDocument);
 
         // when
         GymCreateResponse result = gymService.create(authUser, gymCreateRequest);
@@ -88,13 +101,13 @@ class GymServiceTest {
         Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         Gym gym3 = new Gym("사설체육관1", "사설체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PRIVATE, user);
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Gym> gymPage = new PageImpl<>(Arrays.asList(gym1, gym2, gym3), PageRequest.of(0, 10), 3);
-        when(gymRepository.searchGyms(null, null, null, pageable)).thenReturn(gymPage);
+        List<Gym> gymPage = Arrays.asList(gym1, gym2, gym3);
+        when(gymRepository.search(null, null, null, user.getLatitude(), user.getLongitude(), 100d)).thenReturn(gymPage);
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenReturn(user);
+        when(distanceCalculator.calculateDistance(anyDouble(), anyDouble(), anyDouble(), anyDouble())).thenReturn(BigDecimal.valueOf(0));
 
         // when
-        Page<GymSimpleResponse> results = gymService.search(1, 10, null, null, null);
-
+        Page<GymSimpleResponse> results = gymService.search(authUser, null, null, null, 1 ,10 ,100d);
 
         // then
         assertEquals(3, results.getTotalElements());
@@ -110,13 +123,13 @@ class GymServiceTest {
         // given
         Gym gym1 = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         Gym gym2 = new Gym("공공체육관2", "공공체육관 설명2", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Gym> gymPage = new PageImpl<>(Arrays.asList(gym1, gym2), PageRequest.of(0, 10), 3);
-        when(gymRepository.searchGyms("공공", null, null, pageable)).thenReturn(gymPage);
+        List<Gym> gymPage = Arrays.asList(gym1, gym2);
+        when(gymRepository.search("공공", null, null, user.getLatitude(), user.getLongitude(), null)).thenReturn(gymPage);
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenReturn(user);
+        when(distanceCalculator.calculateDistance(anyDouble(), anyDouble(), anyDouble(), anyDouble())).thenReturn(BigDecimal.valueOf(0));
 
         // when
-        Page<GymSimpleResponse> results = gymService.search(1, 10, "공공", null, null);
-
+        Page<GymSimpleResponse> results = gymService.search(authUser, "공공", null, null, 1 ,10 ,null);
 
         // then
         assertEquals(2, results.getTotalElements());
@@ -150,7 +163,12 @@ class GymServiceTest {
         // given
         Gym gym = new Gym("공공체육관", "공공체육관 설명", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
+        geoCodeDocument = new GeoCodeDocument();
+        GeoCodeDocument.NestedAddress1 address = new GeoCodeDocument.NestedAddress1();
+        ReflectionTestUtils.setField(address, "addressName", "서울특별시 종로구 세종로 1-1");
+        ReflectionTestUtils.setField(geoCodeDocument, "regionAddress", address);
         GymUpdateRequest gymUpdateRequest = new GymUpdateRequest("수정체육관", "수정설명", "서울특별시 종로구 세종로 1-1");
+        when(geoCodeService.getGeoCode(gymUpdateRequest.getUpdateAddress())).thenReturn(geoCodeDocument);
         // when
         GymUpdateResponse result = gymService.update(authUser, 1L, gymUpdateRequest);
 

@@ -6,9 +6,9 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.common.utils.JwtUtil;
+import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthLoginRequest;
 import com.play.hiclear.domain.auth.dto.request.AuthSignupRequest;
-import com.play.hiclear.domain.auth.dto.request.AuthDeleteRequest;
 import com.play.hiclear.domain.auth.dto.response.AuthLoginResponse;
 import com.play.hiclear.domain.auth.dto.response.AuthSignupResponse;
 import com.play.hiclear.domain.auth.entity.AuthUser;
@@ -16,6 +16,7 @@ import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +35,9 @@ public class AuthService {
 
     /**
      * 회원가입기능
-     * @param request
-     * @return AuthSignupResponse
+     *
+     * @param request 회원가입할 유저의 정보를 포함한 객체
+     * @return 회원가입된 유저의 모든 정보를 반환
      */
     @Transactional
     public AuthSignupResponse signup(AuthSignupRequest request) {
@@ -52,14 +54,16 @@ public class AuthService {
         // 비밀번호 암호화
         String encodePassword = passwordEncoder.encode(request.getPassword());
 
+        // 좌표 객체 생성
+        Point location = geoCodeService.createPoint(geoCodeDocument);
+
         // 유저 객체 생성
         User user = new User(
                 request.getName(),
                 request.getEmail(),
                 geoCodeDocument.getRegionAddress(),
                 geoCodeDocument.getRoadAddress(),
-                geoCodeDocument.getLatitude(),
-                geoCodeDocument.getLongitude(),
+                location,
                 encodePassword,
                 Ranks.of(request.getSelfRank()),
                 UserRole.of(request.getUserRole())
@@ -82,8 +86,9 @@ public class AuthService {
 
     /**
      * 로그인(token 반환)
-     * @param request
-     * @return AuthLoginResponse(bearerToken)
+     *
+     * @param request 로그인할 유저의 이메일과 비밀번호를 포함한 객체
+     * @return bearerToken 반환
      */
     public AuthLoginResponse login(AuthLoginRequest request) {
 
@@ -112,8 +117,9 @@ public class AuthService {
 
     /**
      * 회원 탈퇴(Soft Delete)
-     * @param authUser
-     * @param request
+     *
+     * @param authUser 인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
+     * @param request  탈퇴할(접속중인) 유저의 비밀번호를 확인
      */
     @Transactional
     public void delete(AuthUser authUser, AuthDeleteRequest request) {
@@ -134,4 +140,5 @@ public class AuthService {
             throw new CustomException(ErrorCode.AUTH_BAD_REQUEST_PASSWORD);
         }
     }
+
 }

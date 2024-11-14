@@ -1,8 +1,8 @@
 package com.play.hiclear.domain.gym.controller;
 
-import com.play.hiclear.common.utils.DistanceCalculator;
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.gym.dto.request.DistanceRequest;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class GymController {
 
     private final GymService gymService;
-    private final DistanceCalculator distanceCalculator;
 
     // 체육관 등록
     @PostMapping("/v1/business/gyms")
@@ -31,18 +30,26 @@ public class GymController {
         return ResponseEntity.ok(gymService.create(authUser, request));
     }
 
-
-    // 체육관 조회(체육관 이름, 주소, 타입으로 검색가능)
-    @GetMapping("/v1/gyms")
+    // 체육관 조회 인덱싱
+    @GetMapping("/v4/gyms/search")
     public ResponseEntity<Page<GymSimpleResponse>> search(
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String address,
-            @RequestParam(required = false) GymType gymType
-    ) {
-        return ResponseEntity.ok(gymService.search(page, size, name, address, gymType));
+            @RequestParam(required = false) GymType gymType,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Double requestDistance) {
+
+        if (requestDistance != null && requestDistance != 5 && requestDistance != 10 && requestDistance != 50 && requestDistance != 100) {
+            throw new CustomException(ErrorCode.INVALID_DISTANCE);
+        }
+
+        if (requestDistance == null) {
+            requestDistance = 1000d;
+        }
+
+        return ResponseEntity.ok(gymService.search(authUser, name, address, gymType, page, size, requestDistance));
     }
 
 
@@ -52,7 +59,7 @@ public class GymController {
             @AuthenticationPrincipal AuthUser authUser,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
-    ){
+    ) {
         return ResponseEntity.ok(gymService.businessSearch(authUser, page, size));
     }
 
@@ -63,8 +70,8 @@ public class GymController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId,
             @RequestBody GymUpdateRequest gymUpdateRequest
-    ){
-        return ResponseEntity.ok(gymService.update(authUser,gymId, gymUpdateRequest));
+    ) {
+        return ResponseEntity.ok(gymService.update(authUser, gymId, gymUpdateRequest));
     }
 
 
@@ -73,10 +80,11 @@ public class GymController {
     public ResponseEntity<String> delete(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long gymId
-    ){
+    ) {
         gymService.delete(authUser, gymId);
         return ResponseEntity.ok("체육관이 삭제됐습니다.");
     }
+
 
     // 체육관 단건 조회
     @GetMapping("/v1/gyms/{gymId}")
@@ -84,11 +92,4 @@ public class GymController {
             @PathVariable Long gymId) {
         return ResponseEntity.ok(gymService.get(gymId));
     }
-
-
-    // 체육관 거리 조회
-//    @GetMapping("/v1/distance")
-//    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
-//        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
-//    }
 }

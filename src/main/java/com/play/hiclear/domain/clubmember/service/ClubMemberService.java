@@ -63,13 +63,12 @@ public class ClubMemberService {
                         .build()
         );
 
-//        List<ClubMember> members = clubMemberRepository.findAllByClubId(clubId);
-//
-//        for(User clubUser : members.stream().map(ClubMember::getUser).toList()) {
-//            if (clubUser != user)
-//                notiService.send(clubUser, NotiType.JOIN, "가입", "Join");
-//        }
-        //List<User> users = members.stream().map(ClubMember::getUser).toList();
+        List<ClubMember> members = clubMemberRepository.findAllByClubId(clubId);
+
+        for(User clubUser : members.stream().map(ClubMember::getUser).toList()) {
+            if (clubUser != user)
+                notiService.sendNotification(clubUser, NotiType.CLUB, user.getName()+"님이 가입했습니다..", "/v1/clubs/"+ clubId.toString() +"/join");
+        }
     }
 
     /**

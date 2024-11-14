@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -32,16 +33,6 @@ public class EmitterRepositoryImpl implements EmitterRepository{
      */
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
-    /**
-     * eventCache
-     * String 타입의 키와 Object 타입의 값으로 이루어져 있다
-     * 이벤트 캐시를 저장하는 역할
-     * 알림을 받을 사용자의 시겹ㄹ자를 키로 사용하여 해당 사용자에게 전송되지 못한 이벤트를
-     * 캐시로 저장하고 캐시된 이벤트는 사용자가 구독할 때 클라이언트로 전송되어 이벤트의 유실을
-     * 방지함으로써 알림의 신뢰성을 확보하기 위해 사용
-     */
-    private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
-
     @Override
     public SseEmitter save(String emitterId, SseEmitter sseEmitter) {
         emitters.put(emitterId, sseEmitter);
@@ -49,44 +40,12 @@ public class EmitterRepositoryImpl implements EmitterRepository{
     }
 
     @Override
-    public void saveEventCache(String eventCacheId, Object event) {
-        eventCache.put(eventCacheId, event);
+    public Optional<SseEmitter> findById(String memberId) {
+        return Optional.ofNullable(emitters.get(memberId));
     }
 
     @Override
-    public Map<String, SseEmitter> findAllEmitterStartWithByUserEmail(String receiverId) {
-        return emitters.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(receiverId))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @Override
-    public Map<String, Object> findAllEventCacheStartWithByUserEmail(String receiverId) {
-        return eventCache.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(receiverId))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @Override
-    public void deleteById(String id) {
-        emitters.remove(id);
-    }
-
-    @Override
-    public void deleteAllEmitterStartWithId(String email) {
-        emitters.forEach((key, emitter) -> {
-            if (key.startsWith(email)){
-                emitters.remove(key);
-            }
-        });
-    }
-
-    @Override
-    public void deleteAllEventCacheStartWithId(String email) {
-        emitters.forEach((key, emitter) -> {
-            if (key.startsWith(email)){
-                emitters.remove(key);
-            }
-        });
+    public void deleteById(String eventId) {
+        emitters.remove(eventId);
     }
 }

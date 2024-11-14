@@ -14,13 +14,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
-    default User findByEmailAndDeletedAtIsNullOrThrow(String email){
+    default User findByEmailAndDeletedAtIsNullOrThrow(String email) {
         return findByEmailAndDeletedAtIsNull(email).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 
     Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
-    default User findByIdAndDeletedAtIsNullOrThrow(Long id){
+    default User findByIdAndDeletedAtIsNullOrThrow(Long id) {
         return findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, User.class.getSimpleName()));
     }
 

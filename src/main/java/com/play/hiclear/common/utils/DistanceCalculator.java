@@ -1,8 +1,6 @@
 package com.play.hiclear.common.utils;
 
-import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.service.GeoCodeService;
-import com.querydsl.core.types.OrderSpecifier;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -14,11 +12,6 @@ public class DistanceCalculator {
 
     private static final BigDecimal EARTH_RADIUS = new BigDecimal("6371"); // Kilometers
     private static final MathContext MATH_CONTEXT = new MathContext(10, RoundingMode.HALF_UP);
-    private final GeoCodeService geoCodeService;
-
-    public DistanceCalculator(GeoCodeService geoCodeService) {
-        this.geoCodeService = geoCodeService;
-    }
 
     // 각도를 라디안으로 변경(BigDecimal)
     private BigDecimal toRadians(BigDecimal degrees) {

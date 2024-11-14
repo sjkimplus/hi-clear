@@ -1,13 +1,20 @@
 package com.play.hiclear.domain.notification.enums;
 
-import lombok.Getter;
+import com.sun.jdi.request.InvalidRequestStateException;
 
-@Getter
+import java.util.Arrays;
+
 public enum NotiType {
-    JOIN,
-    LEAVE,
+
+    CLUB,
     SCHEDULE,
     BOARD,
-    COMMENT,
-    THREAD
+    COMMENT;
+
+    public static NotiType of(String type) {
+        return Arrays.stream(NotiType.values())
+                .filter(t -> t.name().equalsIgnoreCase(type))
+                .findFirst()
+                .orElseThrow(() -> new InvalidRequestStateException("유효하지 않은 타입 입니다."));
+    }
 }

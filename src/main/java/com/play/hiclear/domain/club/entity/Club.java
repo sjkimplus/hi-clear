@@ -35,19 +35,22 @@ public class Club extends TimeStamped {
     private Integer clubSize;
     private String intro;
     @NotBlank
-    private String region;
+    private String regionAddress;                       // 일반 주소
+    private String roadAddress;                         // 도로명 주소
+    private Double latitude;                            // 위도
+    private Double longitude;                           // 경도
     @NotBlank
     private String password;
 
     @OneToMany(mappedBy = "club")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
-    public Club(User owner, String clubname, Integer clubSize, String intro, String region, String password) {
+    public Club(User owner, String clubname, Integer clubSize, String intro, String regionAddress, String password) {
         this.owner = owner;
         this.clubname = clubname;
         this.clubSize = clubSize;
         this.intro = intro;
-        this.region = region;
+        this.regionAddress = regionAddress;
         this.password = password;
     }
 
@@ -55,6 +58,6 @@ public class Club extends TimeStamped {
         this.clubname = clubUpdateRequest.getClubname();
         this.clubSize = clubUpdateRequest.getClubSize();
         this.intro = clubUpdateRequest.getIntro();
-        this.region = clubUpdateRequest.getRegion();
+        this.regionAddress = clubUpdateRequest.getRegion();
     }
 }

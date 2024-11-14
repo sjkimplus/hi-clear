@@ -4,6 +4,8 @@ import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.dto.response.GeoCodeResponse;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,6 +42,13 @@ public class GeoCodeService {
             System.err.println("GeoCode API call failed: " + e.getMessage());
         }
         throw new CustomException(ErrorCode.ADDRESS_BAD_REQUEST);
+    }
+
+    public Point createPoint(GeoCodeDocument geoCodeDocument) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(geoCodeDocument.getLongitude(), geoCodeDocument.getLatitude()));
+        point.setSRID(4326);
+        return point;
     }
 }
 

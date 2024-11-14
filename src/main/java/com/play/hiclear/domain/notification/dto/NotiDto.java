@@ -1,27 +1,33 @@
 package com.play.hiclear.domain.notification.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.play.hiclear.domain.notification.entity.Noti;
+import com.play.hiclear.domain.notification.enums.NotiType;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotiDto {
 
-    private final String id;
-    private final String name;
-    private final String content;
-    private final String type;
-    private final LocalDateTime createdAt;
+    private Long receiverId;
+    private String content;
+    private String relatedUrl;
+    private boolean isRead;
+    private NotiType notiType;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
 
-    public static NotiDto createResponse(Noti notify) {
-        return NotiDto.builder()
-                .content(notify.getContent())
-                .id(notify.getId().toString())
-                .type(notify.getNotiType().toString())
-                .name(notify.getReceiver().getName())
-                .createdAt(notify.getCreatedAt())
-                .build();
+    public static NotiDto from(Noti noti) {
+        return new NotiDto(noti.getReceiver().getId(), noti.getContent(),
+                noti.getUrl(), noti.getIsRead(), noti.getNotiType(),noti.getCreatedAt());
     }
 }

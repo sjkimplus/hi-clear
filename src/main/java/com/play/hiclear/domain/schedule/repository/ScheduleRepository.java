@@ -35,7 +35,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
             "WHERE s.deletedAt IS NULL " +
             "AND s.startTime BETWEEN :dayStart AND :dayEnd  " +
             "AND s.regionAddress = :regionAddress " +
-            "AND s.longitude = :longitude " +
             "GROUP BY s.club " +
             "HAVING COUNT(s.id) >= 4")
     List<Club> findAllClubsByScheduleAtGym(@Param("dayStart") LocalDateTime dayStart,
@@ -44,8 +43,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
 
     @Query("SELECT s FROM Schedule s WHERE s.deletedAt IS NULL " +
             "AND s.startTime BETWEEN :dayStart AND :dayEnd " +
-            "AND s.latitude = :latitude " +
-            "AND s.longitude = :longitude")
+            "AND s.regionAddress = :regionAddress ")
     List<Schedule> findSchedulesByDayAndLocation(@Param("dayStart") LocalDateTime dayStart,
                                                  @Param("dayEnd") LocalDateTime dayEnd,
                                                  @Param("regionAddress") String regionAddress);
