@@ -60,7 +60,9 @@ jobs:
           echo "image=${ECR_REGISTRY}/${ECR_REPOSITORY}:latest" >> $GITHUB_OUTPUT
 
       - name: Create Task Definition from Secret
-        run: echo "${{ secrets.ECS_TASK_DEFINITION }}" > ecs-task-definition.json
+        run: |
+            echo "${{ secrets.ECS_TASK_DEFINITION }}" > ecs-task-definition.json
+            cat ecs-task-definition.json
 
       - name: Render ECS Task Definition
         id: task-def
