@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/v1/auth/**").permitAll()
+                        .requestMatchers("/v1/health").permitAll()
                         .requestMatchers("/v1/business/**").hasRole(UserRole.BUSINESS.name())
                         .anyRequest().authenticated()
                 )
