@@ -63,7 +63,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: hi-clear-task-definition-revision:18
+          task-definition: ./hi-clear-task-definition/hi-clear-task-definition-revision18.json
           container-name: hi-clear-container
           image: ${{ env.ECR_REGISTRY }}/hi-clear:latest
           # image: ${{ steps.build-image.outputs.image }}
@@ -71,7 +71,7 @@ jobs:
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          # task-definition: ./ecs-task-definitions/hi-clear-task-definition-revision18.json
+          # task-definition: ./hi-clear-task-definition/hi-clear-task-definition-revision18.json
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: hi-clear-service
           cluster: hi-clear-cluster
@@ -84,7 +84,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
 
-          
-
-      
 
