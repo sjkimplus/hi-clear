@@ -47,31 +47,43 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Build and Push Docker Image
+        id: build-image
         env:
           ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           ECR_REPOSITORY: hi-clear
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # Build the image with a tag format 'latest'
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          # Push the image with the tag 'latest' to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=${ECR_REGISTRY}/${ECR_REPOSITORY}:latest" >> $GITHUB_OUTPUT
 
-      - name: Create task definition file from secret
-        env:
-          ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
-        run: echo "${ECS_TASK_DEFINITION}" > task-definition.json
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition hi-clear-task-definition --query taskDefinition > task-definition.json
 
-      - name: Render ECS Task Definition
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
-        id: render-task-definition
         with:
           task-definition: task-definition.json
           container-name: hi-clear-container
-          image: ${{ env.ECR_REGISTRY }}/hi-clear:${{ github.sha }}
-
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+          image: ${{ steps.build-image.outputs.image }}
+          
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: hi-clear-service
-          cluster: hiclear_cluster
+          cluster: hi-clear-cluster
           wait-for-service-stability: true
+        # env:
+        #   DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        #   JWT_KEY: ${{ secrets.JWT_KEY }}
+        #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        #   KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
+
+
