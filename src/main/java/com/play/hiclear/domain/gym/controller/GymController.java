@@ -86,17 +86,10 @@ public class GymController {
     }
 
 
-//    // 체육관 단건 조회
-//    @GetMapping("/v1/gyms/{gymId}")
-//    public ResponseEntity<GymDetailResponse> get(
-//            @PathVariable Long gymId) {
-//        return ResponseEntity.ok(gymService.get(gymId));
-//    }
-
-
-    // 체육관 거리 조회
-//    @GetMapping("/v1/distance")
-//    public ResponseEntity<String> distance(@RequestBody DistanceRequest request){
-//        return ResponseEntity.ok(distanceCalculator.distance(request.getAddressA(), request.getAddressB()));
-//    }
+    // 체육관 단건 조회
+    @GetMapping("/v1/gyms/{gymId}")
+    public ResponseEntity<GymDetailResponse> get(
+            @PathVariable Long gymId) {
+        return ResponseEntity.ok(gymService.get(gymId));
+    }
 }
