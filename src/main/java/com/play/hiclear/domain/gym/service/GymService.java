@@ -5,18 +5,14 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
 import com.play.hiclear.domain.gym.dto.response.GymCreateResponse;
-import com.play.hiclear.domain.gym.dto.response.GymDetailResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.repository.GymRepository;
-import com.play.hiclear.domain.schedule.dto.response.ClubScheduleResponse;
-import com.play.hiclear.domain.schedule.entity.Schedule;
 import com.play.hiclear.domain.schedule.repository.ScheduleRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
@@ -28,13 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +35,7 @@ public class GymService {
     private final GymRepository gymRepository;
     private final GeoCodeService geoCodeService;
     private final ScheduleRepository scheduleRepository;
+
 
     /**
      * 체육관 생성
@@ -86,7 +77,7 @@ public class GymService {
     }
 
     /**
-     * 체육관 검색 v2
+     * 체육관 검색 v4
      *
      * @param authUser        인증된 사용자 객체로, 요청을 수행하는 사용자에 대한 정보를 포함
      * @param name            이름(조건검색)
@@ -98,39 +89,14 @@ public class GymService {
      * @return 조건에 부합하는 체육관(이름, 주소, 거리)들 반환
      */
     public Page<GymSimpleResponse> search(
-            AuthUser authUser, String name, String address,
-            GymType gymType, int page, int size, Double requestDistance) {
-
-        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
-
-        Point userLocation = user.getLocation();
-
-        Pageable pageable = PageRequest.of(page - 1, size);
-
-        return gymRepository.search(name, address, gymType, userLocation, requestDistance, pageable);
-    }
-
-
-    public Page<GymSimpleResponse> searchv4(
             AuthUser authUser, String name, String address, GymType gymType,
             int page, int size, Double requestDistance) {
 
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
-//        Double userLatitude = user.getLocation().getY();
-//        Double userLongitude = user.getLocation().getX();
-//
-//        // 위도 1도는 약 113.32km, 경도 1도는 약 113.32 * cos(위도)
-//        Double minLat = new BigDecimal(userLatitude - requestDistance / 111.32).setScale(6, RoundingMode.DOWN).doubleValue();
-//        Double maxLat = new BigDecimal(userLatitude + requestDistance / 111.32).setScale(6, RoundingMode.UP).doubleValue();
-//        Double minLon = new BigDecimal(userLongitude - requestDistance / (111.32 * Math.cos(Math.toRadians(userLatitude)))).setScale(6, RoundingMode.DOWN).doubleValue();
-//        Double maxLon = new BigDecimal(userLongitude + requestDistance / (111.32 * Math.cos(Math.toRadians(userLatitude)))).setScale(6, RoundingMode.UP).doubleValue();
-
         Pageable pageable = PageRequest.of(page - 1, size);
 
-
-
-        return gymRepository.searchv4(name, address, gymType,
+        return gymRepository.search(name, address, gymType,
                 user.getLocation(), requestDistance, pageable);
     }
 

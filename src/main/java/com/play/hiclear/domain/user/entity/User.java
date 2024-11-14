@@ -35,7 +35,7 @@ public class User extends TimeStamped {
 
     private String roadAddress;
 
-    @Column(columnDefinition = "geometry")
+    @Column(columnDefinition = "POINT NOT NULL SRID 4326")
     private Point location;
 
     private String imgUrl;

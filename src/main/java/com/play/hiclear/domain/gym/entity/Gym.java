@@ -7,6 +7,7 @@ import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
@@ -15,7 +16,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "gyms", indexes = {@Index(name = "point_idx", columnList = "location")})
+@Table(name = "gyms", indexes = {
+        @Index(name = "idx_location", columnList = "location")})
 public class Gym extends TimeStamped {
 
     @Id
@@ -30,7 +32,7 @@ public class Gym extends TimeStamped {
 
     private String roadAddress;
 
-    @Column(columnDefinition = "POINT", nullable = false)
+    @Column(columnDefinition = "POINT NOT NULL SRID 4326")
     private Point location;
 
     @Enumerated(EnumType.STRING)

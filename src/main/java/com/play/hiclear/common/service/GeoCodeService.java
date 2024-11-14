@@ -46,7 +46,9 @@ public class GeoCodeService {
 
     public Point createPoint(GeoCodeDocument geoCodeDocument) {
         GeometryFactory geometryFactory = new GeometryFactory();
-        return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(geoCodeDocument.getLongitude(), geoCodeDocument.getLatitude()));
+        Point point = geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(geoCodeDocument.getLongitude(), geoCodeDocument.getLatitude()));
+        point.setSRID(4326);
+        return point;
     }
 }
 
