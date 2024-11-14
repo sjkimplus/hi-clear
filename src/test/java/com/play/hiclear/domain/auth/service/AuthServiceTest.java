@@ -17,6 +17,7 @@ import com.play.hiclear.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,18 +45,25 @@ class AuthServiceTest {
     @Mock
     private GeoCodeService geoCodeService;
 
+    @Mock
+    private GeoCodeDocument geoCodeDocument;
+
     @InjectMocks
     private AuthService authService;
 
     private AuthSignupRequest authSignupRequest;
     private User user;
     private AuthUser authUser;
+    private Point point;
 
     @BeforeEach
     void setup() {
+        geoCodeDocument = geoCodeService.getGeoCode("서울 중구 세종대로 110");
+        point = geoCodeService.createPoint(geoCodeDocument);
         authSignupRequest = new AuthSignupRequest("test1@gamil.com", "Password!!", "홍길동", "서울 중구 태평로1가 31", "RANK_A", "BUSINESS");
         ;
-        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        user = new User(authSignupRequest.getName(), authSignupRequest.getEmail(), "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+
         ReflectionTestUtils.setField(user, "id", 1L);
         authUser = new AuthUser(1L, "홍길동", "test1@gmail.com", UserRole.BUSINESS);
     }

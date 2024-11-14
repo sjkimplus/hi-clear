@@ -1,6 +1,8 @@
 package com.play.hiclear.domain.court.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.dto.request.CourtCreateRequest;
 import com.play.hiclear.domain.court.dto.request.CourtUpdateRequest;
@@ -13,9 +15,11 @@ import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.repository.GymRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
+import com.play.hiclear.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,24 +36,37 @@ import static org.mockito.Mockito.when;
 class CourtServiceTest {
 
     @InjectMocks
-    CourtService courtService;
+    private CourtService courtService;
 
     @Mock
-    CourtRepository courtRepository;
+    private CourtRepository courtRepository;
 
     @Mock
-    GymRepository gymRepository;
+    private GymRepository gymRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private GeoCodeService geoCodeService;
+
+    @Mock
+    private GeoCodeDocument geoCodeDocument;
 
     private Gym gym;
     private AuthUser authUser;
     private User user;
+    private Point point;
+
 
     @BeforeEach
     void setup() {
         authUser = new AuthUser(1L, "사업자1", "test1@gmail.com", UserRole.BUSINESS);
+        geoCodeDocument = geoCodeService.getGeoCode("서울 중구 세종대로 110");
+        point = geoCodeService.createPoint(geoCodeDocument);
         user = new User(authUser.getName(), authUser.getEmail(), "서울 중구 세종대로 110", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
-        gym = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        gym = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, GymType.PUBLIC, user);
         ReflectionTestUtils.setField(gym, "id", 1L);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
     }

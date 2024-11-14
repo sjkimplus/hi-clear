@@ -1,7 +1,9 @@
 package com.play.hiclear.domain.timeslot.sevice;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.repository.CourtRepository;
@@ -18,6 +20,7 @@ import com.play.hiclear.domain.user.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,17 +50,26 @@ class TimeSlotServiceTest {
     @Mock
     CourtRepository courtRepository;
 
+    @Mock
+    GeoCodeDocument geoCodeDocument;
+
+    @Mock
+    GeoCodeService geoCodeService;
+
     private AuthUser authUser;
     private User user;
     private Gym gym;
     private Court court;
+    private Point point;
 
     @BeforeEach
     void setup() {
         authUser = new AuthUser(1L, "사업자1", "test1@gmail.com", UserRole.BUSINESS);
-        user = new User(authUser.getName(), authUser.getEmail(),"서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031,"encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        geoCodeDocument = geoCodeService.getGeoCode("서울 중구 세종대로 110");
+        point = geoCodeService.createPoint(geoCodeDocument);
+        user = new User(authUser.getName(), authUser.getEmail(),"서울 중구 태평로1가 31", "서울 중구 세종대로 110", point,"encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
-        gym = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, GymType.PUBLIC, user);
+        gym = new Gym("공공체육관1", "공공체육관 설명1", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, GymType.PUBLIC, user);
         ReflectionTestUtils.setField(gym, "id", 1L);
         when(gymRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(gym);
         court = new Court(1L, 10000, gym);

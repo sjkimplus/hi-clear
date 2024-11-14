@@ -15,6 +15,7 @@ import com.play.hiclear.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
@@ -44,16 +45,22 @@ class UserServiceTest {
     private GeoCodeService geoCodeService;
 
     @Mock
+    GeoCodeDocument geoCodeDocument;
+
+    @Mock
     private AwsS3Service awsS3Service; // S3 서비스 Mock
 
     @Mock
     private MultipartFile image; // 테스트용 이미지 파일 Mock
 
     private AuthUser authUser;
+    private Point point;
 
     @BeforeEach
     void setup() {
         authUser = new AuthUser(1L, "홍길동", "test1@gmail.com", UserRole.BUSINESS);
+        geoCodeDocument = geoCodeService.getGeoCode("서울 중구 세종대로 110");
+        point = geoCodeService.createPoint(geoCodeDocument);
     }
 
 
@@ -61,8 +68,8 @@ class UserServiceTest {
     void search_success() {
         // given
         List<User> userList = new ArrayList<>();
-        User user1 = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
-        User user2 = new User("김스파", "test2@gmail.com", "서울특별시 강남구 삼성동 159-1", "서울특별시 강남구 봉은사로 524", 37.5128320848839, 127.057250899584, "encodedPassword", Ranks.RANK_B, UserRole.BUSINESS);
+        User user1 = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        User user2 = new User("김스파", "test2@gmail.com", "서울특별시 강남구 삼성동 159-1", "서울특별시 강남구 봉은사로 524", point, "encodedPassword", Ranks.RANK_B, UserRole.BUSINESS);
         userList.add(user1);
         userList.add(user2);
 
@@ -90,7 +97,7 @@ class UserServiceTest {
     @Test
     void update_success() {
         // given
-        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(any(Long.class))).thenReturn(user);
         GeoCodeDocument geoCodeDocument = new GeoCodeDocument();
         GeoCodeDocument.NestedAddress1 nestedAddress1 = new GeoCodeDocument.NestedAddress1();
@@ -111,7 +118,7 @@ class UserServiceTest {
     @Test
     void get_success() {
         // given
-        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(user);
 
@@ -129,7 +136,7 @@ class UserServiceTest {
     @Test
     void updateImage_success() {
         // given
-        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(any(Long.class))).thenReturn(user);
         when(awsS3Service.uploadFile(image)).thenReturn("imgurl");
 
@@ -145,7 +152,7 @@ class UserServiceTest {
     @Test
     void deleteImage_success() {
         // given
-        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", 37.5663174209601, 126.977829174031, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
+        User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(any(Long.class))).thenReturn(user);
         ReflectionTestUtils.setField(user, "imgUrl", "imgurl");
         doNothing().when(awsS3Service).deleteFile("imgurl");
