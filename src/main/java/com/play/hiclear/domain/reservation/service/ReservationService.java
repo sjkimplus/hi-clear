@@ -26,12 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -44,6 +46,7 @@ public class ReservationService {
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
     private final GymRepository gymRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 예약 생성
@@ -230,6 +233,45 @@ public class ReservationService {
                 throw new CustomException(ErrorCode.RESERVATION_CANT_CANCELED);
             }
         }
+    }
+
+    /**
+     * 분산 락 걸었을 때
+     * @param authUser
+     * @param request
+     * @return
+     */
+    @Transactional
+    public List<ReservationSearchDetailResponse> createReservationDistributedLock(AuthUser authUser, ReservationRequest request) {
+        String lockKey = "reservation-lock:" + request.getCourtId() + ":" + request.getDate().atStartOfDay();  // 날짜와 시간을 정확히 포함
+        String lockValue = "locked";  // 락 값
+        long lockExpiration = 10L;  // 락 만료 시간 (10초)
+
+        // 락 획득 시도
+        Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, lockExpiration, TimeUnit.SECONDS);
+
+        if (Boolean.TRUE.equals(success)) {
+            // 락을 획득한 경우
+            try {
+                log.info("예약 작업 시작: {} {}", request.getCourtId(), request.getDate());
+
+                // 예약 생성 로직 호출
+                return create(authUser, request);
+
+            } catch (Exception e) {
+                // 예약 작업 중 오류가 발생한 경우
+                log.error("예약 작업 중 오류 발생: {}", e.getMessage(), e);
+                throw e;  // 예외를 다시 던짐
+            } finally {
+                // 작업 완료 후 락 해제
+                redisTemplate.delete(lockKey);
+                log.info("예약 작업 완료, 락 해제: {} {}", request.getCourtId(), request.getDate());
+            }
+        }
+
+        // 락을 획득하지 못한 경우 바로 예외 던짐
+        log.error("락을 획득할 수 없습니다. 예약 처리 중 다른 프로세스가 작업을 진행 중입니다.");
+        throw new CustomException(ErrorCode.NO_AUTHORITY, "예약 처리 중 다른 프로세스가 작업을 진행 중입니다.");
     }
 
 
