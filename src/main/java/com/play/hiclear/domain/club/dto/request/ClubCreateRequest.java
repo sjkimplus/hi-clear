@@ -1,7 +1,6 @@
 package com.play.hiclear.domain.club.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
@@ -14,15 +13,15 @@ public class ClubCreateRequest {
     private Integer clubSize;
     private String intro;
     @NotBlank
-    private String region;
+    private String address;
     @NotBlank
     private String password;
 
-    public ClubCreateRequest(String clubname, Integer clubSize, String intro, String region, String password) {
+    public ClubCreateRequest(String clubname, Integer clubSize, String intro, String address, String password) {
         this.clubname = clubname;
         this.clubSize = clubSize;
         this.intro = intro;
-        this.region = region;
+        this.address = address;
         this.password = password;
     }
 }
