@@ -44,8 +44,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        # run: ./gradlew build -x test
         run: ./gradlew build
+
+      - name: Delete existing 'latest' image from ECR
+        run: |
+          echo "Deleting existing 'latest' image from ECR"
+          aws ecr batch-delete-image --repository-name hi-clear --image-ids "[{\"imageTag\":\"latest\"}]"
+
 
       - name: Build and Push Docker Image
         id: build-image
