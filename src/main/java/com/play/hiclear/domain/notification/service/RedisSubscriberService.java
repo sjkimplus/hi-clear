@@ -3,17 +3,15 @@ package com.play.hiclear.domain.notification.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.play.hiclear.domain.notification.dto.NotiDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @RequiredArgsConstructor
 @Component
 public class RedisSubscriberService implements MessageListener {
 
-    private static final String CHANNEL_PREFIX = "emitter:";
+    private final String CHANNEL_PREFIX = "emitter:";
 
     private final ObjectMapper objectMapper;
     private final SseEmitterService sseEmitterService;

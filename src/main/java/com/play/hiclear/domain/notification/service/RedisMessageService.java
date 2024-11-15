@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class RedisMessageService {
-    private static final String CHANNEL_PREFIX = "emitter:";
+    private final String CHANNEL_PREFIX = "emitter:";
 
     private final RedisMessageListenerContainer redisMessageListenerContainer;
     private final RedisSubscriberService redisSubscriberService; // 따로 구현한 Subscriber

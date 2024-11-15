@@ -17,7 +17,7 @@ public class SseEmitterService {
 
     private final EmitterRepository emitterRepository;
 
-    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
+    private final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
 
     public SseEmitter createEmitter(String emitterKey) {
         return emitterRepository.save(emitterKey, new SseEmitter(DEFAULT_TIMEOUT));
