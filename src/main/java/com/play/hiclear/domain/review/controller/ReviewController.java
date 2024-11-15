@@ -4,6 +4,7 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.review.dto.request.ReviewCreateRequest;
 import com.play.hiclear.domain.review.dto.response.ReviewCreateResponse;
 import com.play.hiclear.domain.review.dto.response.ReviewSearchResponse;
+import com.play.hiclear.domain.review.dto.response.UserStatisticsResponse;
 import com.play.hiclear.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,4 +36,13 @@ public class ReviewController {
     ){
         return ResponseEntity.ok(reviewService.create(meetingId, request, authUser));
     }
+
+    // 점수 조회
+    @GetMapping("/v1/statistics/{userId}")
+    public ResponseEntity<UserStatisticsResponse> statistics(
+            @PathVariable Long userId
+    ){
+        return ResponseEntity.ok(reviewService.statistics(userId));
+    }
+
 }

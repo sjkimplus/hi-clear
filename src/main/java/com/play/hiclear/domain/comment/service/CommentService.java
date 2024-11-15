@@ -9,6 +9,8 @@ import com.play.hiclear.domain.comment.dto.request.CommentDeleteRequest;
 import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
 import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.comment.repository.CommentRepository;
+import com.play.hiclear.domain.notification.enums.NotiType;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final NotiService notiService;
 
     /**
      *
@@ -48,6 +51,8 @@ public class CommentService {
                 .build();
 
         commentRepository.save(comment);
+
+        notiService.sendNotification(board.getUser(), NotiType.COMMENT, comment.getUser().getName()+"님이 글을 작성했습니다.", "/v1/clubboards/" + clubboardId.toString() +"/comments");
     }
 
     /**

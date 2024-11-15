@@ -1,7 +1,9 @@
 package com.play.hiclear.domain.club.service;
 
+import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.club.dto.request.ClubCreateRequest;
 import com.play.hiclear.domain.club.dto.request.ClubDeleteRequest;
 import com.play.hiclear.domain.club.dto.request.ClubUpdateRequest;
@@ -33,6 +35,8 @@ public class ClubService {
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
 
+    private final GeoCodeService geoCodeService;
+
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -46,16 +50,22 @@ public class ClubService {
         //  유저 조회
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
+        // 주소값 가져오기
+        GeoCodeDocument address = geoCodeService.getGeoCode(clubCreateRequest.getAddress());
+
         //  모임 생성
         Club club = clubRepository.save(
                 Club.builder()
-                .clubname(clubCreateRequest.getClubname())
-                .clubSize(clubCreateRequest.getClubSize())
-                .intro(clubCreateRequest.getIntro())
-                .region(clubCreateRequest.getRegion())
-                .password(passwordEncoder.encode(clubCreateRequest.getPassword()))
-                .owner(user)
-                .build()
+                        .clubname(clubCreateRequest.getClubname())
+                        .clubSize(clubCreateRequest.getClubSize())
+                        .intro(clubCreateRequest.getIntro())
+                        .regionAddress(address.getRegionAddress())
+                        .roadAddress(address.getRoadAddress())
+                        .longitude(address.getLongitude())
+                        .latitude(address.getLatitude())
+                        .password(passwordEncoder.encode(clubCreateRequest.getPassword()))
+                        .owner(user)
+                        .build()
         );
 
         //  모임 개설자를 모임장으로 클럽멤버 추가
@@ -112,7 +122,7 @@ public class ClubService {
      *
      * @return 모임 이름, 모임 소개글
      */
-    public Page<ClubSearchResponse> search(int size, int page) {
+    public Page<ClubSearchResponse> search(int page, int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedAt").descending());
 

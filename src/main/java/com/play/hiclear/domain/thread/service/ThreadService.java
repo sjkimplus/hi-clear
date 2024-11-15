@@ -4,6 +4,8 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.comment.repository.CommentRepository;
+import com.play.hiclear.domain.notification.enums.NotiType;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.thread.dto.request.ThreadCreateRequest;
 import com.play.hiclear.domain.thread.dto.request.ThreadDeleteRequest;
 import com.play.hiclear.domain.thread.dto.request.ThreadUpdateRequest;
@@ -26,6 +28,7 @@ public class ThreadService {
     private final ThreadRepository threadRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final NotiService notiService;
 
     @Transactional
     public void create(Long userId, Long commentId, ThreadCreateRequest threadCreateRequest) {
@@ -40,6 +43,8 @@ public class ThreadService {
                 .build();
 
         threadRepository.save(thread);
+
+        notiService.sendNotification(comment.getUser(), NotiType.COMMENT, thread.getUser().getName()+"님이 글을 작성했습니다.", "/v1/comments/"+ commentId.toString() + "/threads");
     }
 
     @Transactional
