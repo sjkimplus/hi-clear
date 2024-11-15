@@ -91,7 +91,10 @@ public enum ErrorCode {
     WRONG_MATCH(HttpStatus.BAD_REQUEST, "번개 번호 또는 참가자 번호가 유효하지 않습니다."),
 
     // Review
-    REVIEW_MEETING_USER(HttpStatus.FORBIDDEN, "해당 유저가 미팅에 속해있지 않습니다."),
+    REVIEW_MEETING_USER(HttpStatus.BAD_REQUEST, "해당 유저가 미팅에 속해있지 않습니다."),
+    REVIEW_MISS_SCORE(HttpStatus.BAD_REQUEST, "잘못된 점수입니다."),
+    REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 작성한 리뷰입니다."),
+    LOCK_ACQUISITION_FAILED(HttpStatus.BAD_REQUEST, "락을 얻는데 실패하였습니다."),
 
 
     // Notification
