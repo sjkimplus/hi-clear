@@ -18,11 +18,6 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     List<Participant> findByMeetingAndStatus(Meeting meeting, ParticipantStatus status);
 
-    @Query("SELECT p.meeting FROM Participant p WHERE p.meeting.finished = true")
-    List<Meeting> findFinishedMeetings();
-    List<Participant> findByMeeting(Meeting meeting);
-    //연관관계 이용해서 합치기
-
     @Query("SELECT p FROM Participant p WHERE p.meeting.finished = true AND p.meeting IN " +
             "(SELECT subP.meeting FROM Participant subP WHERE subP.user.id = :userId)")
     List<Participant> findFinishedMeetingsUserJoined(@Param("userId") Long userId);
@@ -40,9 +35,9 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     @Query("""
 
-    SELECT p FROM Participant p 
-    WHERE p.user.id = :userId 
-      AND p.role = :role 
+    SELECT p FROM Participant p
+    WHERE p.user.id = :userId
+      AND p.role = :role
       AND p.meeting.finished = false
       AND p.meeting.deletedAt IS NULL
     ORDER BY p.meeting.startTime ASC
