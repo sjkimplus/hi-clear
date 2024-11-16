@@ -2,7 +2,6 @@ package com.play.hiclear.domain.clubmember.controller;
 
 import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.dto.request.ClubMemberChangeRoleRequest;
 import com.play.hiclear.domain.clubmember.dto.request.ClubMemberExpelRequest;
 import com.play.hiclear.domain.clubmember.service.ClubMemberService;

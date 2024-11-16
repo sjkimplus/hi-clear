@@ -1,6 +1,7 @@
 package com.play.hiclear.domain.notification.enums;
 
-import com.sun.jdi.request.InvalidRequestStateException;
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 
 import java.util.Arrays;
 
@@ -15,6 +16,6 @@ public enum NotiType {
         return Arrays.stream(NotiType.values())
                 .filter(t -> t.name().equalsIgnoreCase(type))
                 .findFirst()
-                .orElseThrow(() -> new InvalidRequestStateException("유효하지 않은 타입 입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTI_BAD_REQUEST_TYPE));
     }
 }

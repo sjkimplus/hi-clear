@@ -5,6 +5,7 @@ import com.play.hiclear.domain.notification.entity.Noti;
 import com.play.hiclear.domain.notification.enums.NotiType;
 import com.play.hiclear.domain.notification.repository.NotiRepository;
 import com.play.hiclear.domain.user.entity.User;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ public class NotiService {
     }
 
     @Transactional
+    @Builder
     public void sendNotification(User receiver, NotiType notiType, String content, String relatedUrl) {
 
         Noti noti = notiRepository.save(Noti.builder()

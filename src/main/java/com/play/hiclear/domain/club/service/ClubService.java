@@ -18,6 +18,7 @@ import com.play.hiclear.domain.clubmember.repository.ClubMemberRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,7 +52,9 @@ public class ClubService {
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
         // 주소값 가져오기
-        GeoCodeDocument address = geoCodeService.getGeoCode(clubCreateRequest.getAddress());
+        GeoCodeDocument geoCodeDocument = geoCodeService.getGeoCode(clubCreateRequest.getAddress());
+
+        Point location = geoCodeService.createPoint(geoCodeDocument);
 
         //  모임 생성
         Club club = clubRepository.save(
@@ -59,10 +62,9 @@ public class ClubService {
                         .clubname(clubCreateRequest.getClubname())
                         .clubSize(clubCreateRequest.getClubSize())
                         .intro(clubCreateRequest.getIntro())
-                        .regionAddress(address.getRegionAddress())
-                        .roadAddress(address.getRoadAddress())
-                        .longitude(address.getLongitude())
-                        .latitude(address.getLatitude())
+                        .regionAddress(geoCodeDocument.getRegionAddress())
+                        .roadAddress(geoCodeDocument.getRoadAddress())
+                        .location(location)
                         .password(passwordEncoder.encode(clubCreateRequest.getPassword()))
                         .owner(user)
                         .build()

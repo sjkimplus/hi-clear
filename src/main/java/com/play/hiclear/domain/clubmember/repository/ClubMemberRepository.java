@@ -3,7 +3,6 @@ package com.play.hiclear.domain.clubmember.repository;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
-import com.play.hiclear.domain.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

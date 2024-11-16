@@ -38,7 +38,7 @@ public class ClubController {
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long clubId,
             @RequestBody ClubUpdateRequest clubUpdateRequest
-    ) throws Exception {
+    ) {
         return ResponseEntity.ok(clubService.update(authUser.getUserId(), clubId, clubUpdateRequest));
     }
 

@@ -65,12 +65,13 @@ public class BoardService {
         );
         Board saveBoard = boardRepository.save(board);
 
-        List<ClubMember> members = clubMemberRepository.findAllByClubId(clubId);
-
-        for(User clubUser : members.stream().map(ClubMember::getUser).toList()) {
-            if (clubUser != user)
-                notiService.sendNotification(clubUser, NotiType.BOARD, user.getName()+"님이 글을 작성했습니다.", "/v1/clubs/"+ clubId.toString() +"/clubboards");
-        }
+        saveBoard.getClub().getClubMembers().stream().filter(clubMember -> clubMember.getUser().equals(user)).
+                forEach(clubMember -> notiService.sendNotification(
+                        clubMember.getUser(),
+                        NotiType.BOARD,
+                        String.format("%s님이 글을 작성했습니다", user.getName()),
+                        String.format("/v1/clubs/%d/clubboards", club.getId())
+                ));
 
         return new BoardCreateResponse(
                 saveBoard.getId(),

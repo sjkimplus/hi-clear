@@ -2,7 +2,6 @@ package com.play.hiclear.domain.thread.controller;
 
 import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.thread.dto.request.ThreadCreateRequest;
 import com.play.hiclear.domain.thread.dto.request.ThreadDeleteRequest;
 import com.play.hiclear.domain.thread.dto.request.ThreadUpdateRequest;
@@ -26,7 +25,7 @@ public class ThreadController {
     }
 
     @PutMapping("/v1/comments/{commentId}/threads/{threadId}")
-    public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long threadId, @RequestBody ThreadUpdateRequest threadUpdateRequest) throws Exception {
+    public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long threadId, @RequestBody ThreadUpdateRequest threadUpdateRequest) {
         threadService.update(authUser.getUserId(), threadId, threadUpdateRequest);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.MODIFIED, Thread.class.getSimpleName()));
     }
