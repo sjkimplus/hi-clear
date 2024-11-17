@@ -1,5 +1,7 @@
 package com.play.hiclear.domain.participant.repository;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
@@ -14,6 +16,12 @@ import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
 
+    default Participant findByIdOrThrow(Long id) {
+        return findById(id).orElseThrow(() ->
+                new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
+        );
+    }
+
     Optional<Participant> findByMeetingAndUser(Meeting meeting, User user);
 
     List<Participant> findByMeetingAndStatus(Meeting meeting, ParticipantStatus status);
@@ -21,7 +29,6 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     @Query("SELECT p.meeting FROM Participant p WHERE p.meeting.finished = true")
     List<Meeting> findFinishedMeetings();
     List<Participant> findByMeeting(Meeting meeting);
-    //연관관계 이용해서 합치기
 
     @Query("SELECT p FROM Participant p WHERE p.meeting.finished = true AND p.meeting IN " +
             "(SELECT subP.meeting FROM Participant subP WHERE subP.user.id = :userId)")

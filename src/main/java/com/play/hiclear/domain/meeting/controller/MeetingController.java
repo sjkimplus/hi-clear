@@ -5,7 +5,7 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
-import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingUpdateRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.meeting.service.MeetingService;
@@ -35,7 +35,7 @@ public class MeetingController {
     // 번개글 수정
     @PatchMapping("/v1/meetings/{meetingId}")
     public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser,
-                                       @RequestBody @Valid MeetingEditRequest request,
+                                       @RequestBody @Valid MeetingUpdateRequest request,
                                        @PathVariable Long meetingId) {
         return ResponseEntity.ok(meetingService.update(authUser, request, meetingId));
     }

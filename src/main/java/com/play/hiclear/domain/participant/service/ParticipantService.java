@@ -112,9 +112,7 @@ public class ParticipantService {
     public String update(AuthUser authUser, Long meetingId, Long participantId, ParticipantUpdateRequest request) {
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
-        Participant participant = participantRepository.findById(participantId).orElseThrow(() ->
-                new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
-        );
+        Participant participant = participantRepository.findByIdOrThrow(participantId);
 
         // 참가자 번호가 미팅 번호에 신청된 번호가 맞는지 확인
         if (participant.getMeeting().getId()!=meeting.getId()) {

@@ -3,10 +3,8 @@ package com.play.hiclear.domain.meeting.entity;
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.entity.TimeStamped;
 import com.play.hiclear.common.enums.Ranks;
-import com.play.hiclear.common.exception.CustomException;
-import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
-import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingUpdateRequest;
 import com.play.hiclear.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -69,7 +67,7 @@ public class Meeting extends TimeStamped {
 
 
     // 모임 일정 수정
-    public void update(MeetingEditRequest request) {
+    public void update(MeetingUpdateRequest request) {
         if (request.getTitle() != null && !request.getTitle().isEmpty()) {
             this.title = request.getTitle();
         }
