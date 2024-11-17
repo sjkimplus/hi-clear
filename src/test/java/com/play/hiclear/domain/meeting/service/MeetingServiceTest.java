@@ -50,8 +50,7 @@ class MeetingServiceTest {
     private ParticipantService participantService;
     @Mock
     private ParticipantRepository participantRepository;
-    @Mock
-    private MeetingQueryDslRepository meetingQueryDslRepository;
+
     @Mock
     private GeoCodeService geoCodeService;
 
