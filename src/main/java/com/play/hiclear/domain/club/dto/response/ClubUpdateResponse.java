@@ -15,6 +15,6 @@ public class ClubUpdateResponse {
         this.clubname = club.getClubname();
         this.clubSize = club.getClubSize();
         this.intro = club.getIntro();
-        this.region = club.getRegion();
+        this.region = club.getRegionAddress();
     }
 }
