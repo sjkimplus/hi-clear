@@ -13,6 +13,10 @@ import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.board.repository.BoardRepository;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
+import com.play.hiclear.domain.clubmember.entity.ClubMember;
+import com.play.hiclear.domain.clubmember.repository.ClubMemberRepository;
+import com.play.hiclear.domain.notification.enums.NotiType;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,6 +36,9 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
+    private final ClubMemberRepository clubMemberRepository;
+
+    private final NotiService notiService;
 
     /**
      * 게시글 생성
@@ -55,6 +64,13 @@ public class BoardService {
                 club
         );
         Board saveBoard = boardRepository.save(board);
+
+        List<ClubMember> members = clubMemberRepository.findAllByClubId(clubId);
+
+        for(User clubUser : members.stream().map(ClubMember::getUser).toList()) {
+            if (clubUser != user)
+                notiService.sendNotification(clubUser, NotiType.BOARD, user.getName()+"님이 글을 작성했습니다.", "/v1/clubs/"+ clubId.toString() +"/clubboards");
+        }
 
         return new BoardCreateResponse(
                 saveBoard.getId(),

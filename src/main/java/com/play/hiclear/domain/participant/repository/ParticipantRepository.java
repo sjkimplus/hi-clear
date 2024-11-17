@@ -47,9 +47,9 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     @Query("""
 
-    SELECT p FROM Participant p 
-    WHERE p.user.id = :userId 
-      AND p.role = :role 
+    SELECT p FROM Participant p
+    WHERE p.user.id = :userId
+      AND p.role = :role
       AND p.meeting.finished = false
       AND p.meeting.deletedAt IS NULL
     ORDER BY p.meeting.startTime ASC

@@ -1,5 +1,7 @@
 package com.play.hiclear.common.enums;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -27,13 +29,17 @@ public enum Ranks {
         this.rankValue = rankValue;
     }
 
+    public static Ranks fromRankValue(int rankValue) {
+        for(Ranks rank : values()) {
+            if(rank.rankValue == rankValue) {
+                return rank;
+            }
+        }
+        throw new CustomException(ErrorCode.REVIEW_MISS_SCORE);
+    }
+
     // Getter method to access the corresponding number
     public int getRankValue() {
         return rankValue;
-    }
-
-    // 급수를 숫자로 가져온다
-    public static int convertRankToNumber(Ranks ranks) {
-        return ranks.getRankValue();
     }
 }

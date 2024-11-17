@@ -96,4 +96,14 @@ public class ReservationController {
             return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.RESERVATION_REJECTED));
         }
     }
+
+
+    // 분산 락을 사용하여 예약 생성
+    @PostMapping("/v1/reservations/distributed")
+    public List<ReservationSearchDetailResponse> createReservationDistributedLock(
+            @RequestBody @Valid ReservationRequest request,
+            @AuthenticationPrincipal AuthUser authUser) {
+
+        return reservationService.createReservationDistributedLock(authUser, request);
+    }
 }
