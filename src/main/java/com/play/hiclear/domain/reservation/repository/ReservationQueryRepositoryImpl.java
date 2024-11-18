@@ -92,11 +92,12 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
                 .fetch();
 
         long total = queryFactory
-                .selectFrom(reservation)
+                .select(reservation.count())
+                .from(reservation)
                 .join(reservation.court, court)
                 .join(court.gym, gym)
                 .where(predicate)
-                .fetchCount();
+                .fetchOne();
 
         return new PageImpl<>(reservations, pageable, total);
     }
@@ -130,9 +131,10 @@ public class ReservationQueryRepositoryImpl implements ReservationQueryRepositor
                 .fetch();
 
         long total = queryFactory
-                .selectFrom(reservation)
+                .select(reservation.count())
+                .from(reservation)
                 .where(predicate)
-                .fetchCount();
+                .fetchOne();
 
         return new PageImpl<>(reservations, pageable, total);
     }

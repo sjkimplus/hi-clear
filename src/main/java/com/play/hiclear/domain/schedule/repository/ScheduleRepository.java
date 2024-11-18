@@ -3,11 +3,11 @@ package com.play.hiclear.domain.schedule.repository;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.club.entity.Club;
-import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.schedule.entity.Schedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -47,5 +47,13 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
     List<Schedule> findSchedulesByDayAndLocation(@Param("dayStart") LocalDateTime dayStart,
                                                  @Param("dayEnd") LocalDateTime dayEnd,
                                                  @Param("regionAddress") String regionAddress);
+
+    // 만료된 일정들을 현재 시간 기준으로 찾는 쿼리
+    List<Schedule> findByEndTimeBefore(LocalDateTime now);
+
+    // 만료된 일정 삭제 메서드
+    @Modifying
+    @Query("DELETE FROM Schedule s WHERE s.endTime < :now")
+    void deleteExpiredSchedules(@Param("now") LocalDateTime now);
 
 }

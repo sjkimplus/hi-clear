@@ -1,18 +1,11 @@
 package com.play.hiclear.domain.reservation.service;
 
-import com.play.hiclear.common.exception.CustomException;
-import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.court.entity.Court;
 import com.play.hiclear.domain.court.repository.CourtRepository;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.repository.GymRepository;
-import com.play.hiclear.domain.reservation.dto.request.ReservationChangeStatusRequest;
-import com.play.hiclear.domain.reservation.dto.request.ReservationRequest;
-import com.play.hiclear.domain.reservation.dto.request.ReservationUpdateRequest;
-import com.play.hiclear.domain.reservation.dto.response.ReservationSearchDetailResponse;
-import com.play.hiclear.domain.reservation.dto.response.ReservationSearchResponse;
 import com.play.hiclear.domain.reservation.entity.Reservation;
 import com.play.hiclear.domain.reservation.enums.ReservationStatus;
 import com.play.hiclear.domain.reservation.repository.ReservationRepository;
@@ -23,15 +16,16 @@ import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.play.hiclear.domain.reservation.dto.response.*;
+import com.play.hiclear.domain.reservation.dto.request.*;
+import com.play.hiclear.common.exception.*;
+import org.springframework.data.domain.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -52,43 +46,71 @@ public class ReservationService {
      * 예약 생성
      * @param authUser
      * @param request
-     * @return List<ReservationSearchDetailResponse>
+     * @return
      */
     @Transactional
     public List<ReservationSearchDetailResponse> create(AuthUser authUser, ReservationRequest request) {
-        log.info("예약 생성 요청 - 사용자: {}", authUser.getEmail());
+        String lockKey = "reservation-lock:" + request.getCourtId() + ":" + request.getDate().atStartOfDay();  // 날짜와 시간을 정확히 포함
+        String lockValue = "locked";  // 락 값
+        long lockExpiration = 10L;  // 락 만료 시간 (10초)
 
-        User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
+        // 락 획득 시도
+        Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, lockExpiration, TimeUnit.SECONDS);
 
-        Court court = courtRepository.findByIdAndDeletedAtIsNullOrThrow(request.getCourtId());
+        if (Boolean.TRUE.equals(success)) {
+            // 락을 획득한 경우
+            try {
+                // 예약 작업 시작
+                log.info("예약 작업 시작: {} {}", request.getCourtId(), request.getDate());
 
-        // 해당 코트가 속한 체육관의 타입이 PRIVATE인지 확인
-        checkGym(court);
+                log.info("예약 생성 요청 - 사용자: {}", authUser.getEmail());
 
-        // 체육관의 주인인지 확인
-        if (court.getGym().getUser().equals(user)) {
-            throw new CustomException(ErrorCode.NO_AUTHORITY, Reservation.class.getSimpleName());
+                User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
+
+                Court court = courtRepository.findByIdAndDeletedAtIsNullOrThrow(request.getCourtId());
+
+                // 해당 코트가 속한 체육관의 타입이 PRIVATE인지 확인
+                checkGym(court);
+
+                // 체육관의 주인인지 확인
+                if (court.getGym().getUser().equals(user)) {
+                    throw new CustomException(ErrorCode.NO_AUTHORITY, Reservation.class.getSimpleName());
+                }
+
+                // 예약 날짜가 현재 시간 이후인지 확인
+                validateRequestDate(request.getDate());
+
+                List<TimeSlot> timeSlots = timeSlotRepository.findAllById(request.getTimeList());
+
+                // 해당 코트 시간이 이미 얘약 되었는지 확인
+                checkTimeSlotAvailability(timeSlots, request.getDate());
+
+                // 요청된 시간 슬롯이 해당 코트와 맞는지 확인
+                validateTimeSlotsForCourt(court, timeSlots);
+
+                List<Reservation> reservations = timeSlots.stream()
+                        .map(timeSlot -> new Reservation(user, court, timeSlot, ReservationStatus.PENDING, request.getDate()))
+                        .toList();
+
+                reservationRepository.saveAll(reservations);
+
+                log.info("예약 생성 완료 - 예약 수: {}", reservations.size());
+                return reservations.stream().map(ReservationSearchDetailResponse::from).toList();
+
+            } catch (Exception e) {
+                // 예약 작업 중 오류가 발생한 경우
+                log.error("예약 작업 중 오류 발생: {}", e.getMessage(), e);
+                throw e;  // 예외를 다시 던짐
+            } finally {
+                // 작업 완료 후 락 해제
+                redisTemplate.delete(lockKey);
+                log.info("예약 작업 완료, 락 해제: {} {}", request.getCourtId(), request.getDate());
+            }
         }
 
-        // 예약 날짜가 현재 시간 이후인지 확인
-        validateRequestDate(request.getDate());
-
-        List<TimeSlot> timeSlots = timeSlotRepository.findAllById(request.getTimeList());
-
-        // 해당 코트 시간이 이미 얘약 되었는지 확인
-        checkTimeSlotAvailability(timeSlots, request.getDate());
-
-        // 요청된 시간 슬롯이 해당 코트와 맞는지 확인
-        validateTimeSlotsForCourt(court, timeSlots);
-
-        List<Reservation> reservations = timeSlots.stream()
-                .map(timeSlot -> new Reservation(user, court, timeSlot, ReservationStatus.PENDING, request.getDate()))
-                .toList();
-
-        reservationRepository.saveAll(reservations);
-
-        log.info("예약 생성 완료 - 예약 수: {}", reservations.size());
-        return reservations.stream().map(ReservationSearchDetailResponse::from).toList();
+        // 락을 획득하지 못한 경우 바로 예외 던짐
+        log.error("락을 획득할 수 없습니다. 예약 처리 중 다른 프로세스가 작업을 진행 중입니다.");
+        throw new CustomException(ErrorCode.RESERVATION_LOCK_CONFLICT);
     }
 
     /**
@@ -226,54 +248,10 @@ public class ReservationService {
                 deleteReservation(reservation);
                 log.info("예약 삭제 완료 - 예약 ID: {}", reservationId);
             }
-            case REJECTED, CANCELED -> {
-                throw new CustomException(ErrorCode.RESERVATION_CANT_ACCEPTED);
-            }
-            default -> {
-                throw new CustomException(ErrorCode.RESERVATION_CANT_CANCELED);
-            }
+            case REJECTED, CANCELED -> throw new CustomException(ErrorCode.RESERVATION_CANT_ACCEPTED);
+            default -> throw new CustomException(ErrorCode.RESERVATION_CANT_CANCELED);
         }
     }
-
-    /**
-     * 분산 락 걸었을 때
-     * @param authUser
-     * @param request
-     * @return
-     */
-    @Transactional
-    public List<ReservationSearchDetailResponse> createReservationDistributedLock(AuthUser authUser, ReservationRequest request) {
-        String lockKey = "reservation-lock:" + request.getCourtId() + ":" + request.getDate().atStartOfDay();  // 날짜와 시간을 정확히 포함
-        String lockValue = "locked";  // 락 값
-        long lockExpiration = 10L;  // 락 만료 시간 (10초)
-
-        // 락 획득 시도
-        Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, lockExpiration, TimeUnit.SECONDS);
-
-        if (Boolean.TRUE.equals(success)) {
-            // 락을 획득한 경우
-            try {
-                log.info("예약 작업 시작: {} {}", request.getCourtId(), request.getDate());
-
-                // 예약 생성 로직 호출
-                return create(authUser, request);
-
-            } catch (Exception e) {
-                // 예약 작업 중 오류가 발생한 경우
-                log.error("예약 작업 중 오류 발생: {}", e.getMessage(), e);
-                throw e;  // 예외를 다시 던짐
-            } finally {
-                // 작업 완료 후 락 해제
-                redisTemplate.delete(lockKey);
-                log.info("예약 작업 완료, 락 해제: {} {}", request.getCourtId(), request.getDate());
-            }
-        }
-
-        // 락을 획득하지 못한 경우 바로 예외 던짐
-        log.error("락을 획득할 수 없습니다. 예약 처리 중 다른 프로세스가 작업을 진행 중입니다.");
-        throw new CustomException(ErrorCode.NO_AUTHORITY, "예약 처리 중 다른 프로세스가 작업을 진행 중입니다.");
-    }
-
 
     /**
      * 사장님 예약 수락/거절
@@ -286,7 +264,7 @@ public class ReservationService {
         log.info("예약 상태 변경 요청 - 예약 ID: {}, 사용자: {}, 상태: {}", reservationId, authUser.getEmail(), request.getStatus());
 
         User user = userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail());
-        Reservation reservation = reservationRepository.findByIdAndCourt_Gym_User_OrThrow(reservationId, user);
+        Reservation reservation = reservationRepository.findByIdAndCourtGymUserOrThrow(reservationId, user);
 
         // 현재 예약이 이미 삭제되었는지 확인
         checkCancellationEligibility(reservation);
@@ -296,6 +274,34 @@ public class ReservationService {
 
         log.info("예약 상태 변경 완료 - 예약 ID: {}, 새로운 상태: {}", reservationId, newStatus);
     }
+
+//    @Scheduled(cron = "0 0 0 * * ?")  // 매일 자정에 실행
+//    @Transactional
+//    public void deleteExpiredReservations() {
+//        log.info("예약 만료 처리 시작");
+//
+//        // 현재 시간
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        // LocalDate와 LocalTime을 각각 추출
+//        LocalDate nowDate = now.toLocalDate();  // 현재 날짜
+//        LocalTime nowTime = now.toLocalTime();  // 현재 시간
+//
+//        // 예약 시간이 지난 예약 List
+//        List<Reservation> expiredReservations = reservationRepository.findExpiredReservations(nowDate, nowTime);
+//
+//        if (expiredReservations.isEmpty()) {
+//            log.info("만료된 예약이 없습니다.");
+//        } else {
+//            // 만료된 예약들을 삭제
+//            reservationRepository.deleteAll(expiredReservations);
+//            log.info("{}개의 만료된 예약이 삭제", expiredReservations.size());
+//
+//            // 삭제된 예약에 대해 로그 출력
+//            expiredReservations.forEach(reservation ->
+//                    log.info("만료된 예약 삭제 - 예약 ID: {}", reservation.getId()));
+//        }
+//    }
 
     // 예약 날짜가 현재 시간 이후인지 확인
     private void validateRequestDate(LocalDate date) {
