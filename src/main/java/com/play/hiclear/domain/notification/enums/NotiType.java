@@ -9,6 +9,7 @@ public enum NotiType {
 
     CLUB,
     SCHEDULE,
+    MEETING,
     BOARD,
     COMMENT;
 

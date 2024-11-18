@@ -6,6 +6,8 @@ import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
+import com.play.hiclear.domain.notification.enums.NotiType;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.participant.dto.ParticipantListResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantUpdateRequest;
@@ -31,6 +33,7 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
     private final UserRepository userRepository;
     private final MeetingRepository meetingRepository;
+    private final NotiService notiService;
 
     /**
      * 참여 신청
@@ -142,6 +145,25 @@ public class ParticipantService {
                     throw new CustomException(ErrorCode.FULL);
             }
             participant.updateStatus(request.getStatus());
+
+            if (request.getStatus()==ParticipantStatus.REJECTED) {
+                notiService.sendNotification(
+                        participant.getUser(),
+                        NotiType.MEETING,
+                        String.format("%s 번개 신청이 거절되었습니다.", meeting.getTitle()),
+                        String.format("/v1/meetings/%d/participants", meeting.getId())
+                );
+            }
+            else if (request.getStatus()==ParticipantStatus.ACCEPTED) {
+                List<Participant> participantList = participantRepository.findByMeetingAndStatus(meeting, ParticipantStatus.ACCEPTED);
+                participantList.stream().filter(member-> !member.getUser().getId().equals(authUser.getUserId())).
+                        forEach(member -> notiService.sendNotification(
+                                member.getUser(),
+                                NotiType.MEETING,
+                                String.format("%s님이 번개에 참가했습니다", participant.getUser().getName()),
+                                String.format("/v1/meetings/%d/participants", meeting.getId())
+                        ));
+            }
         } else { // 기타는 불가
             throw new CustomException(ErrorCode.WRONG_STATUS);
         }
