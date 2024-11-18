@@ -20,9 +20,12 @@ import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +45,8 @@ public class ScheduleService {
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
     private final GeoCodeService geoCodeService;
+    private final JobLauncher jobLauncher;
+    private final Job deleteExpiredJob;
     private final NotiService notiService;
 
     /**
@@ -78,10 +83,19 @@ public class ScheduleService {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Schedule.class.getSimpleName());
         }
 
-        Schedule schedule = new Schedule(user, club, scheduleRequest.getTitle(), scheduleRequest.getDescription(), scheduleRequest.getStartTime(), scheduleRequest.getEndTime(),
-                geoCodeAddress.getRegionAddress(), geoCodeAddress.getRoadAddress(), geoCodeAddress.getLatitude(), geoCodeAddress.getLongitude());
-
-        Schedule savedSchedule = scheduleRepository.save(schedule);
+        // Schedule 객체 생성
+        Schedule savedSchedule = scheduleRepository.save(Schedule.builder()
+                .user(user)
+                .club(club)
+                .title(scheduleRequest.getTitle())
+                .description(scheduleRequest.getDescription())
+                .startTime(scheduleRequest.getStartTime())
+                .endTime(scheduleRequest.getEndTime())
+                .regionAddress(geoCodeAddress.getRegionAddress())
+                .roadAddress(geoCodeAddress.getRoadAddress())
+                .latitude(geoCodeAddress.getLatitude())
+                .longitude(geoCodeAddress.getLongitude())
+                .build());
 
         // 참가자 목록 추가
         addParticipants(savedSchedule, participantIds, club);

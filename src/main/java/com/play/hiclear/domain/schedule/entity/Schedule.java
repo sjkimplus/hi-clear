@@ -5,16 +5,16 @@ import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
 import com.play.hiclear.domain.schedule.dto.request.ScheduleUpdateRequest;
 import com.play.hiclear.domain.user.entity.User;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "schedules")
 public class Schedule extends TimeStamped {
     @Id
@@ -46,19 +46,6 @@ public class Schedule extends TimeStamped {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    public Schedule(User user, Club club, String title, String description, LocalDateTime startTime, LocalDateTime endTime, String regionAddress, String roadAddress, Double latitude, Double longitude) {
-        this.user = user;
-        this.club = club;
-        this.title = title;
-        this.description = description;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.regionAddress = regionAddress;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.roadAddress = roadAddress;
-    }
 
     // 모임 일정 수정
     public void updateSchedule(ScheduleUpdateRequest scheduleUpdateRequest) {
