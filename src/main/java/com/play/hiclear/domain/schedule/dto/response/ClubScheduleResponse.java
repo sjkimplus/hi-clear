@@ -1,6 +1,5 @@
 package com.play.hiclear.domain.schedule.dto.response;
 
-import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.schedule.entity.Schedule;
 import lombok.Getter;
 

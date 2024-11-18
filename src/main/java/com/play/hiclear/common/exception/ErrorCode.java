@@ -61,6 +61,7 @@ public enum ErrorCode {
     RESERVATION_CANT_ACCEPTED(HttpStatus.CONFLICT, "예약은 이미 거절/취소 되었습니다."),
     INVALID_DATE(HttpStatus.CONFLICT, "예약 날짜는 현재 시간 이후여야 합니다."),
     INVALID_TIME_SLOT(HttpStatus.CONFLICT, "선택한 시간 슬롯이 해당 코트와 일치하지 않습니다."),
+    RESERVATION_LOCK_CONFLICT(HttpStatus.CONFLICT, "예약 처리 중 다른 프로세스가 작업을 진행 중입니다."),
     RESERVATION_BAD_REQUEST_ROLE(HttpStatus.BAD_REQUEST,
             String.format("ReservationStatus 입력이 올바르지 않습니다. 가능한 값: %s",
                     Arrays.toString(new String[]{"ACCEPTED", "REJECTED"}))),
