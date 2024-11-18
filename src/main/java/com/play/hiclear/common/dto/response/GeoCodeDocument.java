@@ -17,6 +17,17 @@ public class GeoCodeDocument {
     @JsonProperty("road_address")
     private NestedAddress2 roadAddress;
 
+    // test에 사용
+    public GeoCodeDocument(double longitude, double latitude, String regionAddressName, String roadAddressName) {
+        this.longitude = String.valueOf(longitude);
+        this.latitude = String.valueOf(latitude);
+
+        this.regionAddress = new NestedAddress1();
+        this.regionAddress.addressName = regionAddressName;
+        this.roadAddress = new NestedAddress2();
+        this.roadAddress.addressName = roadAddressName;
+    }
+
     public String getRegionAddress() {
         return regionAddress != null ? regionAddress.getAddressName() : null ;
     }

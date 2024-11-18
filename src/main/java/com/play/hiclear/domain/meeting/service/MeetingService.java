@@ -6,10 +6,9 @@ import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.common.service.GeoCodeService;
-import com.play.hiclear.common.utils.DistanceCalculator;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
-import com.play.hiclear.domain.meeting.dto.request.MeetingEditRequest;
+import com.play.hiclear.domain.meeting.dto.request.MeetingUpdateRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.enums.SortType;
@@ -75,7 +74,7 @@ public class MeetingService {
      * @return
      */
     @Transactional
-    public String update(AuthUser authUser, MeetingEditRequest request, Long meetingId) {
+    public String update(AuthUser authUser, MeetingUpdateRequest request, Long meetingId) {
         // 업로드한 번개 일정 찾기
         Meeting meeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meetingId);
 
