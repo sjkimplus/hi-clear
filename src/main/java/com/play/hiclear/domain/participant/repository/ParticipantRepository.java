@@ -1,5 +1,7 @@
 package com.play.hiclear.domain.participant.repository;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
@@ -14,6 +16,12 @@ import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
 
+    default Participant findByIdOrThrow(Long id) {
+        return findById(id).orElseThrow(() ->
+                new CustomException(ErrorCode.NOT_FOUND, Participant.class.getSimpleName())
+        );
+    }
+
     Optional<Participant> findByMeetingAndUser(Meeting meeting, User user);
 
     List<Participant> findByMeetingAndStatus(Meeting meeting, ParticipantStatus status);
@@ -24,8 +32,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
 
     @Query("""
-    SELECT COUNT(p) FROM Participant p 
-    WHERE p.meeting = :meeting 
+    SELECT COUNT(p) FROM Participant p
+    WHERE p.meeting = :meeting
       AND p.status = :status
     """)
     int countByMeetingAndStatus(
