@@ -104,7 +104,7 @@ class ScheduleServiceTest {
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(admin.getId())).thenReturn(admin);
         when(clubRepository.findByIdAndDeletedAtIsNullOrThrow(club.getId())).thenReturn(club);
 
-        geoCodeDocument = new GeoCodeDocument();
+        geoCodeDocument = new GeoCodeDocument(37.5665, 126.9780, "서울 관악구 신림동 533-29", "서울 관악구 조원로 89-1");
 
         GeoCodeDocument.NestedAddress1 regionAddress = new GeoCodeDocument.NestedAddress1();
         ReflectionTestUtils.setField(regionAddress, "addressName", "Seoul");
