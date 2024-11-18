@@ -24,6 +24,13 @@ repositories {
 }
 
 dependencies {
+
+    // Elasticsearch starter for Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    // Optional: High-Level Rest Client for Elasticsearch (specific version to match Elasticsearch version)
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.25'
+
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
