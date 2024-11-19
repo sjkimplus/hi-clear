@@ -1,5 +1,4 @@
 package com.play.hiclear.domain.meeting.service;
-
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
@@ -10,8 +9,10 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.dto.request.MeetingUpdateRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
+import com.play.hiclear.domain.meeting.elasticsearch.MeetingDocument;
 import com.play.hiclear.domain.meeting.entity.Meeting;
 import com.play.hiclear.domain.meeting.enums.SortType;
+import com.play.hiclear.domain.meeting.elasticsearch.MeetingElasticSearchRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingQueryDslRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.participant.dto.ParticipantResponse;
@@ -41,6 +42,41 @@ public class MeetingService {
     private final ParticipantRepository participantRepository;
     private final MeetingQueryDslRepository meetingQueryDslRepository;
     private final GeoCodeService geoCodeService;
+    private final MeetingElasticSearchRepository meetingESRepository;
+
+    /**
+     *
+     * @param title
+     * @param regionAddress
+     * @param ranks
+     * @param page
+     * @param size
+     * @return
+     */
+    public Page<MeetingDocument> searchMeetings(String title, String regionAddress, String ranks, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        // 급수(Ranks)로 필터링
+        if (ranks != null && !ranks.isEmpty()) {
+            return meetingESRepository.findByRanks(ranks, pageable);
+        }
+        // 제목과 지역주소를 모두 검색
+        else if (title != null && !title.isEmpty() && regionAddress != null && !regionAddress.isEmpty()) {
+            return meetingESRepository.findByTitleContainingOrRegionAddressContaining(title, regionAddress, pageable);
+        }
+        // 제목만 검색
+        else if (title != null && !title.isEmpty()) {
+            return meetingESRepository.findByTitleContaining(title, pageable);
+        }
+        // 지역주소만 검색
+        else if (regionAddress != null && !regionAddress.isEmpty()) {
+            return meetingESRepository.findByRegionAddressContaining(regionAddress, pageable);
+        }
+        // 모든 검색 조건이 없으면, 전체 데이터를 페이징하여 반환
+        else {
+            return meetingESRepository.findAll(pageable);
+        }
+    }
+
 
     /**
      * 번개 생성
@@ -52,14 +88,17 @@ public class MeetingService {
     public String create(AuthUser authUser, MeetingCreateRequest request) {
         // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
         checkTimeValidity(request.getStartTime(), request.getEndTime());
-        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+        User user =     userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         // 주소값 가져오기
         GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
 
-        // 거리
         Meeting meeting = new Meeting(request, user, address);
         meetingRepository.save(meeting);
+        // ES에 저장
+        Meeting foundMeeting = meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId());
+        MeetingDocument meetingDocument = new MeetingDocument(foundMeeting);
+        meetingESRepository.save(meetingDocument);
 
         // participant 에 추가
         participantService.add(authUser, meeting.getId());
@@ -85,8 +124,14 @@ public class MeetingService {
 
         // 권한체크 - 작성자가 맞는지 체크
         checkAuthority(authUser, meeting);
-        
         meeting.update(request);
+        // 기존에 ES에 있는 데이터 삭제
+        meetingESRepository.deleteById(meeting.getId());
+        // ES에 저장
+        // not sure
+        MeetingDocument meetingDocument = new MeetingDocument(meeting);
+        meetingESRepository.save(meetingDocument);
+
 
         // 지역 정보(region)가 제공되면, 해당 정보를 사용하여 위치 정보를 갱신
         if (request.getAddress() != null && !request.getAddress().isEmpty()) {
@@ -116,6 +161,7 @@ public class MeetingService {
         checkAuthority(authUser, meeting);
 
         meeting.markDeleted();
+        meetingESRepository.deleteById(meeting.getId());
         return SuccessMessage.customMessage(SuccessMessage.DELETED, Meeting.class.getSimpleName());
     }
 
