@@ -11,6 +11,8 @@ import com.play.hiclear.domain.club.dto.response.ClubGetResponse;
 import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
 import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.entity.Club;
+import com.play.hiclear.domain.club.entity.ClubDocument;
+import com.play.hiclear.domain.club.repository.ClubElasticsearchRepository;
 import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
@@ -27,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +38,7 @@ public class ClubService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
+    private final ClubElasticsearchRepository clubElasticsearchRepository;
 
     private final GeoCodeService geoCodeService;
 
@@ -67,6 +71,16 @@ public class ClubService {
                         .location(location)
                         .password(passwordEncoder.encode(clubCreateRequest.getPassword()))
                         .owner(user)
+                        .build()
+        );
+
+        clubElasticsearchRepository.save(
+                ClubDocument.builder()
+                        .id(club.getId().toString())
+                        .clubname(club.getClubname())
+                        .intro(club.getIntro())
+                        .regionAddress(club.getRegionAddress())
+                        .roadAddress(club.getRoadAddress())
                         .build()
         );
 
@@ -163,5 +177,38 @@ public class ClubService {
         if (clubMember.getClubMemberRole() != ClubMemberRole.ROLE_MASTER) {
             throw new CustomException(ErrorCode.NO_AUTHORITY, Club.class.getSimpleName());
         }
+    }
+
+    public Page<ClubDocument> elsearch(
+            int page, int size,
+            String clubname, String intro,
+            String regionAddress, String roadAddress) {
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        boolean addressCondition = (regionAddress != null && !regionAddress.isEmpty())
+                || (roadAddress != null && !roadAddress.isEmpty());
+
+        boolean clubnameCondition = clubname != null && !clubname.isEmpty();
+
+        boolean introCondition = intro != null && !intro.isEmpty();
+
+        if (clubnameCondition && addressCondition && introCondition) {
+            return clubElasticsearchRepository.findByClubnameContainingAndIntroContainingAndRegionAddressContainingAndRoadAddressContaining(clubname, intro, regionAddress, roadAddress, pageable);
+        }
+
+        if (introCondition) {
+            return clubElasticsearchRepository.findByIntroContaining(intro, pageable);
+        }
+
+        if (clubnameCondition) {
+            return clubElasticsearchRepository.findByClubnameContaining(clubname, pageable);
+        }
+
+        if (addressCondition) {
+            return clubElasticsearchRepository.findByRegionAddressContainingAndRoadAddressContaining(regionAddress, roadAddress, pageable);
+        }
+
+        return clubElasticsearchRepository.findAll(pageable);
     }
 }
