@@ -1,5 +1,6 @@
-package com.play.hiclear.domain.meeting.elasticsearch;
+package com.play.hiclear.domain.meeting.repository;
 
+import com.play.hiclear.domain.meeting.entity.MeetingDocument;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;

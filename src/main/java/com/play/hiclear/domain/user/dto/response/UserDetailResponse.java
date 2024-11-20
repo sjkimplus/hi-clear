@@ -11,6 +11,6 @@ public class UserDetailResponse {
     private final String nameEmail;
     private final String region;
     private final Ranks selfRank;
-//    private Ranks reviewRank;
-//    private Long stringTention;
+    private final String reviewRank;
+    private final String stringTension;
 }

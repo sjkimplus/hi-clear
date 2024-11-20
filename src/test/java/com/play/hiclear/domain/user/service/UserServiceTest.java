@@ -5,6 +5,8 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.service.AwsS3Service;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.review.dto.response.UserStatisticsResponse;
+import com.play.hiclear.domain.review.service.ReviewService;
 import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.dto.response.UserDetailResponse;
 import com.play.hiclear.domain.user.dto.response.UserSimpleResponse;
@@ -52,6 +54,9 @@ class UserServiceTest {
 
     @Mock
     private MultipartFile image; // 테스트용 이미지 파일 Mock
+
+    @Mock
+    private ReviewService reviewService;;
 
     private AuthUser authUser;
     private Point point;
@@ -121,6 +126,8 @@ class UserServiceTest {
         User user = new User("홍길동", "test1@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", point, "encodedPassword", Ranks.RANK_A, UserRole.BUSINESS);
         ReflectionTestUtils.setField(user, "id", 1L);
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(1L)).thenReturn(user);
+        UserStatisticsResponse statisticsResponse = new UserStatisticsResponse("LOW", "RANK_B");
+        when(reviewService.statistics(1L)).thenReturn(statisticsResponse);
 
         // when
         UserDetailResponse result = userService.get(authUser, 1L);

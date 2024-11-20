@@ -8,13 +8,16 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 @Configuration
 public class ElasticSearchConfig extends ElasticsearchConfiguration {
 
+    // spring.elasticsearch.uris 값을 String으로 받아오기
     @Value("${spring.elasticsearch.uris}")
-    private String esUri;
+    private String esHost;
 
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
-                .connectedTo(esUri)
+                .connectedTo(esHost)
                 .build();
     }
+
+
 }

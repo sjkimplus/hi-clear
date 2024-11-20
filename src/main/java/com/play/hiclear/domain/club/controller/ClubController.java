@@ -9,8 +9,8 @@ import com.play.hiclear.domain.club.dto.response.ClubGetResponse;
 import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
 import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.entity.Club;
-import com.play.hiclear.domain.club.entity.ClubDocument;
 import com.play.hiclear.domain.club.service.ClubService;
+import com.play.hiclear.domain.club.entity.ClubDocument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -67,5 +67,11 @@ public class ClubController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(clubService.elsearch(page, size, clubname, intro, regionAddress, roadAddress));
+    }
+
+    @PostMapping("/v1/clubs/dummy")
+    public ResponseEntity<String> createDummy(){
+        clubService.createDummy();
+        return ResponseEntity.ok("더미데이터생성");
     }
 }
