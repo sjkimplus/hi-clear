@@ -1,4 +1,5 @@
 package com.play.hiclear.domain.meeting.service;
+
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
@@ -28,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,7 +45,6 @@ public class MeetingService {
     private final MeetingElasticSearchRepository meetingESRepository;
 
     /**
-     *
      * @param title
      * @param regionAddress
      * @param ranks
@@ -77,6 +76,45 @@ public class MeetingService {
         }
     }
 
+
+    /**
+     * 인덱스를 적용하기 전 검색
+     *
+     * @param title
+     * @param regionAddress
+     * @param ranks
+     * @param page
+     * @param size
+     * @return
+     */
+    public Page<MeetingDocumentResponse> searchBeforeMeetings(String title, String regionAddress, String ranks, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        // 급수(Ranks)로 필터링
+        if (ranks != null && !ranks.isEmpty()) {
+            // Fetch meetings with ranks and apply pagination
+            Page<Meeting> meetings = meetingRepository.findByRanks(Ranks.of(ranks), pageable);
+
+            // Convert Meeting entities to MeetingDocumentResponse
+            Page<MeetingDocumentResponse> meetingResponses = meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+
+            return meetingResponses;
+        }
+
+        // // 제목 또는 지역주소를 검색
+        if ((title != null && !title.isEmpty()) || (regionAddress != null && !regionAddress.isEmpty())) {
+            Page<Meeting> meetings = meetingRepository.findByTitleContainingOrRegionAddressContaining(title, regionAddress, pageable);
+
+            Page<MeetingDocumentResponse> meetingResponses = meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+
+            return meetingResponses;
+        }
+
+        // 아무것도 없으면 전체 반환
+        Page<Meeting> meetings = meetingRepository.findAll(pageable);
+
+        return meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+    }
 
     /**
      * 번개 생성
