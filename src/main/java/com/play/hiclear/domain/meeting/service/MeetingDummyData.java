@@ -3,14 +3,13 @@ package com.play.hiclear.domain.meeting.service;
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
-import com.play.hiclear.domain.meeting.elasticsearch.MeetingDocument;
-import com.play.hiclear.domain.meeting.elasticsearch.MeetingElasticSearchRepository;
 import com.play.hiclear.domain.meeting.entity.Meeting;
+import com.play.hiclear.domain.meeting.entity.MeetingDocument;
+import com.play.hiclear.domain.meeting.repository.MeetingElasticSearchRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -18,7 +17,6 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.Random;
 
@@ -33,20 +31,14 @@ public class MeetingDummyData {
     private final BCryptPasswordEncoder passwordEncoder;
     private final Random random = new Random();
 
-    @PostConstruct
     @Transactional
     public void generateDummyMeetings() {
-        // 데이터베이스에 더미 데이터가 이미 존재하면 생성하지 않음
-        if (meetingRepository.count() > 100) {
-            log.info("더미 데이터가 이미 존재합니다.");
-            return;
-        }
 
         // 사용자 생성
         String encodePassword = passwordEncoder.encode("A1234567*");
         Point userPoint = createPoint(126.977829174031, 37.5663174209601);
         userPoint.setSRID(4326);
-        User user = new User("이름", "adminuser123@gmail.com",
+        User user = new User("이름", "adminuser12345@gmail.com",
                 "서울 중구 태평로1가 31", "서울 중구 세종대로 110",
                 userPoint, encodePassword, Ranks.RANK_A, UserRole.BUSINESS);
         userRepository.save(user);
@@ -56,7 +48,7 @@ public class MeetingDummyData {
         LocalDateTime endTime = startTime.plusHours(1);
 
         // Generate 10,000 unique titles
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 10; i++) {
             String uniqueTitle = generateUniqueTitle(i);
 
             MeetingCreateRequest request = new MeetingCreateRequest(

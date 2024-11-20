@@ -1,5 +1,5 @@
 package com.play.hiclear.domain.meeting.service;
-import co.elastic.clients.elasticsearch._types.Rank;
+
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
@@ -24,16 +24,12 @@ import com.play.hiclear.domain.participant.service.ParticipantService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.geolatte.geom.M;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

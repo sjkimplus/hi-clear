@@ -2,15 +2,12 @@ package com.play.hiclear.domain.participant.controller;
 
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.participant.dto.ParticipantListResponse;
-import com.play.hiclear.domain.participant.dto.ParticipantResponse;
 import com.play.hiclear.domain.participant.dto.ParticipantUpdateRequest;
 import com.play.hiclear.domain.participant.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
