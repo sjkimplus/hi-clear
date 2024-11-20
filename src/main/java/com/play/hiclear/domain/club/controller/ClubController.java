@@ -10,6 +10,7 @@ import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
 import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.service.ClubService;
+import com.play.hiclear.domain.club.entity.ClubDocument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -54,5 +55,23 @@ public class ClubController {
     public ResponseEntity<String> delete(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubDeleteRequest clubDeleteRequest) {
         clubService.delete(authUser.getUserId(), clubId, clubDeleteRequest);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.DELETED, Club.class.getSimpleName()));
+    }
+
+    @GetMapping("/v1/clubs/search")
+    public ResponseEntity<Page<ClubDocument>> elsearch(
+            @RequestParam(required = false) String clubname,
+            @RequestParam(required = false) String intro,
+            @RequestParam(required = false) String regionAddress,
+            @RequestParam(required = false) String roadAddress,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(clubService.elsearch(page, size, clubname, intro, regionAddress, roadAddress));
+    }
+
+    @PostMapping("/v1/clubs/dummy")
+    public ResponseEntity<String> createDummy(){
+        clubService.createDummy();
+        return ResponseEntity.ok("더미데이터생성");
     }
 }
