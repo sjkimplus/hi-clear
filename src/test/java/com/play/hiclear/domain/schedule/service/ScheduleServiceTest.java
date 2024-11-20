@@ -9,6 +9,7 @@ import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.clubmember.entity.ClubMember;
 import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
 import com.play.hiclear.domain.schduleparticipant.repository.ScheduleParticipantRepository;
 import com.play.hiclear.domain.schedule.dto.request.ScheduleRequest;
@@ -21,6 +22,8 @@ import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -34,6 +37,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.locationtech.jts.geom.Point;
 
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
 import static com.play.hiclear.common.enums.Ranks.RANK_B;
@@ -60,12 +65,16 @@ class ScheduleServiceTest {
     @Mock
     private GeoCodeService geoCodeService;
 
+    @Mock
+    private NotiService notiService;
+
     private User admin;
     private User user;
     private Club club;
     private Schedule schedule;
     private AuthUser authUser;
     private GeoCodeDocument geoCodeDocument;
+    private Point location;
 
     @BeforeEach
     void setUp() {
@@ -76,11 +85,17 @@ class ScheduleServiceTest {
         user = new User("Jamee", "jamee@example.com", "경기도 수원시", RANK_B, UserRole.USER);
         ReflectionTestUtils.setField(user, "id", 2L);
 
-        club = new Club(admin, "Test Club", 10, "A great club", "Seoul", "secret");
+        // GeometryFactory를 사용하여 서울의 위도, 경도 값을 기반으로 Point 객체 생성
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate coordinate = new Coordinate(37.5665, 126.978);  // 서울의 위도, 경도
+        location = geometryFactory.createPoint(coordinate);  // location을 Point 객체로 초기화
+
+        club = new Club(admin, "Test Club", 10, "A great club", "Seoul", location, "123-45", "secret");
         ReflectionTestUtils.setField(club, "id", 1L);
         club.getClubMembers().add(new ClubMember(1L, user, club, ClubMemberRole.ROLE_MEMBER));
         club.getClubMembers().add(new ClubMember(2L, admin, club, ClubMemberRole.ROLE_MASTER));
 
+        // scheduleParticipants 리스트 초기화
         schedule = Schedule.builder()
                 .user(admin)
                 .club(club)
@@ -92,6 +107,7 @@ class ScheduleServiceTest {
                 .roadAddress("roadAddress")
                 .latitude(35.235345)
                 .longitude(45.209294)
+                .scheduleParticipants(new ArrayList<>()) // 여기에서 리스트 초기화
                 .build();
         ReflectionTestUtils.setField(schedule, "id", 1L);
 
@@ -427,20 +443,27 @@ class ScheduleServiceTest {
         Long participantId = user.getId();
         AuthUser authUser = new AuthUser(admin.getId(), admin.getName(), admin.getEmail(), UserRole.BUSINESS); // 일정의 생성자
 
+        // Mock 설정
         when(scheduleRepository.findByIdAndDeletedAtIsNullOrThrow(scheduleId)).thenReturn(schedule);
         when(userRepository.findByEmailAndDeletedAtIsNullOrThrow(authUser.getEmail())).thenReturn(admin);
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(participantId)).thenReturn(user);
-
-        doNothing().when(scheduleParticipantRepository).checkIfAlreadyParticipating(schedule, user);
-
+        doNothing().when(scheduleParticipantRepository).checkIfAlreadyParticipating(schedule, user);  // 이미 참가 중인 사용자 없음
         when(scheduleParticipantRepository.save(any(ScheduleParticipant.class))).thenReturn(new ScheduleParticipant(schedule, user, club));
+
+        // 알림 서비스 mock 처리
+        doNothing().when(notiService).sendNotification(any(), any(), any(), any());  // 알림 서비스의 sendNotification 메서드가 호출되지 않도록 mock
 
         // When
         scheduleService.addParticipant(scheduleId, participantId, authUser);
 
         // Then
-        verify(scheduleParticipantRepository).save(any(ScheduleParticipant.class));
+        // 1. 참가자가 일정에 추가되었는지 검증
+        verify(scheduleParticipantRepository, times(1)).save(any(ScheduleParticipant.class));
+
+        // 알림 서비스의 sendNotification 메서드가 호출되지 않았는지 검증
+        verify(notiService, never()).sendNotification(any(), any(), any(), any());  // 알림 서비스가 호출되지 않음을 확인
     }
+
 
     @Test
     void addParticipant_fail_alreadyParticipating() {
