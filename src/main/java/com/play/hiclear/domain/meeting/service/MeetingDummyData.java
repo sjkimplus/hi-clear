@@ -48,7 +48,7 @@ public class MeetingDummyData {
         LocalDateTime endTime = startTime.plusHours(1);
 
         // Generate 10,000 unique titles
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 1000; i++) {
             String uniqueTitle = generateUniqueTitle(i);
 
             MeetingCreateRequest request = new MeetingCreateRequest(
@@ -64,7 +64,7 @@ public class MeetingDummyData {
             meetingESRepository.save(meetingDocument);
 
             // Flush every 2500 iterations
-            if (i % 2500 == 0) {
+            if (i % 250 == 0) {
                 meetingRepository.flush();
             }
         }
