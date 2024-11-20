@@ -4,6 +4,8 @@ import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.service.AwsS3Service;
 import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
+import com.play.hiclear.domain.review.dto.response.UserStatisticsResponse;
+import com.play.hiclear.domain.review.service.ReviewService;
 import com.play.hiclear.domain.user.dto.request.UserUpdateRequest;
 import com.play.hiclear.domain.user.dto.response.UserDetailResponse;
 import com.play.hiclear.domain.user.dto.response.UserSimpleResponse;
@@ -31,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final GeoCodeService geoCodeService;
     private final AwsS3Service s3Service;
+    private final ReviewService reviewService;
 
 
     /**
@@ -106,16 +109,22 @@ public class UserService {
         // 유저 불러오기
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
+
         // name(email)형태의 문자열 생성
         String nameEmail = String.format("%s(%s)", user.getName(), user.getEmail());
 
-//        reviewService.updateUserStatistics();
+        // 유저 점수 불러오기
+        UserStatisticsResponse statisticsResponse = reviewService.statistics(userId);
+
+
 
         // DTO 객체 생성 및 반환
         return new UserDetailResponse(
                 nameEmail.toString(),
                 user.getRegionAddress(),
                 user.getSelfRank()
+                ,statisticsResponse.getAverageGradeRank()
+                ,statisticsResponse.getAverageMannerScore()
         );
     }
 

@@ -1,5 +1,7 @@
 package com.play.hiclear.domain.clubmember.enums;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +21,7 @@ public enum ClubMemberRole {
         return Arrays.stream(ClubMemberRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 UerRole"));
+                .orElseThrow(() -> new CustomException(ErrorCode.CLUBMEBER_BAD_REQUEST_TYPE));
     }
 
     public static class ClubMemberAuthority {

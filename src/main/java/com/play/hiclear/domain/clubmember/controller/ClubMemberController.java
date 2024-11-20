@@ -2,7 +2,6 @@ package com.play.hiclear.domain.clubmember.controller;
 
 import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
-import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.clubmember.dto.request.ClubMemberChangeRoleRequest;
 import com.play.hiclear.domain.clubmember.dto.request.ClubMemberExpelRequest;
 import com.play.hiclear.domain.clubmember.service.ClubMemberService;
@@ -30,7 +29,7 @@ public class ClubMemberController {
     }
 
     @DeleteMapping("/v1/clubs/{clubId}/expel")
-    public ResponseEntity<String> clubId(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubMemberExpelRequest clubMemberExpelRequest) {
+    public ResponseEntity<String> expel(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubMemberExpelRequest clubMemberExpelRequest) {
         clubMemberService.expel(authUser.getUserId(), clubId, clubMemberExpelRequest);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.CLUBMEMBER_EXPEL));
     }

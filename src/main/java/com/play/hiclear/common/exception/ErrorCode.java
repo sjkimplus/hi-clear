@@ -1,6 +1,8 @@
 package com.play.hiclear.common.exception;
 
+import com.play.hiclear.domain.clubmember.enums.ClubMemberRole;
 import com.play.hiclear.domain.gym.enums.GymType;
+import com.play.hiclear.domain.notification.enums.NotiType;
 import com.play.hiclear.domain.user.enums.UserRole;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -82,6 +84,9 @@ public enum ErrorCode {
     CLUBMEMBER_NOT_EXPEL_ONESELF(HttpStatus.CONFLICT, "자기 자신을 추방할 수 없습니다"),
     CLUBMEMBER_ADMIN_NOT_WITHDRAW(HttpStatus.CONFLICT, "자기 자신을 추방할 수 없습니다"),
     CLUBMEMBER_ADMIN_ONLY_ONE(HttpStatus.CONFLICT, "모임장은 한 명만 존재할 수 있습니다."),
+    CLUBMEBER_BAD_REQUEST_TYPE(HttpStatus.BAD_REQUEST,
+            String.format("ClubMemberRole 입력이 올바르지 않습니다. 가능한 값: %s",
+                    Arrays.toString(ClubMemberRole.values()))),
 
 
 
@@ -99,9 +104,13 @@ public enum ErrorCode {
 
 
     // Notification
+    NOTI_BAD_REQUEST_TYPE(HttpStatus.BAD_REQUEST,
+            String.format("NotiType 입력이 올바르지 않습니다. 가능한 값: %s",
+                    Arrays.toString(NotiType.values()))),
 
 
     // 기본 코드
+    DUMMY_ALREADY_EXIST(HttpStatus.ALREADY_REPORTED, "이미 데이터가 존재합니다."),
     ADDRESS_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 주소 입니다."),
     IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일입니다."),
     IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 중 오류가 발생했습니다." ),

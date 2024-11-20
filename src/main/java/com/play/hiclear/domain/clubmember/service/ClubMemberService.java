@@ -42,7 +42,7 @@ public class ClubMemberService {
     public void join(Long userId, Long clubId) {
 
         //  유저 조회
-        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
+        User joinUser = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
         //  모임 조회
         Club club = clubRepository.findByIdAndDeletedAtIsNullOrThrow(clubId);
 
@@ -57,18 +57,19 @@ public class ClubMemberService {
 
         clubMemberRepository.save(
                 ClubMember.builder()
-                        .user(user)
+                        .user(joinUser)
                         .club(club)
                         .clubMemberRole(ClubMemberRole.ROLE_MEMBER)
                         .build()
         );
 
-        List<ClubMember> members = clubMemberRepository.findAllByClubId(clubId);
-
-        for(User clubUser : members.stream().map(ClubMember::getUser).toList()) {
-            if (clubUser != user)
-                notiService.sendNotification(clubUser, NotiType.CLUB, user.getName()+"님이 가입했습니다..", "/v1/clubs/"+ clubId.toString() +"/join");
-        }
+        club.getClubMembers().stream().filter(joinMember -> !joinMember.getUser().equals(joinUser)).
+                forEach(joinMember -> notiService.sendNotification(
+                        joinMember.getUser(),
+                        NotiType.CLUB,
+                        String.format("%s님이 가입했습니다",joinMember.getUser().getName()),
+                        String.format("/v1/clubs/%d/join", club.getId())
+                ));
     }
 
     /**
@@ -163,11 +164,6 @@ public class ClubMemberService {
         ClubMember changeMember = clubMemberRepository.findByUserIdAndClubIdOrThrow(changeUser.getId(), club.getId());
 
         changeMember.change(clubMemberChangeRoleRequest.getRole());
-    }
-
-    // User 조회
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
     }
 
     // 비밀번호 확인

@@ -7,8 +7,9 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.dto.request.MeetingUpdateRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
-import com.play.hiclear.domain.meeting.elasticsearch.MeetingDocument;
+import com.play.hiclear.domain.meeting.entity.MeetingDocument;
 import com.play.hiclear.domain.meeting.enums.SortType;
+import com.play.hiclear.domain.meeting.service.MeetingDummyData;
 import com.play.hiclear.domain.meeting.service.MeetingService;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
 import jakarta.validation.Valid;
@@ -25,20 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class MeetingController {
 
     private final MeetingService meetingService;
+    private final MeetingDummyData meetingDummyData;
 
-    @GetMapping("/v2/search")
-    public ResponseEntity<Page<MeetingDocument>> searchMeetings(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String regionAddress,
-            @RequestParam(required = false) String ranks,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        // 서비스 메서드 호출
-        Page<MeetingDocument> meetings = meetingService.searchMeetings(title, regionAddress, ranks, page, size);
-        return ResponseEntity.ok(meetings);
+    @PostMapping("/v1/meetings/dummy")
+    public void testDummy() {
+        meetingDummyData.generateDummyMeetings();
     }
-
 
     // 인덱스를 적용하기 전 검색
     @GetMapping("/v1/search")
@@ -51,6 +44,19 @@ public class MeetingController {
     ) {
         // 서비스 메서드 호출
         Page<MeetingDocumentResponse> meetings = meetingService.searchBeforeMeetings(title, regionAddress, ranks, page, size);
+        return ResponseEntity.ok(meetings);
+    }
+
+    @GetMapping("/v2/search")
+    public ResponseEntity<Page<MeetingDocument>> searchMeetings(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String regionAddress,
+            @RequestParam(required = false) String ranks,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // 서비스 메서드 호출
+        Page<MeetingDocument> meetings = meetingService.searchMeetings(title, regionAddress, ranks, page, size);
         return ResponseEntity.ok(meetings);
     }
 

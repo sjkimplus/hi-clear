@@ -2,6 +2,7 @@ package com.play.hiclear.domain.gym.controller;
 
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.gym.dto.request.GymCreateRequest;
 import com.play.hiclear.domain.gym.dto.request.GymUpdateRequest;
@@ -10,6 +11,7 @@ import com.play.hiclear.domain.gym.dto.response.GymDetailResponse;
 import com.play.hiclear.domain.gym.dto.response.GymSimpleResponse;
 import com.play.hiclear.domain.gym.dto.response.GymUpdateResponse;
 import com.play.hiclear.domain.gym.enums.GymType;
+import com.play.hiclear.domain.gym.service.GymDummyService;
 import com.play.hiclear.domain.gym.service.GymService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class GymController {
 
     private final GymService gymService;
+    private final GymDummyService gymDummyService;
 
     // 체육관 등록
     @PostMapping("/v1/business/gyms")
@@ -92,4 +95,12 @@ public class GymController {
             @PathVariable Long gymId) {
         return ResponseEntity.ok(gymService.get(gymId));
     }
+
+
+    @PostMapping("/v1/gyms/dummy")
+    public ResponseEntity<String> createDummy() {
+        int count = gymDummyService.generateDummyGyms();
+        return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.CREATED, "체육관 더미데이터 " + count + "건"));
+    }
+
 }

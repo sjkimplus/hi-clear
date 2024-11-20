@@ -1,8 +1,7 @@
-package com.play.hiclear.domain.meeting.elasticsearch;
+package com.play.hiclear.domain.meeting.entity;
 
 import org.springframework.data.elasticsearch.annotations.Field;
 import com.play.hiclear.common.enums.Ranks;
-import com.play.hiclear.domain.meeting.entity.Meeting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
