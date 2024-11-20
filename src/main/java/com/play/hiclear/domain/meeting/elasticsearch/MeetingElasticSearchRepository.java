@@ -19,4 +19,6 @@ public interface MeetingElasticSearchRepository extends ElasticsearchRepository<
 
     // 제목과 지역주소 둘 다 검색
     Page<MeetingDocument> findByTitleContainingOrRegionAddressContaining(String title, String regionAddress, Pageable pageable);
+
+
 }

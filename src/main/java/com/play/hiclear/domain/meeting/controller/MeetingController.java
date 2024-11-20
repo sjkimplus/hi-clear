@@ -40,6 +40,20 @@ public class MeetingController {
     }
 
 
+    // 인덱스를 적용하기 전 검색
+    @GetMapping("/v1/search")
+    public ResponseEntity<Page<MeetingDocumentResponse>> searchBeforeMeetings(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String regionAddress,
+            @RequestParam(required = false) String ranks,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // 서비스 메서드 호출
+        Page<MeetingDocumentResponse> meetings = meetingService.searchBeforeMeetings(title, regionAddress, ranks, page, size);
+        return ResponseEntity.ok(meetings);
+    }
+
     // 번개글 생성
     @PostMapping("/v1/meetings")
     public ResponseEntity<String> create(@AuthenticationPrincipal AuthUser authUser,

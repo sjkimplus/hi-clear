@@ -1,4 +1,5 @@
 package com.play.hiclear.domain.meeting.service;
+import co.elastic.clients.elasticsearch._types.Rank;
 import com.play.hiclear.common.dto.response.GeoCodeDocument;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
@@ -23,13 +24,16 @@ import com.play.hiclear.domain.participant.service.ParticipantService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.geolatte.geom.M;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,7 +49,6 @@ public class MeetingService {
     private final MeetingElasticSearchRepository meetingESRepository;
 
     /**
-     *
      * @param title
      * @param regionAddress
      * @param ranks
@@ -76,6 +79,109 @@ public class MeetingService {
             return meetingESRepository.findAll(pageable);
         }
     }
+
+
+    /**
+     * 인덱스를 적용하기 전 검색
+     *
+     * @param title
+     * @param regionAddress
+     * @param ranks
+     * @param page
+     * @param size
+     * @return
+     */
+
+    public Page<MeetingDocumentResponse> searchBeforeMeetings(String title, String regionAddress, String ranks, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        // 급수(Ranks)로 필터링
+        if (ranks != null && !ranks.isEmpty()) {
+            // Fetch meetings with ranks and apply pagination
+            Page<Meeting> meetings = meetingRepository.findByRanks(Ranks.of(ranks), pageable);
+
+            // Convert Meeting entities to MeetingDocumentResponse
+            Page<MeetingDocumentResponse> meetingResponses = meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+
+            return meetingResponses;
+        }
+
+        // // 제목 또는 지역주소를 검색
+        if ((title != null && !title.isEmpty()) || (regionAddress != null && !regionAddress.isEmpty())) {
+            Page<Meeting> meetings = meetingRepository.findByTitleContainingOrRegionAddressContaining(title, regionAddress, pageable);
+
+            Page<MeetingDocumentResponse> meetingResponses = meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+
+            return meetingResponses;
+        }
+
+        // 아무것도 없으면 전체 반환
+        Page<Meeting> meetings = meetingRepository.findAll(pageable);
+//        Page<MeetingDocumentResponse> meetingResponses = meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+
+        return meetings.map(meeting -> new MeetingDocumentResponse(meeting));
+    }
+
+//    public Page<MeetingDocumentResponse> searchBeforeMeetings(String title, String regionAddress, String ranks, int page, int size) {
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//        // 급수(Ranks)로 필터링
+//        if (ranks != null && !ranks.isEmpty()) {
+//            Page<Meeting> meetings = meetingRepository.findByRanks(Ranks.of(ranks), pageable);
+//            Page<MeetingDocumentResponse> meetingResponses = new ArrayList<>();
+//            for (Meeting meeting : meetings) {
+//                MeetingDocumentResponse meetingDocument = new MeetingDocumentResponse(meeting);
+//                meetingResponses.add(meetingDocument);
+//            }
+//            return new PageImpl<>(meetingResponses, pageable, meetingResponses.size());
+//        }
+//        return null;
+//        // 제목과 지역주소를 모두 검색
+//        else if (title != null && !title.isEmpty() && regionAddress != null && !regionAddress.isEmpty()) {
+//            return meetingRepository.findByTitleContainingOrRegionAddressContaining(title, regionAddress, pageable);
+//        }
+//        // 제목만 검색
+//        else if (title != null && !title.isEmpty()) {
+//            return meetingRepository.findByTitleContaining(title, pageable);
+//        }
+//        // 지역주소만 검색
+//        else if (regionAddress != null && !regionAddress.isEmpty()) {
+//            return meetingRepository.findByRegionAddressContaining(regionAddress, pageable);
+//        }
+//        // 모든 검색 조건이 없으면, 전체 데이터를 페이징하여 반환
+//        else {
+//            null;
+//        }
+//    }
+
+//    public Page<MeetingDocumentResponse> searchBeforeMeetings(String title, String regionAddress, String ranks, int page, int size) {
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//
+//        // 급수(Ranks)로 필터링
+//        if (ranks != null && !ranks.isEmpty()) {
+//            Page<Meeting> meetings = meetingRepository.findByRanks(Ranks.of(ranks).name(), pageable);
+//
+//            Page<MeetingDocumentResponse> response = meetings.map(meeting ->
+//                    new MeetingDocumentResponse(meeting));
+//            return response;
+//        }
+//
+//        // 제목 또는 지역주소로 검색
+//        if ((title != null && !title.isEmpty()) )|| (regionAddress != null && !regionAddress.isEmpty()) {
+//            Page<Meeting> meetings = meetingRepository.findByTitleContainingOrRegionAddressContaining(
+//                    title != null ? title : "",
+//                    regionAddress != null ? regionAddress : "",
+//                    pageable);
+//
+//            Page<MeetingDocumentResponse> response = meetings.map(meeting ->
+//                    new MeetingDocumentResponse(meeting));
+//            return response;
+//        }
+//
+//        // Default: 전체 미팅 조회
+//        Page<Meeting> meetings = meetingRepository.findAll(pageable);
+//        return meetings.map(meeting ->
+//                new MeetingDocumentResponse(meeting));
+//    }
 
 
     /**
