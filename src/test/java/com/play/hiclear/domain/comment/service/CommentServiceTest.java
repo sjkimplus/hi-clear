@@ -7,23 +7,28 @@ import com.play.hiclear.domain.board.repository.BoardRepository;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.comment.dto.request.CommentCreateRequest;
+import com.play.hiclear.domain.comment.dto.request.CommentDeleteRequest;
+import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
 import com.play.hiclear.domain.comment.entity.Comment;
 import com.play.hiclear.domain.comment.repository.CommentRepository;
 import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static com.play.hiclear.common.enums.Ranks.RANK_A;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -37,9 +42,6 @@ public class CommentServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private ClubRepository clubRepository;
-
-    @Mock
     private BoardRepository boardRepository;
 
     @Mock
@@ -49,15 +51,13 @@ public class CommentServiceTest {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Mock
-    private GeoCodeService geoCodeService;
-
-    @Mock
     private NotiService notiService;
 
     private AuthUser authUser;
     private User user;
-    private Board board;
     private Club club;
+    private Board board;
+    private Comment comment;
     private Point point;
 
 
@@ -73,6 +73,14 @@ public class CommentServiceTest {
 
         board = new Board("게시글 제목", "게시글 내용", user, club);
         ReflectionTestUtils.setField(board, "id", 1L);
+
+        comment = Comment.builder()
+                .content("content")
+                .user(user)
+                .board(board)
+                .build();
+        ReflectionTestUtils.setField(comment, "id", 1L);
+
     }
 
     @Test
@@ -89,5 +97,36 @@ public class CommentServiceTest {
         commentService.create(user.getId(), board.getId(), request);
 
         verify(commentRepository, times(1)).save(any(Comment.class));
+    }
+
+    @Test
+    void update_success() {
+
+        CommentUpdateRequest request = new CommentUpdateRequest("content", "encodedPassword");
+
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(user.getId())).thenReturn(user);
+        when(commentRepository.findByIdAndDeletedAtIsNullOrThrow(comment.getId())).thenReturn(comment);
+
+        when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
+
+        // When
+        commentService.update(user.getId(), comment.getId(), request);
+
+        verify(commentRepository, Mockito.times(1)).findByIdAndDeletedAtIsNullOrThrow(comment.getId());
+    }
+
+    @Test
+    void delete_success() {
+
+        CommentDeleteRequest request = new CommentDeleteRequest("encodedPassword");
+
+        when(userRepository.findByIdAndDeletedAtIsNullOrThrow(user.getId())).thenReturn(user);
+        when(commentRepository.findByIdAndDeletedAtIsNullOrThrow(comment.getId())).thenReturn(comment);
+
+        when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
+
+        // When
+        commentService.delete(user.getId(), comment.getId(), request);
+        assertNotNull(comment.getDeletedAt());
     }
 }

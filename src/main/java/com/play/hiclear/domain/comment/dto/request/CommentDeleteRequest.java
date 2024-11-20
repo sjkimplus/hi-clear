@@ -8,4 +8,8 @@ public class CommentDeleteRequest {
 
     @NotBlank
     private String password;
+
+    public CommentDeleteRequest(String password) {
+        this.password = password;
+    }
 }
