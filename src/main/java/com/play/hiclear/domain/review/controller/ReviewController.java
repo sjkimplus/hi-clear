@@ -5,6 +5,7 @@ import com.play.hiclear.domain.review.dto.request.ReviewCreateRequest;
 import com.play.hiclear.domain.review.dto.response.ReviewCreateResponse;
 import com.play.hiclear.domain.review.dto.response.ReviewSearchResponse;
 import com.play.hiclear.domain.review.dto.response.UserStatisticsResponse;
+import com.play.hiclear.domain.review.service.ReviewDummyService;
 import com.play.hiclear.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ReviewDummyService reviewDummyService;
 
     // 리뷰 가능한 유저 가져오기
     @GetMapping("/v1/reviewable")
@@ -45,4 +47,10 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.statistics(userId));
     }
 
+    // 리뷰 10000개 추가 API
+    @PostMapping("/v1/reviews/dummy")
+    public ResponseEntity<String> dummy(){
+        reviewDummyService.generateDummyReviews();
+        return ResponseEntity.ok("더미데이터 생성 완료!");
+    }
 }

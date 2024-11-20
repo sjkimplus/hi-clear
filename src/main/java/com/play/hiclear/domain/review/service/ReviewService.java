@@ -102,7 +102,6 @@ public class ReviewService {
         String lockKey = "review_lock_" + meetingId + ":" + reviewerId;
 
         // 락 획득 시도
-
         boolean lockAcquired = tryLock(lockKey, 10, TimeUnit.SECONDS); // 10초 동안 락 시도
         try{//
             Thread.sleep(100);
@@ -126,6 +125,16 @@ public class ReviewService {
                     request.getGradeRank()
             );
             reviewRepository.save(review);
+
+            String cacheKey = "user:statistics" + reviewee.getId();
+
+            //Redis에서 캐시를 조회
+            UserStatisticsResponse cachedResponse = (UserStatisticsResponse) redisTemplate.opsForValue().get(cacheKey);
+
+            //캐시값이 있으면 캐시 무효화
+            if (cachedResponse != null) {
+                invalidateCache(reviewee.getId());
+            }
 
             // 리뷰 반환
             return new ReviewCreateResponse(
@@ -152,6 +161,11 @@ public class ReviewService {
 
         return new UserStatisticsResponse(mannerRank.name(), gradeRank.name());
 
+    }
+
+    public void invalidateCache(Long userId) {
+        String cacheKey = "user:statistics:" + userId;
+        redisTemplate.delete(cacheKey);  // 캐시 삭제
     }
 
     // 매너 점수 평균을 계산후 소수점을 버리고 해당 값에 따른 enum을 반환

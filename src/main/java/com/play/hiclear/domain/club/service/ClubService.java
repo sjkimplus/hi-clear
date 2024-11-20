@@ -5,10 +5,12 @@ import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
 import com.play.hiclear.common.service.GeoCodeService;
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.club.dto.request.ClubCreateRequest;
 import com.play.hiclear.domain.club.dto.request.ClubDeleteRequest;
 import com.play.hiclear.domain.club.dto.request.ClubUpdateRequest;
 import com.play.hiclear.domain.club.dto.response.ClubGetResponse;
+import com.play.hiclear.domain.club.dto.response.ClubNearResponse;
 import com.play.hiclear.domain.club.dto.response.ClubSearchResponse;
 import com.play.hiclear.domain.club.dto.response.ClubUpdateResponse;
 import com.play.hiclear.domain.club.entity.Club;
@@ -21,15 +23,12 @@ import com.play.hiclear.domain.clubmember.repository.ClubMemberRepository;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
-import com.play.hiclear.domain.club.entity.ClubDocument;
-import com.play.hiclear.domain.club.repository.ClubElasticsearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,11 +139,11 @@ public class ClubService {
     /**
      * @return 모임 이름, 모임 소개글
      */
-    public Page<ClubSearchResponse> search(int page, int size) {
+    public Page<ClubSearchResponse> search(int page, int size, String clubname, String intro, String regionAddress, String roadAddress) {
 
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedAt").descending());
+        Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Club> clubList = clubRepository.findAll(pageable);
+        Page<Club> clubList = clubRepository.findByDeletedAtIsNullAndFilters(clubname, intro, regionAddress, roadAddress, pageable);
 
         return clubList.map(ClubSearchResponse::new);
     }
@@ -216,51 +215,104 @@ public class ClubService {
 
     @Transactional
     public void createDummy() {
-
+        // 이미 데이터가 존재하는 경우 예외 처리
         if (clubRepository.count() > 0) {
             throw new CustomException(ErrorCode.DUMMY_ALREADY_EXIST);
         }
 
-        Random random = new Random();
-        String encodePassword = passwordEncoder.encode("A1234567*");
+        // 비밀번호와 기본 사용자 생성
+        String encodedPassword = passwordEncoder.encode("A1234567*");
         Point userPoint = createPoint(126.977829174031, 37.5663174209601);
-        User user = new User("이름", "adminuser21@gmail.com", "서울 중구 태평로1가 31", "서울 중구 세종대로 110", userPoint, encodePassword, Ranks.RANK_A, UserRole.BUSINESS);
         userPoint.setSRID(4326);
-        userRepository.save(user);
-        String[] clubnameL = {" 클럽", " 모임", " 동호회"};
-        String[] clubnameM = {" 초보", " 초심", " 왕초보", " 고수", " 즐거운", " 화목한"};
+
+        User adminUser = createUser(
+                "이름",
+                "adminuser21@gmail.com",
+                "서울 중구 태평로1가 31",
+                "서울 중구 세종대로 110",
+                userPoint,
+                encodedPassword,
+                Ranks.RANK_A,
+                UserRole.BUSINESS
+        );
+
+        // 클럽 이름과 관련 데이터
+        String[] clubSuffixes = {" 클럽", " 모임", " 동호회"};
+        String[] clubDescriptors = {" 초보", " 초심", " 왕초보", " 고수", " 즐거운", " 화목한"};
         String[] regions = {
                 "서울", "부산", "대구", "인천", "광주",
                 "대전", "울산", "수원", "성남", "고양",
                 "용인", "청주", "전주", "포항", "창원"
         };
 
-        for (int i = 0; i < 100; i++) {
-            Integer clubSize = 5;
-            String clubname = regions[random.nextInt(regions.length)]
-                    + clubnameM[random.nextInt(clubnameM.length)]
-                    + clubnameL[random.nextInt(clubnameL.length)];
+        // 더미 클럽 생성
+        Random random = new Random();
+//        List<Club> clubs = new ArrayList<>();
+//        List<ClubDocument> clubDocuments = new ArrayList<>();
 
-            String intro = regions[random.nextInt(regions.length)]
-                    + clubnameM[random.nextInt(clubnameM.length)]
-                    + clubnameL[random.nextInt(clubnameL.length)];
+        for (int i = 0; i < 10000; i++) {
+            String clubName = generateRandomName(random, regions, clubDescriptors, clubSuffixes);
+            String intro = generateRandomName(random, regions, clubDescriptors, clubSuffixes);
             String regionAddress = regions[random.nextInt(regions.length)];
-            String password = "A1234567*";
-            Club club = new Club(user, clubname, clubSize, intro, regionAddress, userPoint, regionAddress, password);
+
+            Club club = new Club(
+                    adminUser,
+                    clubName,
+                    5, // clubSize
+                    intro,
+                    regionAddress,
+                    userPoint,
+                    regionAddress,
+                    "A1234567*" // 비밀번호
+            );
             clubRepository.save(club);
-            clubElasticsearchRepository.save(
-                    ClubDocument.builder()
-                            .id(club.getId())
-                            .clubname(club.getClubname())
-                            .intro(club.getIntro())
-                            .regionAddress(club.getRegionAddress())
-                            .roadAddress(club.getRoadAddress())
-                            .build());
+
+            clubElasticsearchRepository.save(ClubDocument.builder()
+                    .id(club.getId())
+                    .clubname(clubName)
+                    .intro(intro)
+                    .regionAddress(regionAddress)
+                    .roadAddress(regionAddress)
+                    .build());
+
+            if (i % 2500 == 0) {
+                clubRepository.flush();
+            }
         }
+    }
+
+    private User createUser(String name, String email, String address, String roadAddress, Point point,
+                            String password, Ranks rank, UserRole role) {
+        User user = new User(name, email, address, roadAddress, point, password, rank, role);
+        userRepository.save(user);
+        return user;
+    }
+
+    private String generateRandomName(Random random, String[] regions, String[] descriptors, String[] suffixes) {
+        return regions[random.nextInt(regions.length)] +
+                descriptors[random.nextInt(descriptors.length)] +
+                suffixes[random.nextInt(suffixes.length)];
     }
 
     private Point createPoint(Double longitude, Double latitude) {
         GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(longitude, latitude));
+    }
+
+    public Page<ClubNearResponse> near(AuthUser authUser, Double distance, int page, int size) {
+
+        if (distance != null && distance != 5 && distance != 10 && distance != 50 && distance != 100) {
+            throw new CustomException(ErrorCode.INVALID_DISTANCE);
+        }
+
+        if (distance == null) {
+            distance = 1000d;
+        }
+
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        return clubRepository.search(user.getLocation(), distance, pageable);
     }
 }

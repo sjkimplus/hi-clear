@@ -29,7 +29,7 @@ public class ClubMemberController {
     }
 
     @DeleteMapping("/v1/clubs/{clubId}/expel")
-    public ResponseEntity<String> clubId(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubMemberExpelRequest clubMemberExpelRequest) {
+    public ResponseEntity<String> expel(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long clubId, @RequestBody ClubMemberExpelRequest clubMemberExpelRequest) {
         clubMemberService.expel(authUser.getUserId(), clubId, clubMemberExpelRequest);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.CLUBMEMBER_EXPEL));
     }
