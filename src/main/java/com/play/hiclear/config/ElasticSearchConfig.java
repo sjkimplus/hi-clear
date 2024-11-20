@@ -1,4 +1,4 @@
-package com.play.hiclear.domain.meeting.elasticsearch;
+package com.play.hiclear.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
