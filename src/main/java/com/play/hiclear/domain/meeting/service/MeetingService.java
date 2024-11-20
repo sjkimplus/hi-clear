@@ -126,7 +126,7 @@ public class MeetingService {
     public String create(AuthUser authUser, MeetingCreateRequest request) {
         // 시간 체크 - 최소 한시간, 시작시간은 현재 이후만 가능
         checkTimeValidity(request.getStartTime(), request.getEndTime());
-        User user =     userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
 
         // 주소값 가져오기
         GeoCodeDocument address = geoCodeService.getGeoCode(request.getAddress());
@@ -163,13 +163,6 @@ public class MeetingService {
         // 권한체크 - 작성자가 맞는지 체크
         checkAuthority(authUser, meeting);
         meeting.update(request);
-        // 기존에 ES에 있는 데이터 삭제
-        meetingESRepository.deleteById(meeting.getId());
-        // ES에 저장
-        // not sure
-        MeetingDocument meetingDocument = new MeetingDocument(meeting);
-        meetingESRepository.save(meetingDocument);
-
 
         // 지역 정보(region)가 제공되면, 해당 정보를 사용하여 위치 정보를 갱신
         if (request.getAddress() != null && !request.getAddress().isEmpty()) {
@@ -180,6 +173,12 @@ public class MeetingService {
                 meeting.updateLocation(address);
             }
         }
+        // 기존에 ES에 있는 데이터 삭제
+        meetingESRepository.deleteById(meeting.getId());
+        // ES에 저장
+        MeetingDocument meetingDocument = new MeetingDocument(meeting);
+        meetingESRepository.save(meetingDocument);
+
         return SuccessMessage.customMessage(SuccessMessage.MODIFIED, Meeting.class.getSimpleName());
     }
 
