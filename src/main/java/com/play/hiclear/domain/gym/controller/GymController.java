@@ -98,8 +98,9 @@ public class GymController {
 
 
     @PostMapping("/v1/gyms/dummy")
-    public ResponseEntity<String> createDummy(){
-        int count = gymDummyService.createDummy();
+    public ResponseEntity<String> createDummy() {
+        int count = gymDummyService.generateDummyGyms();
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.CREATED, "체육관 더미데이터 " + count + "건"));
     }
+
 }
