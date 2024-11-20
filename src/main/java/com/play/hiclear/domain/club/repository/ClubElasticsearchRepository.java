@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-public interface ClubElasticsearchRepository extends ElasticsearchRepository<ClubDocument, String> {
+public interface ClubElasticsearchRepository extends ElasticsearchRepository<ClubDocument, Long> {
 
     Page<ClubDocument> findByRegionAddressContainingAndRoadAddressContaining(String regionAddress, String roadAddress, Pageable pageable);
 

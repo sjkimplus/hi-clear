@@ -7,6 +7,8 @@ import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.club.entity.Club;
 import com.play.hiclear.domain.club.repository.ClubRepository;
+import com.play.hiclear.domain.notification.enums.NotiType;
+import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.schduleparticipant.entity.ScheduleParticipant;
 import com.play.hiclear.domain.schduleparticipant.repository.ScheduleParticipantRepository;
 import com.play.hiclear.domain.schedule.dto.request.ScheduleRequest;
@@ -45,6 +47,7 @@ public class ScheduleService {
     private final GeoCodeService geoCodeService;
     private final JobLauncher jobLauncher;
     private final Job deleteExpiredJob;
+    private final NotiService notiService;
 
     /**
      * 모임 일정 생성
@@ -271,6 +274,15 @@ public class ScheduleService {
         // 7. 참가자 추가
         ScheduleParticipant additionalParticipant = new ScheduleParticipant(schedule, participantUser, schedule.getClub());
         scheduleParticipantRepository.save(additionalParticipant);
+
+        schedule.getScheduleParticipants()
+                .stream().filter(paticiapnt -> !(paticiapnt.getUser().equals(participantUser) || paticiapnt.getUser().equals(user)))
+                .forEach(participant -> notiService.sendNotification(
+                        participant.getUser(),
+                        NotiType.SCHEDULE,
+                        String.format("%s 님이 %s 일정에 참가했습니다", participantUser.getName(), schedule.getTitle()),
+                        String.format("/v1/schedules/%d/participants/%d" , schedule.getId(), participantUser.getId()
+                        )));
 
         log.info("모임 일정 참가자 추가 완료 - 일정 ID: {}, 참가자 ID: {}", scheduleId, participantId);
     }

@@ -52,7 +52,12 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        notiService.sendNotification(board.getUser(), NotiType.COMMENT, comment.getUser().getName()+"님이 글을 작성했습니다.", "/v1/clubboards/" + clubboardId.toString() +"/comments");
+        notiService.sendNotification(
+                board.getUser(),
+                NotiType.COMMENT,
+                String.format("%s님이 댓글을 작성했습니다.", comment.getUser().getName()),
+                String.format("v1/clubboards/%d/comments", board.getClub().getId())
+        );
     }
 
     /**

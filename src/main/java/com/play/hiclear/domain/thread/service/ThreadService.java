@@ -44,7 +44,11 @@ public class ThreadService {
 
         threadRepository.save(thread);
 
-        notiService.sendNotification(comment.getUser(), NotiType.COMMENT, thread.getUser().getName()+"님이 글을 작성했습니다.", "/v1/comments/"+ commentId.toString() + "/threads");
+        notiService.sendNotification(
+                comment.getUser(),
+                NotiType.COMMENT,
+                String.format("%s님이 대댓글을 작성했습니다", thread.getUser().getName()),
+                String.format("/v1/comments/%d/threads", comment.getId()));
     }
 
     @Transactional

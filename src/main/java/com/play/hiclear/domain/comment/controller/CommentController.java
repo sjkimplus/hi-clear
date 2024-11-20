@@ -25,7 +25,7 @@ public class CommentController {
     }
 
     @PutMapping("/v1/clubboards/{clubboardId}/comments/{commentId}")
-    public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentId, @RequestBody CommentUpdateRequest commentUpdateRequest) throws Exception {
+    public ResponseEntity<String> update(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long commentId, @RequestBody CommentUpdateRequest commentUpdateRequest) {
         commentService.update(authUser.getUserId(), commentId, commentUpdateRequest);
         return ResponseEntity.ok(SuccessMessage.customMessage(SuccessMessage.MODIFIED, Comment.class.getSimpleName()));
     }
