@@ -19,120 +19,111 @@
 
 <div align=left><h2>📚 기술스택</h2></div>
 
-<div><h3>언어 및 프레임워크</h3>
- <div style="display: grid; grid-template-columns: repeat(3, 80px); gap: 0px;">
-  <!-- Java -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=java&theme=light" alt="Java Icon" />
-    </a>
-    <div>Java</div>
-  </div>
+<h3>언어 및 프레임워크</h3>
+<table border="0">
+  <tr>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=java&theme=light" alt="Java Icon" />
+      </a>
+      <div>Java</div>
+    </td>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=spring&theme=light" alt="Spring Icon" />
+      </a>
+      <div>Spring</div>
+    </td>
+  </tr>
+</table>
 
-  <!-- Spring -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=spring&theme=light" alt="Spring Icon" />
-    </a>
-    <div>Spring</div>
-  </div>
-</div>
+<h3>데이터베이스</h3>
+<table border="0">
+  <tr>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=mysql&theme=light" alt="MySQL Icon" />
+      </a>
+      <div style="text-align: center;">MySQL</div>
+    </td>
+   <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=redis&theme=light" alt="Redis Icon" />
+      </a>
+      <div style="text-align: center;">Redis</div>
+    </td>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=elasticsearch&theme=light" alt="Elasticsearch Icon" />
+      </a>
+      <div style="text-align: center;">Elasticsearch</div>
+    </td>
+  </tr>
+</table>
 
-<div><h3>데이터베이스</h3>
- <div style="display: grid; grid-template-columns: repeat(3, 80px); gap: 0px;">
-  <!-- MySQL -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=mysql&theme=light" alt="MySQL Icon" />
-    </a>
-    <div>MySQL</div>
-  </div>
+<h3>CI/CD 및 형상기억</h3>
+<table border="0">
+  <tr>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=docker&theme=light" alt="Docker Icon" />
+      </a>
+      <div>Docker</div>
+    </td>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=githubactions&theme=light" alt="Github Actions Icon" />
+      </a>
+      <div>Github Actions</div>
+    </td>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=git&theme=light" alt="Git Icon" />
+      </a>
+      <div>Git</div>
+    </td>
+    <td align="center">
+      <a href="https://skillicons.dev">
+        <img src="https://skillicons.dev/icons?i=github&theme=light" alt="GitHub Icon" />
+      </a>
+      <div>GitHub</div>
+    </td>
+  </tr>
+</table>
 
-  <!-- Redis -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=redis&theme=light" alt="Redis Icon" />
-    </a>
-    <div>Redis</div>
-  </div>
-
-  <!-- Elasticsearch -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=elasticsearch&theme=light" alt="Elasticsearch Icon" />
-    </a>
-    <div>Elasticsearch</div>
-  </div>
-</div>
-
-
-<div><h3>CI/CD 및 형상기억</h3>
- <div style="display: grid; grid-template-columns: repeat(4, 80px); gap: 0px;">
-  <!-- Docker -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=docker&theme=light" alt="MySQL Icon" />
-    </a>
-    <div>Docker</div>
-  </div>
-
-  <!-- Githubactions -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=githubactions&theme=light" alt="Redis Icon" />
-    </a>
-    <div>Githubactions</div>
-  </div>
-
-  <!-- Git -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=git&theme=light" alt="Elasticsearch Icon" />
-    </a>
-    <div>Git</div>
-  </div>
-
-  <!-- Github -->
-  <div style="text-align: center;">
-    <a href="https://skillicons.dev">
-      <img src="https://skillicons.dev/icons?i=github&theme=light" alt="Elasticsearch Icon" />
-    </a>
-    <div>Github</div>
-  </div>
-</div>
-
-<div>
-  <h3>클라우드</h3>
-  <div style="display: grid; grid-template-columns: repeat(2, 80px); gap: 0px;">
-    <!-- AWS Icon -->
-    <div style="text-align: center;">
+<h3>클라우드</h3>
+<table border="0">
+  <tr>
+    <td align="center">
       <a href="https://skillicons.dev">
         <img src="https://skillicons.dev/icons?i=aws&theme=light" alt="AWS Icon" />
       </a>
       <div>AWS</div>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(2, 60px); gap: 10px;">
-      <img src="https://img.shields.io/badge/ecs-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white" alt="ECS Badge">
-      <img src="https://img.shields.io/badge/ec2-FF9900?style=for-the-badge&logo=amazon ec2&logoColor=white" alt="EC2 Badge">
-      <img src="https://img.shields.io/badge/rds-527FFF?style=for-the-badge&logo=amazon rds&logoColor=white" alt="RDS Badge">
-      <img src="https://img.shields.io/badge/s3-569A31?style=for-the-badge&logo=amazon s3&logoColor=white" alt="s3 Badge">
-    </div>
-  </div>
-</div>
+    </td>
+    <td colspan="2" style="text-align: center;">
+      <div>
+        <img src="https://img.shields.io/badge/ecs-FF9900?style=for-the-badge&logo=amazon ecs&logoColor=white" alt="ECS Badge">
+        <img src="https://img.shields.io/badge/ec2-FF9900?style=for-the-badge&logo=amazon ec2&logoColor=white" alt="EC2 Badge">
+        <img src="https://img.shields.io/badge/rds-527FFF?style=for-the-badge&logo=amazon rds&logoColor=white" alt="RDS Badge">
+        <img src="https://img.shields.io/badge/s3-569A31?style=for-the-badge&logo=amazon s3&logoColor=white" alt="S3 Badge">
+      </div>
+    </td>
+  </tr>
+</table>
+<h3>기타</h3>
+      <div>
+        <img src="https://img.shields.io/badge/spring security-6DB33F?style=for-the-badge&logo=spring security&logoColor=white" alt="spring security Badge">
+        <img src="https://img.shields.io/badge/jwt-000000?style=for-the-badge&logo=json web tokens&logoColor=white" alt="jwt Badge">
+        <img src="https://img.shields.io/badge/jpa-527FFF?style=for-the-badge&logo=jpa&logoColor=white" alt="jpa Badge">
+        <img src="https://img.shields.io/badge/gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white" alt="gradle Badge">
+      </div>
+      <div>
+        <img src="https://img.shields.io/badge/junit5-25A162?style=for-the-badge&logo=junit5&logoColor=white" alt="junit5 Badge">
+        <img src="https://img.shields.io/badge/postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white" alt="postman Badge">
+        <img src="https://img.shields.io/badge/locust-006600?style=for-the-badge&logo=locust&logoColor=white" alt="locust Badge">
+      </div>
 
-
-
-
-- Github
-- Java 17
-- Spring boot 3.3.4
-- Spring Security
-- JWT
-- Gradle Multi Module
-- MySQL
-- Spring Data JPA
-- Postman
-- JUnit
+<br>
 
 **(2). 핵심 기술스택**
 
