@@ -1,7 +1,9 @@
 package com.play.hiclear.common.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class GeoCodeDocument {
 
     // Primary fields at the top level of the document

@@ -14,7 +14,6 @@ import com.play.hiclear.domain.meeting.dto.response.MyMeetingDetailResponse;
 import com.play.hiclear.domain.meeting.dto.response.MyMeetingResponse;
 import com.play.hiclear.domain.meeting.dto.response.MyMeetingResponses;
 import com.play.hiclear.domain.meeting.entity.Meeting;
-import com.play.hiclear.domain.meeting.repository.MeetingQueryDslRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
