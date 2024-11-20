@@ -3,7 +3,6 @@ package com.play.hiclear.domain.gym.service;
 import com.play.hiclear.common.enums.Ranks;
 import com.play.hiclear.common.exception.CustomException;
 import com.play.hiclear.common.exception.ErrorCode;
-import com.play.hiclear.common.message.SuccessMessage;
 import com.play.hiclear.domain.gym.entity.Gym;
 import com.play.hiclear.domain.gym.enums.GymType;
 import com.play.hiclear.domain.gym.repository.GymRepository;
@@ -29,12 +28,15 @@ public class GymDummyService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-
+    /**
+     * 체육관 더미데이터 생성
+     * @return 체육관 더미데이터
+     */
     @Transactional
-    public int createDummy() {
+    public int generateDummyGyms() {
         // 데이터베이스에 더미 데이터가 이미 존재하면 생성하지 않음
         if (gymRepository.count() > 0 || userRepository.count() > 0) {
-           throw new CustomException(ErrorCode.DUMMY_ALREADY_EXIST);
+            throw new CustomException(ErrorCode.DUMMY_ALREADY_EXIST);
         }
 
         // 사용자 생성
@@ -54,36 +56,37 @@ public class GymDummyService {
         int i = 0;
         int count = 100000;
         while (i < count){
-                // 지역 이름 랜덤 선택
-                String regionAddress = region[random.nextInt(region.length)];
-                String name = regionAddress + (i / 2 == 0 ? " 공공체육관" : " 사설체육관");
+            // 지역 이름 랜덤 선택
+            String regionAddress = region[random.nextInt(region.length)];
+            String name = regionAddress + (i / 2 == 0 ? " 공공체육관" : " 사설체육관");
 
-                // 무작위 위도, 경도 생성
-                BigDecimal latitude = generateRandomBigDecimal(latMin, latMax, scale);
-                BigDecimal longitude = generateRandomBigDecimal(longMin, longMax, scale);
+            // 무작위 위도, 경도 생성
+            BigDecimal latitude = generateRandomBigDecimal(latMin, latMax, scale);
+            BigDecimal longitude = generateRandomBigDecimal(longMin, longMax, scale);
 
-                Point point = createPoint(longitude.doubleValue(), latitude.doubleValue());
-                point.setSRID(4326);
+            Point point = createPoint(longitude.doubleValue(), latitude.doubleValue());
+            point.setSRID(4326);
 
-                GymType gymType = (i / 2 == 0) ? GymType.PUBLIC : GymType.PRIVATE;
-                Gym gym = new Gym(name, null, regionAddress, null, point, gymType, user);
+            GymType gymType = (i / 2 == 0) ? GymType.PUBLIC : GymType.PRIVATE;
+            Gym gym = new Gym(name, null, regionAddress, null, point, gymType, user);
 
-                gymRepository.save(gym);
+            gymRepository.save(gym);
 
-                if (i % 2500 == 0) {
-                    gymRepository.flush();
-                }
-                i++;
-            };
-        return count;
+            if (i % 2500 == 0) {
+                gymRepository.flush();
+            }
+            i++;
         };
+        return count;
+    };
+
 
     private Point createPoint(Double longitude, Double latitude) {
         GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(longitude, latitude));
     }
 
-    public static BigDecimal generateRandomBigDecimal(BigDecimal min, BigDecimal max, int scale) {
+    private static BigDecimal generateRandomBigDecimal(BigDecimal min, BigDecimal max, int scale) {
         Random random = new Random();
 
         // min과 max 범위 사이에서 랜덤 값 생성
@@ -94,4 +97,7 @@ public class GymDummyService {
 
         return randomBigDecimal;
     }
+
+
+
 }
