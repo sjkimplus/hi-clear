@@ -7,7 +7,7 @@ import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.meeting.dto.request.MeetingCreateRequest;
 import com.play.hiclear.domain.meeting.dto.request.MeetingUpdateRequest;
 import com.play.hiclear.domain.meeting.dto.response.*;
-import com.play.hiclear.domain.meeting.elasticsearch.MeetingDocument;
+import com.play.hiclear.domain.meeting.entity.MeetingDocument;
 import com.play.hiclear.domain.meeting.enums.SortType;
 import com.play.hiclear.domain.meeting.service.MeetingService;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
