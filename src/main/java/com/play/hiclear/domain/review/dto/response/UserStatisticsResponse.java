@@ -11,4 +11,7 @@ public class UserStatisticsResponse {
         this.averageMannerScore = averageMannerScore;
         this.averageGradeRank = averageGradeRank;
     }
+
+    public UserStatisticsResponse() {
+    }
 }
