@@ -81,15 +81,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: hi-clear-service-lb
+          service: hi-clear-fargate-service
           cluster: hi-clear-cluster
           wait-for-service-stability: true
-        # env:
-        #   DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        #   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        #   JWT_KEY: ${{ secrets.JWT_KEY }}
-        #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        #   KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
-
-
+        
