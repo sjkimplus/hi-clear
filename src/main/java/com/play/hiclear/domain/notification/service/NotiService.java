@@ -1,10 +1,14 @@
 package com.play.hiclear.domain.notification.service;
 
+import com.play.hiclear.common.exception.CustomException;
+import com.play.hiclear.common.exception.ErrorCode;
+import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.notification.dto.NotiDto;
 import com.play.hiclear.domain.notification.entity.Noti;
 import com.play.hiclear.domain.notification.enums.NotiType;
 import com.play.hiclear.domain.notification.repository.NotiRepository;
 import com.play.hiclear.domain.user.entity.User;
+import com.play.hiclear.domain.user.repository.UserRepository;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ public class NotiService {
     private final NotiRepository notiRepository;
     private final SseEmitterService sseEmitterService;
     private final RedisMessageService redisMessageService;
+    private final UserRepository userRepository;
 
     public SseEmitter subscribe(String userEmail) {
 
@@ -52,5 +57,33 @@ public class NotiService {
 
         // redis 이벤트 발행
         redisMessageService.publish(receiver.getEmail(), NotiDto.from(noti));
+    }
+
+    @Transactional
+    public void read(AuthUser authUser, Long notificationId) {
+
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
+        Noti noti = notiRepository.findByIdOrThrow(notificationId);
+
+        if (!noti.getReceiver().equals(user)) {
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Noti.class.getSimpleName());
+        }
+
+        noti.read();
+    }
+
+    @Transactional
+    public void delete(AuthUser authUser, Long notificationId) {
+
+        User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId());
+
+        Noti noti = notiRepository.findByIdOrThrow(notificationId);
+
+        if (!noti.getReceiver().equals(user)) {
+            throw new CustomException(ErrorCode.NO_AUTHORITY, Noti.class.getSimpleName());
+        }
+
+        notiRepository.delete(noti);
     }
 }
