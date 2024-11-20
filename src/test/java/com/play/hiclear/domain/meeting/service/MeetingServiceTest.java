@@ -14,6 +14,7 @@ import com.play.hiclear.domain.meeting.dto.response.MyMeetingDetailResponse;
 import com.play.hiclear.domain.meeting.dto.response.MyMeetingResponse;
 import com.play.hiclear.domain.meeting.dto.response.MyMeetingResponses;
 import com.play.hiclear.domain.meeting.entity.Meeting;
+import com.play.hiclear.domain.meeting.repository.MeetingElasticSearchRepository;
 import com.play.hiclear.domain.meeting.repository.MeetingRepository;
 import com.play.hiclear.domain.participant.entity.Participant;
 import com.play.hiclear.domain.participant.enums.ParticipantRole;
@@ -49,7 +50,8 @@ class MeetingServiceTest {
     private ParticipantService participantService;
     @Mock
     private ParticipantRepository participantRepository;
-
+    @Mock
+    private MeetingElasticSearchRepository meetingESRepository;
     @Mock
     private GeoCodeService geoCodeService;
 
@@ -66,10 +68,11 @@ class MeetingServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        authUser = new AuthUser(1L, "일반회원", "test123@gmail.com", UserRole.USER);
+
         user = new User("일반회원", "test123@gmail.com", "서울 관악구 신림동 533-29",
                 "서울 관악구 조원로 89-1", null, "encodedPassword", Ranks.RANK_A, UserRole.USER);
-        ReflectionTestUtils.setField(user, "id", 1L);
+        userRepository.save(user);
+        authUser = new AuthUser(user.getId(), "일반회원", "test123@gmail.com", UserRole.USER);
 
         LocalDateTime startTime = LocalDateTime.now().plusHours(1);
         LocalDateTime endTime = startTime.plusHours(1);
@@ -78,7 +81,7 @@ class MeetingServiceTest {
         geoCodeDocument = new GeoCodeDocument(37.5665, 126.9780, "서울 관악구 신림동 533-29", "서울 관악구 조원로 89-1");
 
         meeting = new Meeting(request, user, geoCodeDocument);
-        ReflectionTestUtils.setField(meeting, "id", 1L);
+        meetingRepository.save(meeting);
     }
 
     @Test
@@ -87,6 +90,7 @@ class MeetingServiceTest {
         when(userRepository.findByIdAndDeletedAtIsNullOrThrow(authUser.getUserId())).thenReturn(user);
         when(geoCodeService.getGeoCode(request.getAddress())).thenReturn(geoCodeDocument);
         when(meetingRepository.save(any(Meeting.class))).thenReturn(meeting);
+        when(meetingRepository.findByIdAndDeletedAtIsNullOrThrow(meeting.getId())).thenReturn(meeting);
 
         // then
         String result = meetingService.create(authUser, request);
