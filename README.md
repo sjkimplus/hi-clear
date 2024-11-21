@@ -4,7 +4,7 @@
 <img src="https://github.com/user-attachments/assets/a607b045-d29b-471b-a867-c7703e728ea1" />
 <br>
 
-## 목차
+## 📚 목차
 
 -----------------------
 1. 프로젝트 개요
@@ -13,7 +13,7 @@
 3. 핵심기능
 4. 트러블슈팅
 
-## 프로젝트 개요
+## 📝 프로젝트 개요
 
 -----------------------
 <h3>프로젝트 기간 24.10.21 ~ 24.11.21(1개월)</h3>
@@ -26,19 +26,25 @@
 - 유저들간 평가를 통해 __실력 및 매너점수 평가__ 기능 제공
 
 
-## 프로젝트 도메인 및 와이어프레임
+## 🖋️ 프로젝트 도메인 및 와이어프레임
 
 -----------------------
 
 - [도메인](http://backend.8-lay-hi-clear.com/)
 
-- [와이어프레임](https://www.figma.com/design/rCMVjHvTEuh08lJ5f1kN2Q/8%EB%A0%88%EC%9D%B4-%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84?node-id=0-1&t=ySMEWBCA1OlOHPKA-1)
+- [API명세서 링크](https://teamsparta.notion.site/a602640d708e43e6ae316434166dd6f2?v=d3e1ab06b21a40acbd6a2c651bc639ec)  
+
+- [와이어프레임 링크](https://www.figma.com/design/rCMVjHvTEuh08lJ5f1kN2Q/8%EB%A0%88%EC%9D%B4-%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84?node-id=0-1&t=ySMEWBCA1OlOHPKA-1)
+  
+  ![image](https://github.com/user-attachments/assets/242642f1-3e34-4a92-b237-8ebd70bf21be)
 
 - ERD
 
   <img src="./images/ERD.png" alt="erd" />
 
-## 팀원 소개
+
+
+## 👨🏻‍🎨 팀원 소개
 
 -----------------------
 | 사진                                                                                      | 이름 | 담당 도메인                          | 블로그 링크         | GitHub 링크                                |
@@ -51,7 +57,7 @@
 
 
 
-## 적용 기술
+## 🤖 적용 기술
 
 -----------------------
 <div>
@@ -92,7 +98,7 @@
       </div>
 </div>
 
-## 서비스 아키텍쳐 및 CI/CD
+## 🖼️ 서비스 아키텍쳐 및 CI/CD
 
 -----------------------
 
@@ -128,7 +134,7 @@
 
   <img src="./images/service_architecture.png" alt="service_architecture" width="1000" />
 
-## 핵심 기능
+## 🛎️ 핵심 기능
 
 -----------------------
 
