@@ -49,7 +49,7 @@
 -----------------------
 | 사진                                                                                      | 이름 | 담당 도메인                          | 블로그 링크         | GitHub 링크                                |
 |-----------------------------------------------------------------------------------------|------|---------------------------------|----------------|------------------------------------------|
-| ![김성주](https://github.com/user-attachments/assets/a3461cec-3b5c-483d-b38c-216d00aee5b3) | 김성주 | 번개모임, 참여자                       | [블로그](https://velog.io/@sjkimplus09/posts) | [GitHub](https://github.com/sjkimplus)   |
+| ![김성주](https://github.com/user-attachments/assets/a3461cec-3b5c-483d-b38c-216d00aee5b3) | 김성주 | 번개, 참여자                       | [블로그](https://velog.io/@sjkimplus09/posts) | [GitHub](https://github.com/sjkimplus)   |
 | ![남태혁](https://github.com/user-attachments/assets/f843314b-6991-46bc-a4c2-9e39126497ed) | 남태혁 | 알림, <br/>모임, 모임멤버,<br/> 댓글, 대댓글 | [블로그](https://navyth91.tistory.com/) | [GitHub](https://github.com/taehyeokNam) |
 | ![정예지](https://github.com/user-attachments/assets/264328c5-266c-4222-8268-b80b74da983e) | 정예지 | 유저 리뷰, 좋아요,<br/>모임 게시글          | [블로그](https://codingbykugom.tistory.com/) | [GitHub](https://github.com/KUGOM)       |
 | ![윤지현](https://github.com/user-attachments/assets/316845c9-0be2-4900-abd0-03406513e492) | 윤지현 | 모임일정, 예약                        | [블로그](https://velog.io/@jhy1/posts) | [GitHub](github.com/KangDongJoon)        |
@@ -150,7 +150,7 @@
 
   <img src="https://github.com/user-attachments/assets/059e5a4f-2712-4de3-8431-cf9515b6a60f" width="650">
 
-<h3>Elastic Search를 활용한 번개 및 모임 검색</h3>
+<h3>Elastic Search를 활용한 번개검색</h3>
 
 - __[사용기술]__ Elastic Search 와 nori 형태소 분석 플러그인
 - __[도입이유]__ 번개 제목 및 주소로 유저가 검색시 더 빠른 결과 값을 가져오기 위해
