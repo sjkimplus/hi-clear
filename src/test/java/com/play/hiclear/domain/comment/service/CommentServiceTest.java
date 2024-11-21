@@ -1,11 +1,9 @@
 package com.play.hiclear.domain.comment.service;
 
-import com.play.hiclear.common.service.GeoCodeService;
 import com.play.hiclear.domain.auth.entity.AuthUser;
 import com.play.hiclear.domain.board.entity.Board;
 import com.play.hiclear.domain.board.repository.BoardRepository;
 import com.play.hiclear.domain.club.entity.Club;
-import com.play.hiclear.domain.club.repository.ClubRepository;
 import com.play.hiclear.domain.comment.dto.request.CommentCreateRequest;
 import com.play.hiclear.domain.comment.dto.request.CommentDeleteRequest;
 import com.play.hiclear.domain.comment.dto.request.CommentUpdateRequest;
@@ -15,7 +13,6 @@ import com.play.hiclear.domain.notification.service.NotiService;
 import com.play.hiclear.domain.user.entity.User;
 import com.play.hiclear.domain.user.enums.UserRole;
 import com.play.hiclear.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
