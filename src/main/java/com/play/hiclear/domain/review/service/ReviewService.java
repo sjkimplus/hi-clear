@@ -153,14 +153,28 @@ public class ReviewService {
 
     //유저의 아이디를 받아 해당 유저의 점수들을 반환
     public UserStatisticsResponse statistics(Long userId) {
-
+        // 사용자 검증
         User user = userRepository.findByIdAndDeletedAtIsNullOrThrow(userId);
 
+        // 입력받은 userId로 캐싱키 생성
+        String cacheKey = "user:statistics" + user.getId();
+
+        // Redis에서 캐시를 조회
+        UserStatisticsResponse cachedResponse = (UserStatisticsResponse) redisTemplate.opsForValue().get(cacheKey);
+        // 캐싱에 저장된 값이 있다면 반환
+        if(cachedResponse != null){
+            return cachedResponse;
+        }
+
+        //캐시가 없으면 DB에서 계산;
         MannerRank mannerRank = updateUserMannerScore(user);
         Ranks gradeRank = updateUserGradeRank(user);
 
-        return new UserStatisticsResponse(mannerRank.name(), gradeRank.name());
+        // 캐싱된 값을 캐시에 저장(48시간 동안 유효)
+        cachedResponse = new UserStatisticsResponse(mannerRank.name(), gradeRank.name());
+        redisTemplate.opsForValue().set(cacheKey, cachedResponse, 48, TimeUnit.HOURS);
 
+        return cachedResponse;
     }
 
     public void invalidateCache(Long userId) {
