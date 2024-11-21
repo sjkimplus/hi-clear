@@ -1,4 +1,4 @@
-# 🏸Hi-Clear (배드민턴 모임 및 코트 예약 서비스)
+# 🏸Hi-Clear(배드민턴 모임 및 코트 예약 서비스)
 
 -------------------
 <img src="https://github.com/user-attachments/assets/a607b045-d29b-471b-a867-c7703e728ea1" />
@@ -7,25 +7,49 @@
 ## 목차
 
 -----------------------
-1. 프로젝트 기획 및 목적
-2. 적용기술
+1. 프로젝트 개요
+2. 도메인 및 설계문서
 2. 서비스 아카텍처
 3. 핵심기능
 4. 트러블슈팅
 
-## 프로젝트 기획 및 목적
+## 프로젝트 개요
 
 -----------------------
+<h3>프로젝트 기간 24.10.21 ~ 24.11.21(1개월)</h3>
+<h3>BE - 4명</h3>
+<h3>서비스 개요</h3>
+
 - 배드민턴 동호인들이 __정기적 모임__ 과 __일회성 모임__ 으로 배드민턴을 칠 수 있도록 관리해주는 서비스
 - __위치기반 체육관, 번개, 클럽 조회기능__ 제공
 - 사장님들은 체육관을 등록하고 __코트 예약을__ 받고, 유저들은 사설 체육관 예약가능
 - 유저들간 평가를 통해 __실력 및 매너점수 평가__ 기능 제공
 
 
-## 프로젝트 도메인
+## 프로젝트 도메인 및 와이어프레임
 
 -----------------------
-<h3>http://backend.8-lay-hi-clear.com/</h3>
+
+- [도메인](http://backend.8-lay-hi-clear.com/)
+
+- [와이어프레임](https://www.figma.com/design/rCMVjHvTEuh08lJ5f1kN2Q/8%EB%A0%88%EC%9D%B4-%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84?node-id=0-1&t=ySMEWBCA1OlOHPKA-1)
+
+- ERD
+
+  <img src="./images/ERD.png" alt="erd" />
+
+## 팀원 소개
+
+-----------------------
+| 사진                                                                                      | 이름 | 담당 도메인                          | 블로그 링크         | GitHub 링크                                |
+|-----------------------------------------------------------------------------------------|------|---------------------------------|----------------|------------------------------------------|
+| ![김성주](https://github.com/user-attachments/assets/a3461cec-3b5c-483d-b38c-216d00aee5b3) | 김성주 | 번개모임, 참여자                       | [블로그](https://velog.io/@sjkimplus09/posts) | [GitHub](https://github.com/sjkimplus)   |
+| ![남태혁](https://github.com/user-attachments/assets/f843314b-6991-46bc-a4c2-9e39126497ed) | 남태혁 | 알림, <br/>모임, 모임멤버,<br/> 댓글, 대댓글 | [블로그](https://navyth91.tistory.com/) | [GitHub](https://github.com/taehyeokNam) |
+| ![정예지](https://github.com/user-attachments/assets/264328c5-266c-4222-8268-b80b74da983e) | 정예지 | 유저 리뷰, 좋아요,<br/>모임 게시글          | [블로그](https://codingbykugom.tistory.com/) | [GitHub](https://github.com/KUGOM)       |
+| ![윤지현](https://github.com/user-attachments/assets/316845c9-0be2-4900-abd0-03406513e492) | 윤지현 | 모임일정, 예약                        | [블로그](https://velog.io/@jhy1/posts) | [GitHub](github.com/KangDongJoon)        |
+| ![강동준](https://github.com/user-attachments/assets/d297c605-d6df-4885-b9e9-c6e993c2986e) | 강동준 | 유저, 체유관,<br/>코트, 코트시간           | [블로그](https://djhelloworld.tistory.com/) | [GitHub](https://github.com/JH1Yoon)     |
+
+
 
 ## 적용 기술
 
@@ -102,8 +126,7 @@
 ### [결론]
 - 소규모 프로젝트인 것과 AWS와 Github을 메인으로 프로젝트를 구축하는 것을 고려하여 CI/CD로는 Github Actions, 서비스 아키텍처 관련 튤은 모두 AWS에서 사용
 
-
-<img src="./images/service_architecture.png" alt="service_architecture" width="1000" />
+  <img src="./images/service_architecture.png" alt="service_architecture" width="1000" />
 
 ## 핵심 기능
 
@@ -118,7 +141,8 @@
 - __[수치/결과]__
 - 응답속도 567ms → 157ms __(260% 향상)__
 - 부하량 증가 시 10953ms → 165ms __(6500% 향상)__
-- <img src="https://github.com/user-attachments/assets/059e5a4f-2712-4de3-8431-cf9515b6a60f" width="650">
+
+  <img src="https://github.com/user-attachments/assets/059e5a4f-2712-4de3-8431-cf9515b6a60f" width="650">
 
 <h3>Elastic Search를 활용한 번개 및 모임 검색</h3>
 
@@ -135,7 +159,7 @@
   '/v2/search' API가 Elastic Search를 도입한 쿼리이다.<br>
   Elastic Search의 도입으로 검색 쿼리의 속도가 약 30% 향상되었다.
 
-<img src="./images/meeting_es_chart.png" alt="Meeting Nori" width="600" /> 
+  <img src="./images/meeting_es_chart.png" alt="Meeting Nori" width="600" /> 
 
 <h3>유저 리뷰 생성 분산락</h3>
 
@@ -143,9 +167,9 @@
 - __[도입이유]__ 분산락을 사용하여 프로그램이 경쟁 상태에 들어가는것을 방지하고 데이터의 정합성을 유지, 서버 부하를 관리 하기 위해
 - __[수치/결과]__ 중복 요청이 방지되어 처리시간이 약 __[83% 증가]__ 하였으며, 리뷰 중복 생성이 감소하였습니다.
 - <u>분산락 도입 전</u>
-  <img src="https://github.com/user-attachments/assets/6293142e-c578-4079-bf65-d54783eeee0a">
+  <img src="https://github.com/user-attachments/assets/6293142e-c578-4079-bf65-d54783eeee0a" style="margin-bottom: 10px;">
 - <u>분산락 도입 후</u>
-  <img src="https://github.com/user-attachments/assets/2e0e0557-9388-405a-9376-a7f21e8487e4" >
+  <img src="https://github.com/user-attachments/assets/2e0e0557-9388-405a-9376-a7f21e8487e4" style="margin-bottom: 10px;">
 - <u>RPS 비교</u>
 
   <img src="https://github.com/user-attachments/assets/ce329118-c10d-4640-9ace-3ce52170fae8" width="400">
@@ -156,9 +180,9 @@
 - __[도입이유]__ Redis의 캐싱을 사용하여 불필요한 DB 접근을 방지하여 처리 속도를 크게 향상하고 서버의 부화를 최소화 하기 위해
 - __[수치/결과]__ 캐시를 사용함으로써 조회 기능의 응답 시간이 약 __[91% 감소]__ , DB에 걸리는 부하가 감소하였습니다.
 - <u>캐싱 도입 전</u>
-  <img src="https://github.com/user-attachments/assets/220b911f-1cc5-4537-88f9-34bd1a30a42d">
+  <img src="https://github.com/user-attachments/assets/220b911f-1cc5-4537-88f9-34bd1a30a42d" style="margin-bottom: 10px;">
 - <u>캐싱 도입 후</u>
-  <img src="https://github.com/user-attachments/assets/0373487d-c311-46dc-98c8-6ab9478d82be">
+  <img src="https://github.com/user-attachments/assets/0373487d-c311-46dc-98c8-6ab9478d82be" style="margin-bottom: 10px;">
 - <u>응답 시간</u>
 
   <img src="https://github.com/user-attachments/assets/732dd939-eeee-4646-b7e0-6d68e10f9aac">
@@ -166,7 +190,7 @@
 
 <h3>예약 동시성 제어</h3>
 
-- __[사용기술]__  Redis의 Lock 기능
+- __[사용기술]__  Redis의 SETNX, EXPIRE 기능
 - __[도입이유]__ 분산락을 구현하여 동시에 여러 명의 사람들이 예약하려고 할 때 중복 예약 생엉을 제외하기 위해서
 - __[수치/결과]__ 분산락을 이용했을 때 **예약 1개만 생성**되고(**2653개 요청, 2652개 실패, 1개 성공**),
     락을 걸기 전보다 RPS(초당 처리할 수 있는 요청 수)가 **149.8->168.9**로 향상되었다.
@@ -186,15 +210,14 @@
 
   
 - __[수치/결과]__
-  - SSE만 사용했을 때보다 Redis를 함께 사용했을 때 1000명 이상의 클라이언트가 접속 시 약 __30~40%__ 성능 향상이 있었습니다.
+  - SSE만 사용했을 때보다 Redis를 함께 사용했을 때 1000명 이상의 클라이언트가 접속 시 약 __30~40%__ 성능 향상이 있었습니다. 
+  - 중위값
+  
+    <img src="https://github.com/user-attachments/assets/c838f99e-b72e-4b23-9d90-34bbb9e0a7be" style="margin-bottom: 20px;">
 
-<u>중위값</u>
-
-  <img src="https://github.com/user-attachments/assets/c838f99e-b72e-4b23-9d90-34bbb9e0a7be">
-
-<u>상위 95%</u>
-
-  <img src="https://github.com/user-attachments/assets/ab515827-2c8e-4c3f-b113-dfab944a94e5">
+  - 상위 95%
+  
+    <img src="https://github.com/user-attachments/assets/ab515827-2c8e-4c3f-b113-dfab944a94e5">
 
 <h3>지오코딩</h3>
 
@@ -204,7 +227,7 @@
 
   - 잘못된 주소 입력
 
-    <img src="https://github.com/user-attachments/assets/5cb0a41e-ec64-4ea4-8e35-0111cc007722" width="400" style="margin-bottom: 20px;">
+    <img src="https://github.com/user-attachments/assets/5cb0a41e-ec64-4ea4-8e35-0111cc007722" width="400" style="margin-bottom: 10px;">
     
   - 올바른 주소 입력
     
@@ -215,7 +238,7 @@
 
 -----------------------
 <details>
-<summary><h3>[CI/CD] Task Fail Error</h3></summary>
+<summary><strong>[CI/CD] Task Fail Error</strong></summary>
 
 __[요약]__
 - <u>도커 이미지를 못찾는 오류</u>: workflow파일에서 docker image를 생성할 때 테그이름과 task deifnition에서 찾는 도커 이미지의 테그 이름을 일치 시켜서 오류 해결
@@ -259,7 +282,7 @@ __[Trouble shooting 성공!]__ <br>
 
 
 <details>
-  <summary><h3>인덱스 적용과정</h3></summary>
+  <summary><strong>인덱스 적용과정</strong></summary>
 
 - __[문제]__
   - MySQL 공간함수를 사용하여 인덱스를 적용시켜 검색기능을 향샹시키고자함
@@ -273,14 +296,26 @@ __[Trouble shooting 성공!]__ <br>
   - <img src="https://github.com/user-attachments/assets/fae5de7e-4f07-4cd7-a654-40878d1a1075" width="600">
 - __[결과]__
 - 인덱싱 적용 후 응답속도 __최소 260%__ 에서 부하량 증가 시 __최대 6500%__ 향상으로 성능차이 극대화
-- <img src="https://github.com/user-attachments/assets/059e5a4f-2712-4de3-8431-cf9515b6a60f" width="450">
+
+  <img src="https://github.com/user-attachments/assets/059e5a4f-2712-4de3-8431-cf9515b6a60f" width="450">
+
 </details>
 
 
 <details>
-  <summary><h3>유저리뷰 분산락</h3></summary>
+  <summary><strong>유저리뷰 분산락</strong></summary>
 
 - __[문제]__
+  - 리뷰 생성시 중복되는 리뷰 발생을 줄이고자 분산락을 적용시키고자 함
+  - 분산락을 걸었으나, 테스트 결과 충복되는 요청이 2~3건 발생하는것을 발견
+- __[과정]__
+  - 락을 획득하고 해제하는 과정이 너무 빠르게 진행되어 일부 요청이 락을 받지 않은 채 통과되고 있다는 사실을 확인
+  - 락 획득 - 해제 과정에서 텀을 주기위해 Thread.sleep(100);을 이용
+
+  - <img src="https://github.com/user-attachments/assets/2d8df524-9515-41d4-82b3-396df80d9e05">
+- __[결과]__
+  - 분산락 적용 후 처리시간 성능이 약 83% 증가하여 성능 극대화
+   <img src="https://github.com/user-attachments/assets/ce329118-c10d-4640-9ace-3ce52170fae8" width="400">
 
 
 </details>
