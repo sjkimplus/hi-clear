@@ -10,4 +10,9 @@ public class CommentUpdateRequest {
     private String content;
     @NotBlank
     private String password;
+
+    public CommentUpdateRequest(String content, String password) {
+        this.content = content;
+        this.password = password;
+    }
 }

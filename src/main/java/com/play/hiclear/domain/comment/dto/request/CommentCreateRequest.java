@@ -8,4 +8,8 @@ public class CommentCreateRequest {
 
     @NotBlank
     private String content;
+
+    public CommentCreateRequest(String content) {
+        this.content = content;
+    }
 }

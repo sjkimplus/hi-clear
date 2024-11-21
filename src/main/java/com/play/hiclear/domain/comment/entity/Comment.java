@@ -36,10 +36,10 @@ public class Comment extends TimeStamped {
     private Board board;
 
     @OneToMany(mappedBy = "comment")
-    private List<Likes> likes = new ArrayList<>();
+    private List<Likes> likes;
     
     @OneToMany(mappedBy = "comment")
-    private List<Thread> threads = new ArrayList<>();
+    private List<Thread> threads;
 
     @NotBlank
     private String content;
