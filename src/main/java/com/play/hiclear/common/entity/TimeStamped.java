@@ -22,5 +22,14 @@ public class TimeStamped {
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime modifiedAt;
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime deletedAt;
+
+    public void markDeleted() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
 }
 
