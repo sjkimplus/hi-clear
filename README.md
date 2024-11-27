@@ -3,8 +3,6 @@
 -------------------
 <img src="https://github.com/user-attachments/assets/a607b045-d29b-471b-a867-c7703e728ea1" />
 <br>
-<img src="./images/dependencies.png" alt="dep.png" />
-<img src="./images/screen.jpeg" alt="dep.jpeg" />
 
 ## 📚 목차
 
