@@ -179,9 +179,9 @@
 - **[Rationale]** To prevent a user for writing multiple reviews for a single user met at a match event.
 - **[Metrics/Results]**  
   Duplicate review requests were prevented, reducing processing time by approximately **83%**.
-    - *Before distributed lock implementation*
+    - *Before distributed lock implementation* <br>
       <img src="https://github.com/user-attachments/assets/6293142e-c578-4079-bf65-d54783eeee0a" style="margin-bottom: 10px;">
-    - *After distributed lock implementation*
+    - *After distributed lock implementation* <br>
       <img src="https://github.com/user-attachments/assets/2e0e0557-9388-405a-9376-a7f21e8487e4" style="margin-bottom: 10px;">
     - *RPS Comparison* <br>
       <img src="https://github.com/user-attachments/assets/ce329118-c10d-4640-9ace-3ce52170fae8" width="400">
@@ -192,11 +192,11 @@
 - **[Rationale]** To prevent unnecessary database access, significantly improve processing speed, and minimize server load.
 - **[Metrics/Results]**  
   By using caching, response time for retrieval functions decreased by approximately **91%**, and database load decreased.
-    - *Before caching implementation*
+    - *Before caching implementation* <br>
       <img src="https://github.com/user-attachments/assets/220b911f-1cc5-4537-88f9-34bd1a30a42d" style="margin-bottom: 10px;">
-    - *After caching implementation*
+    - *After caching implementation* <br>
       <img src="https://github.com/user-attachments/assets/0373487d-c311-46dc-98c8-6ab9478d82be" style="margin-bottom: 10px;">
-    - *Response Time Comparison*
+    - *Response Time Comparison* <br>
       <img src="https://github.com/user-attachments/assets/732dd939-eeee-4646-b7e0-6d68e10f9aac">
 
 <h3>Reservation Concurrency Control</h3>
@@ -217,9 +217,9 @@
     - Redis Pub/Sub enables multiple servers to easily share messages, asynchronously process server-to-server message delivery, and allows clients to receive messages in real-time.
 - **[Metrics/Results]**
     - Combining Redis with SSE improved performance by approximately **30–40%** when over 1000 clients were connected.
-    - Median
+    - Median <br>
       <img src="https://github.com/user-attachments/assets/c838f99e-b72e-4b23-9d90-34bbb9e0a7be" style="margin-bottom: 20px;">
-    - 95th Percentile
+    - 95th Percentile <br>
       <img src="https://github.com/user-attachments/assets/ab515827-2c8e-4c3f-b113-dfab944a94e5">
 
 <h3>Geocoding</h3>
