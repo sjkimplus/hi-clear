@@ -25,7 +25,7 @@
 
 - Users can sign up for badminton clubs and one-time matches near their registered location 
 - Users can also look up badminton gymnasiums and make reservations for private gymnasiums
-- After their one-time matches, users can submit a review of the players at the match regarding their skill level and sports manners. With the accumulated reviews, the User is given an average skill score and manner score, shown in their profile.
+- After their one-time matches, users can submit a review of the players at the match regarding their skill level and sports manners. With the accumulated reviews, the user is given an average skill score and manner score, shown in their profile.
 - Business users can register their gymnasiums and recieve reservations for its badminton courts via our app
 
 ## 🖋️ Application Design
