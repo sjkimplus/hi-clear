@@ -7,18 +7,20 @@
 ## 📚 Table of Contents
 
 -----------------------
-1. Introduction
-2. Application Design
-2. Service Architecture
-3. Key Technology
-4. Troubleshooting
+1. Project Introduction
+2. Application Design 
+3. Team Introduction 
+4. Tech Stack
+5. Service Architecture and CI/CD
+6. Key Implementations
+7. Troubleshooting
+8. Reflections & Future Considerations
 
-## 📝 Introduction
+## 📝 Project Introduction
 
 -----------------------
-<h3>Project Duration: 24.10.21 ~ 24.11.21 (4 weeks)</h3>
-<h3>Group Name: 8-lay</h3>
-<h3>Group Composition: 5 Backend Engineers</h3>
+<h3>Project Name: Hi-Clear</h3>
+<h3>Project Duration: Oct 21 - Nov 21  (2024)</h3>
 <h3>Service Overview</h3>
 
 - Users can sign up for badminton clubs and one-time matches near their registered location 
@@ -44,9 +46,12 @@
 
 
 
-## 👨🏻‍🎨 팀원 소개
+## 👨🏻‍🎨 Team Introduction
 
 -----------------------
+<h3>Group Name: 8-lay</h3>
+<h3>Group Composition: 5 Backend Engineers</h3>
+
 | Avatar                                                                                  | Name          | Domain in Charge                                    | Blog Link                                        | GitHub Link                              |
 |-----------------------------------------------------------------------------------------|---------------|-----------------------------------------------------|--------------------------------------------------|------------------------------------------|
 | ![김성주](https://github.com/user-attachments/assets/a3461cec-3b5c-483d-b38c-216d00aee5b3) | Sungju Kim    | Meeting, Participant                                | [Blog Link](https://velog.io/@sjkimplus09/posts) | [GitHub](https://github.com/sjkimplus)   |
@@ -109,6 +114,8 @@
 4. Images created during user registration are managed in an S3 bucket, the main database (MySQL) is managed via RDS, and Redis used in the project is managed on a separate EC2 instance.
 5. Kakao maps is an external API used to collect geographical data of an address (e.g. longitude and latitude of a location)
 
+  <img src="./images/service_architecture.png" alt="service_architecture" width="1000" />
+
 ### [Service Architecture Considerations]
 - **Amazon ECR vs. Docker Hub**
     - **Amazon ECR**
@@ -135,9 +142,8 @@
 ### [Conclusion]
 - Considering the small-scale of the project and that AWS and GitHub are the main platforms used, GitHub Actions is chosen for the CI/CD tool, and all tools for the service architecture are chosen from AWS.
 
-  <img src="./images/service_architecture.png" alt="service_architecture" width="1000" />
 
-## 🛎️ Key Features
+## 🛎️ Key Implementations
 
 -----------------------
 
@@ -156,7 +162,7 @@
 <h3>Enhanced Meeting Search Using Elasticsearch</h3>
 
 - **[Technology Used]** Elasticsearch with the Nori (Korean language analysis) plugin.
-- **[Rationale]** To retrieve faster search results when users search by Meeting (one-time match) title or its address.
+- **[Rationale]** To retrieve faster search results when users search by Meeting (one-time match) title or its location address.
 - **[Implementation Method]**  
   Multiple index filters were applied to maximize ElasticSearch efficiency. Interjections and adverbs were excluded, and irrelevant terms such as "match" and synonyms were registered as stopwords. Additionally, words like "minton" and "baemin" (abbreviations for "badminton" in Korean) that were not captured by the Nori tokenizer were registered as synonyms.
 
@@ -177,7 +183,7 @@
       <img src="https://github.com/user-attachments/assets/6293142e-c578-4079-bf65-d54783eeee0a" style="margin-bottom: 10px;">
     - *After distributed lock implementation*
       <img src="https://github.com/user-attachments/assets/2e0e0557-9388-405a-9376-a7f21e8487e4" style="margin-bottom: 10px;">
-    - *RPS Comparison*
+    - *RPS Comparison* <br>
       <img src="https://github.com/user-attachments/assets/ce329118-c10d-4640-9ace-3ce52170fae8" width="400">
 
 <h3>Optimizing User's Average Skill & Manner Score Calculation with Caching</h3>
@@ -221,9 +227,9 @@
 - **[Technology Used]** Geocoding.
 - **[Rationale]** Since users will register their interest location based on address rather than via GPS, we needed to convert string addresses to geo location points (longitude & latitude)
 - **[Metrics/Results]**
-    - Incorrect address input:
+    - Incorrect address input: <br>
       <img src="https://github.com/user-attachments/assets/5cb0a41e-ec64-4ea4-8e35-0111cc007722" width="400" style="margin-bottom: 10px;">
-    - Correct address input:
+    - Correct address input: <br>
       <img src="https://github.com/user-attachments/assets/6ca96487-1e80-451f-9dc3-7744d164356e" width="400">
       <img src="https://github.com/user-attachments/assets/447f1172-e726-4bd8-a578-91e3e7fbab9d">
 
@@ -238,7 +244,7 @@ __[Summary]__
 - <u>Error finding task definition</u>: Resolved by using a shell command to directly download the latest task definition from AWS ECS.
 
 __[Error Scenario 1]__ <br>
-During deployment, using the workflow file, all tasks failed after starting, and subsequent retries resulted in a __‘Max attempts exceeded’__ error.
+During deployment, all tasks failed after starting, and subsequent retries resulted in a __‘Max attempts exceeded’__ error.
 <img src="./images/cicd_error1.png" alt="cicd_error1" width="800" />
 
 __[Root Cause 1]__ <br>
@@ -252,7 +258,7 @@ After the above modifications, an error occurred indicating that the task defini
   <img src="./images/cicd_error2.png" alt="cicd_error2" width="800" />
 
 __[Root Cause 2]__ <br>
-We assumed that it wasm because the command was missing the revision number (18) required to locate the task definition.
+We assumed that it was because the command was missing the revision number (18) required to locate the task definition.
 
   <img src="./images/cicd_solve2.png" alt="cicd_solve2" width="600" />
 
@@ -267,7 +273,8 @@ The task definition needed to be fetched directly using a shell command from AWS
   run: |
     aws ecs describe-task-definition --task-definition my-task-definition-family --query taskDefinition > task-definition.json
 ```
-__[Troubleshooting Successful!]__ <br>
+__[Result]__ <br>
+Troubleshooting was successful and the project was finally deployed!
 <img src="./images/cicd_success.png" alt="cicd_success" width="800" />
 </details>
 
@@ -311,15 +318,15 @@ __[Troubleshooting Successful!]__ <br>
 </details>
 <br>
 
-## ✏️ Reflections
+## ✏️ Reflections & Future Considerations
 
 ------
 
-### Dongjoon Kang
-- It was great to learn and apply database indexing in-depth. I experimented with Elasticsearch but only at a basic level, which was disappointing. Next time, I aim to enhance Elasticsearch usage to improve the completeness of search functionality.
-
 ### Sungju Kim
 - I hope that next time we could adopt an MSA structure for our service architecture. Considering the app offers diverse services, it would have been better to have servers segmented by functions like club management, meeting management, user reservation management etc.
+
+### Dongjoon Kang
+- It was great to learn and apply database indexing in-depth. I experimented with Elasticsearch but only at a basic level, which was disappointing. Next time, I aim to enhance Elasticsearch usage to improve the completeness of search functionality.
 
 ### Taehyeok Nam
 - While implementing notification services, I realized I didn’t fully understand the flow and structure of my service despite studying SSE, message queues, and Redis Pub/Sub. I hesitated with troubleshooting and refactoring, delaying the coding start.
