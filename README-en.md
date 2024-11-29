@@ -1,6 +1,4 @@
-# 🏸Hi-Clear(배드민턴 모임 및 코트 예약 서비스)
-
-## [🇺🇸 English Version](README-en.md)
+# 🏸Hi-Clear (Badminton Club & Court Reservation App)
 
 -------------------
 <img src="https://github.com/user-attachments/assets/a607b045-d29b-471b-a867-c7703e728ea1" />
@@ -34,10 +32,10 @@
 
 - [도메인](http://backend.8-lay-hi-clear.com/)
 
-- [API명세서 링크](https://teamsparta.notion.site/a602640d708e43e6ae316434166dd6f2?v=d3e1ab06b21a40acbd6a2c651bc639ec)  
+- [API명세서 링크](https://teamsparta.notion.site/a602640d708e43e6ae316434166dd6f2?v=d3e1ab06b21a40acbd6a2c651bc639ec)
 
 - [와이어프레임 링크](https://www.figma.com/design/rCMVjHvTEuh08lJ5f1kN2Q/8%EB%A0%88%EC%9D%B4-%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84?node-id=0-1&t=ySMEWBCA1OlOHPKA-1)
-  
+
   ![image](https://github.com/user-attachments/assets/242642f1-3e34-4a92-b237-8ebd70bf21be)
 
 - ERD
@@ -125,12 +123,12 @@
     - 서버간의 성능이 유사하고 처리하는 작업들이 간단하므로 __순서대로 돌아가며 작업__을 나누어주는 라운드로빈 알고리즘 적용.
 ### [CI/CD 고려사항]
 - __Jenkins vs GitHub Actions__
-  - __Jenkins__
-      - 온프레미스 환경에서 민감한 데이터를 처리해야 하는 경우 사용에 용이.
-      - 복잡한 CI/CD 워크플로와 다양한 외부 도구 통합이 필요한 경우에 용이.
-  - __GitHub Actions__
-      - GitHub를 주요 코드 저장소로 사용하며, CI/CD 설정을 간단히 하고 싶은 경우에 용이.
-      - 클라우드 기반 워크플로를 선호하며, 별도의 서버 유지보수를 할 필요가 없다.
+    - __Jenkins__
+        - 온프레미스 환경에서 민감한 데이터를 처리해야 하는 경우 사용에 용이.
+        - 복잡한 CI/CD 워크플로와 다양한 외부 도구 통합이 필요한 경우에 용이.
+    - __GitHub Actions__
+        - GitHub를 주요 코드 저장소로 사용하며, CI/CD 설정을 간단히 하고 싶은 경우에 용이.
+        - 클라우드 기반 워크플로를 선호하며, 별도의 서버 유지보수를 할 필요가 없다.
 ### [결론]
 - 소규모 프로젝트인 것과 AWS와 Github을 메인으로 프로젝트를 구축하는 것을 고려하여 CI/CD로는 Github Actions, 서비스 아키텍처 관련 튤은 모두 AWS에서 사용
 
@@ -194,38 +192,38 @@
 - <u>응답 시간</u>
 
   <img src="https://github.com/user-attachments/assets/732dd939-eeee-4646-b7e0-6d68e10f9aac">
-  
+
 
 <h3>예약 동시성 제어</h3>
 
 - __[사용기술]__  Redis의 SETNX, EXPIRE 기능
 - __[도입이유]__ 분산락을 구현하여 동시에 여러 명의 사람들이 예약하려고 할 때 중복 예약 생엉을 제외하기 위해서
 - __[수치/결과]__ 분산락을 이용했을 때 **예약 1개만 생성**되고(**2653개 요청, 2652개 실패, 1개 성공**),
-    락을 걸기 전보다 RPS(초당 처리할 수 있는 요청 수)가 **149.8->168.9**로 향상되었다.
+  락을 걸기 전보다 RPS(초당 처리할 수 있는 요청 수)가 **149.8->168.9**로 향상되었다.
 
   ![Requests, Fails, Current RPS](https://github.com/user-attachments/assets/5498cba4-b4e2-40a4-85cf-4a1539831cf4)
 
 <h3>SSE 알림 기능</h3>
 
 - __[사용기술]__
-  - SSE : 클라이언트에게 실시간 및 단방향으로 이벤트를 푸시
-  - Redis Pub/Sub : 메시지 브로커 역할을 하여 클라이언트와 서버 간의 이벤트를 효율적으로 전달
+    - SSE : 클라이언트에게 실시간 및 단방향으로 이벤트를 푸시
+    - Redis Pub/Sub : 메시지 브로커 역할을 하여 클라이언트와 서버 간의 이벤트를 효율적으로 전달
 
 
-- __[도입이유]__ 
-  - Redis Pub/Sub을 통해 여러 서버가 메시지를 쉽게 공유가 가능하고 서버 간의 메시지 전달을 비동기적으로 처리하며
-    클라이언트가 실시간으로 메시지를 전달받을 수 있습니다.
+- __[도입이유]__
+    - Redis Pub/Sub을 통해 여러 서버가 메시지를 쉽게 공유가 가능하고 서버 간의 메시지 전달을 비동기적으로 처리하며
+      클라이언트가 실시간으로 메시지를 전달받을 수 있습니다.
 
-  
+
 - __[수치/결과]__
-  - SSE만 사용했을 때보다 Redis를 함께 사용했을 때 1000명 이상의 클라이언트가 접속 시 약 __30~40%__ 성능 향상이 있었습니다. 
-  - 중위값
-  
-    <img src="https://github.com/user-attachments/assets/c838f99e-b72e-4b23-9d90-34bbb9e0a7be" style="margin-bottom: 20px;">
+    - SSE만 사용했을 때보다 Redis를 함께 사용했을 때 1000명 이상의 클라이언트가 접속 시 약 __30~40%__ 성능 향상이 있었습니다.
+    - 중위값
 
-  - 상위 95%
-  
-    <img src="https://github.com/user-attachments/assets/ab515827-2c8e-4c3f-b113-dfab944a94e5">
+      <img src="https://github.com/user-attachments/assets/c838f99e-b72e-4b23-9d90-34bbb9e0a7be" style="margin-bottom: 20px;">
+
+    - 상위 95%
+
+      <img src="https://github.com/user-attachments/assets/ab515827-2c8e-4c3f-b113-dfab944a94e5">
 
 <h3>지오코딩</h3>
 
@@ -233,14 +231,14 @@
 - __[도입이유]__ 사용자가 특정 좌표값을 알고 입력하기 어려움(주소 입력)
 - __[수치/결과]__
 
-  - 잘못된 주소 입력
+    - 잘못된 주소 입력
 
-    <img src="https://github.com/user-attachments/assets/5cb0a41e-ec64-4ea4-8e35-0111cc007722" width="400" style="margin-bottom: 10px;">
-    
-  - 올바른 주소 입력
-    
-    <img src="https://github.com/user-attachments/assets/6ca96487-1e80-451f-9dc3-7744d164356e" width="400">
-    <img src="https://github.com/user-attachments/assets/447f1172-e726-4bd8-a578-91e3e7fbab9d">
+      <img src="https://github.com/user-attachments/assets/5cb0a41e-ec64-4ea4-8e35-0111cc007722" width="400" style="margin-bottom: 10px;">
+
+    - 올바른 주소 입력
+
+      <img src="https://github.com/user-attachments/assets/6ca96487-1e80-451f-9dc3-7744d164356e" width="400">
+      <img src="https://github.com/user-attachments/assets/447f1172-e726-4bd8-a578-91e3e7fbab9d">
 
 ## 트러블슈팅(트러블 제목 클릭하여 자세히 보기)
 
@@ -254,7 +252,7 @@ __[요약]__
 
 __[에러 상황 1]__ <br>
 workflow 파일로 deploy 과정 중 테스크가 시작후, 모두 fail, 향후 재시도후 __‘Max attempts exceeded’__ 에러 발생
-  <img src="./images/cicd_error1.png" alt="cicd_error1" width="800" />
+<img src="./images/cicd_error1.png" alt="cicd_error1" width="800" />
 
 __[원인 분석 1]__ <br>
 ECR에 있는 이미지를 가져오는데 실패를 한것이라 생각하여, image tag를 ‘latest’로 수정 및 task definition에서도 ‘latest’라는 image tag로 이미지를 찾도록 수정
@@ -277,8 +275,8 @@ revision 번호가 표기된 task definition도 못찾는 에러발생
 <img src="./images/cicd_error3.png" alt="cicd_error3" width="800" />
 
 __[원인 분석 3]__ <br>
-  task definition을 찾을 수 있도록 revision번호(18)를 command에 포함
-  공식 홈페이지를 찾아보니 task definition을 리포지토리에 저장하지 않을 경우 AWS에서 다운해가는 shell command 를 쓰면된다고 하여서, 다음과 같이 수정.
+task definition을 찾을 수 있도록 revision번호(18)를 command에 포함
+공식 홈페이지를 찾아보니 task definition을 리포지토리에 저장하지 않을 경우 AWS에서 다운해가는 shell command 를 쓰면된다고 하여서, 다음과 같이 수정.
 ```angular2html
 - name: Download task definition
   run: |
@@ -293,15 +291,15 @@ __[Trouble shooting 성공!]__ <br>
   <summary><strong>인덱스 적용과정</strong></summary>
 
 - __[문제]__
-  - MySQL 공간함수를 사용하여 인덱스를 적용시켜 검색기능을 향샹시키고자함
-  - ST_Distance_Sphere를 사용했을 때 인덱스가 적용되지 않음
-  - <img src="https://github.com/user-attachments/assets/cab2b659-6d15-4680-97e2-f2251612c3f6" width="600">
+    - MySQL 공간함수를 사용하여 인덱스를 적용시켜 검색기능을 향샹시키고자함
+    - ST_Distance_Sphere를 사용했을 때 인덱스가 적용되지 않음
+    - <img src="https://github.com/user-attachments/assets/cab2b659-6d15-4680-97e2-f2251612c3f6" width="600">
 - __[과정]__
-  - R-Tree 자료구조 기반 공간 인덱스 사용
-  - 쿼리 실행계획을 사용하여 인덱스 적용 확인
-  - ST_Distance_Sphere를 사용하여 모든 데이터를 필터링 한 후 결과 반환
-  - ST_Contains를 사용하여 인덱싱하는 전략 구성
-  - <img src="https://github.com/user-attachments/assets/fae5de7e-4f07-4cd7-a654-40878d1a1075" width="600">
+    - R-Tree 자료구조 기반 공간 인덱스 사용
+    - 쿼리 실행계획을 사용하여 인덱스 적용 확인
+    - ST_Distance_Sphere를 사용하여 모든 데이터를 필터링 한 후 결과 반환
+    - ST_Contains를 사용하여 인덱싱하는 전략 구성
+    - <img src="https://github.com/user-attachments/assets/fae5de7e-4f07-4cd7-a654-40878d1a1075" width="600">
 - __[결과]__
 - 인덱싱 적용 후 응답속도 __최소 260%__ 에서 부하량 증가 시 __최대 6500%__ 향상으로 성능차이 극대화
 
@@ -314,16 +312,16 @@ __[Trouble shooting 성공!]__ <br>
   <summary><strong>유저리뷰 분산락</strong></summary>
 
 - __[문제]__
-  - 리뷰 생성시 중복되는 리뷰 발생을 줄이고자 분산락을 적용시키고자 함
-  - 분산락을 걸었으나, 테스트 결과 충복되는 요청이 2~3건 발생하는것을 발견
+    - 리뷰 생성시 중복되는 리뷰 발생을 줄이고자 분산락을 적용시키고자 함
+    - 분산락을 걸었으나, 테스트 결과 충복되는 요청이 2~3건 발생하는것을 발견
 - __[과정]__
-  - 락을 획득하고 해제하는 과정이 너무 빠르게 진행되어 일부 요청이 락을 받지 않은 채 통과되고 있다는 사실을 확인
-  - 락 획득 - 해제 과정에서 텀을 주기위해 Thread.sleep(100);을 이용
+    - 락을 획득하고 해제하는 과정이 너무 빠르게 진행되어 일부 요청이 락을 받지 않은 채 통과되고 있다는 사실을 확인
+    - 락 획득 - 해제 과정에서 텀을 주기위해 Thread.sleep(100);을 이용
 
-  - <img src="https://github.com/user-attachments/assets/2d8df524-9515-41d4-82b3-396df80d9e05">
+    - <img src="https://github.com/user-attachments/assets/2d8df524-9515-41d4-82b3-396df80d9e05">
 - __[결과]__
-  - 분산락 적용 후 처리시간 성능이 약 83% 증가하여 성능 극대화
-   <img src="https://github.com/user-attachments/assets/ce329118-c10d-4640-9ace-3ce52170fae8" width="400">
+    - 분산락 적용 후 처리시간 성능이 약 83% 증가하여 성능 극대화
+      <img src="https://github.com/user-attachments/assets/ce329118-c10d-4640-9ace-3ce52170fae8" width="400">
 
 
 </details>
@@ -332,9 +330,9 @@ __[Trouble shooting 성공!]__ <br>
 ## ✏️ 회고
 
 ------
- 
+
 ### 강동준
-- DB인덱싱에 대해 심도있게 학습하고 적용 할 수 있어서 좋았습니다, Elasticsearch를 적용시켜봤으나 기초적인 수준으로만 적용해봐서 아쉬웠습니다. 다음번에는 조금 Elastcisearch를 고도화하여 검색 기능의 완성도를 높여보고싶습니다. 
+- DB인덱싱에 대해 심도있게 학습하고 적용 할 수 있어서 좋았습니다, Elasticsearch를 적용시켜봤으나 기초적인 수준으로만 적용해봐서 아쉬웠습니다. 다음번에는 조금 Elastcisearch를 고도화하여 검색 기능의 완성도를 높여보고싶습니다.
 ### 김성주
 - CI/CD 관련하여 MSA 구조를 가져가지 못한 것 이 아쉽다. 하이클리어 어플이 다양한 서비스를 제공하는 만큼 사장님의 체육과 관리, 모임관리, 번개관리, 유저예약관리 등으로 서버를 세분화 해서 관리하는 아키텍처를 가져으갔면 더 좋았을 것 같다.
 ### 남태혁
