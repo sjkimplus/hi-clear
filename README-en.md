@@ -237,7 +237,7 @@
 
 -----------------------
 <details>
-<summary><strong>[CI/CD] Task Fail Error</strong></summary>
+<summary><strong>Task Fail Error during CI/CD</strong></summary>
 
 __[Summary]__
 - <u>Error finding Docker image</u>: Resolved by ensuring the tag name in the workflow file matches the tag name in the task definition.
